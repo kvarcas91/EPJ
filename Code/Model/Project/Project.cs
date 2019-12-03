@@ -1,0 +1,123 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EPJ
+{
+    public class Project : IProject
+    {
+
+        #region Properties
+
+        /// <summary>
+        /// Current project ID
+        /// </summary>
+        public uint ID { get; private set; }
+
+        /// <summary>
+        /// Project name
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Project description
+        /// </summary>
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Project creation date
+        /// </summary>
+        public DateTime Date { get; private set; }
+
+        /// <summary>
+        /// Project deadline
+        /// </summary>
+        public DateTime DueDate { get; set; }
+
+        /// <summary>
+        /// Project priority
+        /// </summary>
+        public Priority Priority { get; set; } = Priority.Default;
+
+        /// <summary>
+        /// Project progress
+        /// </summary>
+        public uint Progress { get; set; } = 0;
+
+        /// <summary>
+        /// Contributors for the project
+        /// </summary>
+        public ObservableCollection<IContributor> Contributors { get; } = new ObservableCollection<IContributor>();
+
+        /// <summary>
+        /// Related files to the project
+        /// </summary>
+        public List<IRelatedFile> RelatedFiles { get; } = new List<IRelatedFile>();
+
+        /// <summary>
+        /// Comments for the project
+        /// </summary>
+        public List<IComment> Comments { get; } = new List<IComment>();
+
+        public List<IProjectElement> ProjectBodyElements { get; } = new List<IProjectElement>();
+
+        public string ProjectPath { get; set; }
+
+
+        #endregion
+
+        #region Constructors
+
+        public Project(uint ID)
+        {
+            this.ID = ID;
+            Date = DateTime.Now;
+        }
+
+        #endregion
+
+        #region Builder
+
+        /// <summary>
+        /// Creates Contributor and adds it to the list if doesn't exist
+        /// </summary>
+        /// <param name="firstName">contributor first name</param>
+        /// <param name="lastName">contributor last name</param>
+        /// <returns></returns>
+        public Project AddContributor(Contributor contributor)
+        {
+            if (!Contributors.Contains(contributor))
+                Contributors.Add(contributor);
+
+            return this;
+        }
+
+        public Project AddComment(string commentText)
+        {
+            var comment = new Comment(ID, commentText);
+            Comments.Add(comment);
+            return this;
+        }
+
+        public Project AddElement(IProjectElement element)
+        {
+            //todo stuf
+            return this;
+        }
+
+        public Project AddContributor(IContributor contributor)
+        {
+            if (!Contributors.Contains(contributor))
+                Contributors.Add(contributor);
+
+            return this;
+        }
+
+        #endregion
+
+
+    }
+}
