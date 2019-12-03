@@ -23,6 +23,7 @@ namespace EPJ
             //}
 
             mAddProjectCommand = new RelayCommand(ShowMessage);
+            mShowListItemSettingsCommand = new RelayCommand(ShowListItemSettings);
         }
 
         #endregion
@@ -53,6 +54,8 @@ namespace EPJ
 
         public ICommand mAddProjectCommand { get; set; }
 
+        public ICommand mShowListItemSettingsCommand { get; set; }
+
         /// <summary>
         /// ProjectList view model instance
         /// </summary>
@@ -76,10 +79,16 @@ namespace EPJ
 
         #endregion
 
-        public void ShowMessage()
+        public void ShowMessage(object param)
         {
             WindowViewModel.Instance.CurrentPage = ApplicationPage.AddProject;
             DataBase.GetContributors();
+        }
+
+        public void ShowListItemSettings (object param)
+        {
+            var project = (IProject)param;
+           
         }
 
         public void AddFakeData ()
