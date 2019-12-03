@@ -1,7 +1,10 @@
-﻿using EPJ.Database;
+﻿using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Configuration;
+using System.Data;
+using System.Data.SQLite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,38 +16,36 @@ namespace EPJ
 
         public static void InsertContributor(IContributor contributor)
         {
-            using (var db = new DatabaseModel())
+           
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
-                Database.Contributor contr = new Database.Contributor
-                {
-                    Id = db.Contributors.Count() + 1,
-                    FirstName = contributor.FirstName,
-                    LastName = contributor.LastName
-                };
-
-                db.Contributors.Add(contr);
-                db.SaveChanges();
-                db.Dispose();
+                connection.Execute("insert into contributor (FirstName, LastName) values (@FirstName, @LastName)", contributor);
             }
+            
         }
 
-        public static List<IContributor> GetContributors()
+        public static List<Contributor> GetContributors()
         {
-            List<IContributor> contributors = new List<IContributor>(0);
-            List<Database.Contributor> dbContributors;
 
-            using (var db = new DatabaseModel())
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
-                dbContributors = (from contributor in db.Contributors select contributor).ToList();
+                var output = connection.Query<Contributor>("select * from contributor", new DynamicParameters());
+                connection.Dispose();
+                return output.ToList();
             }
 
-            foreach (var item in dbContributors)
-            {
-                contributors.Add(new Contributor(item.Id, item.FirstName, item.LastName));
-            }
+           
+        }
 
+        public static void GetProjects ()
+        {
+            List<IProject> projects = new List<IProject>();
+               
+        }
 
-            return contributors;
+        private static string GetConnectionString (string id = "Default")
+        {
+            return ConfigurationManager.ConnectionStrings[id].ConnectionString;
         }
     }
 }

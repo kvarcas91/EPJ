@@ -1,5 +1,4 @@
-﻿using SQLite;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -53,7 +52,10 @@ namespace EPJ
             InitialColor = ColourPool.GetColour();
         }
 
-        public Contributor() { }
+        public Contributor() 
+        {
+            InitialColor = ColourPool.GetColour();
+        }
 
         #endregion
 

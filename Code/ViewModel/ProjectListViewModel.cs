@@ -1,10 +1,6 @@
-﻿using EPJ.Database;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -82,21 +78,25 @@ namespace EPJ
         public void ShowMessage(object param)
         {
             WindowViewModel.Instance.CurrentPage = ApplicationPage.AddProject;
-            DataBase.GetContributors();
+            try
+            {
+                MessageBox.Show($"Contributor size {DataBase.GetContributors().Count}");
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
+            
         }
 
         public void ShowListItemSettings (object param)
         {
             var project = (IProject)param;
-           
         }
 
         public void AddFakeData ()
         {
-            //var firstContributor = new Contributor(0, "Eduardas", "Slutas");
-            //var secondContributor = new Contributor(1, "Mindaugas", "Slutas");
-            //var thirdContributor = new Contributor(2, "Ivona", "Blabla");
-            List<IContributor> contributors = DataBase.GetContributors();
+            List<Contributor> contributors = DataBase.GetContributors();
 
             var mProject = new Project(0);
             mProject.AddContributor(contributors[0])

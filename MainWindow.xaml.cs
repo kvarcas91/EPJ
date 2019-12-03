@@ -22,10 +22,10 @@ namespace EPJ
     {
         public MainWindow()
         {
-            string executable = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            string path = (System.IO.Path.GetDirectoryName(executable));
-            AppDomain.CurrentDomain.SetData("DataDirectory", path);
-            Console.WriteLine(path);
+            //string executable = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            //string path = (System.IO.Path.GetDirectoryName(executable));
+            //AppDomain.CurrentDomain.SetData("DataDirectory", path);
+            //Console.WriteLine(path);
             InitializeComponent();
             DataContext = WindowViewModel.Instance;
         }
