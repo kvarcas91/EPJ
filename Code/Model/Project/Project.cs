@@ -15,12 +15,12 @@ namespace EPJ
         /// <summary>
         /// Current project ID
         /// </summary>
-        public uint ID { get; private set; }
+        public long ID { get; set; }
 
         /// <summary>
         /// Project name
         /// </summary>
-        public string Name { get; set; }
+        public string Title { get; set; }
 
         /// <summary>
         /// Project description
@@ -45,7 +45,7 @@ namespace EPJ
         /// <summary>
         /// Project progress
         /// </summary>
-        public uint Progress { get; set; } = 0;
+        public double Progress { get; set; } = 0;
 
         /// <summary>
         /// Contributors for the project
@@ -71,10 +71,9 @@ namespace EPJ
 
         #region Constructors
 
-        public Project(uint ID)
+        public Project()
         {
-            this.ID = ID;
-            Date = DateTime.Now;
+           // Date = DateTime.Now;
         }
 
         #endregion
@@ -95,9 +94,16 @@ namespace EPJ
             return this;
         }
 
-        public Project AddComment(string commentText)
+        public void AddContributors(List<Contributor> contributors)
         {
-            var comment = new Comment(ID, commentText);
+            foreach (var contributor in contributors)
+            {
+                Contributors.Add(contributor);
+            }
+        }
+
+        public Project AddComment(IComment comment)
+        {
             Comments.Add(comment);
             return this;
         }
@@ -118,6 +124,10 @@ namespace EPJ
 
         #endregion
 
+        public override string ToString()
+        {
+            return $"title: {Title}; Description: {Description}";
+        }
 
     }
 }

@@ -17,14 +17,14 @@ namespace EPJ
         string ProjectPath { get; set; }
 
         DateTime DueDate { get; set; }
-        uint ID { get; }
-        string Name { get; set; }
-        uint Progress { get; set; }
+        long ID { get; set; }
+        string Title { get; set; }
+        double Progress { get; set; }
         List<IRelatedFile> RelatedFiles { get; }
         Priority Priority { get; set; }
         Project AddElement(IProjectElement element);
-        Project AddComment(string commentText);
-        Project AddContributor(Contributor contributor);
+        Project AddComment(IComment comment);
+        //Project AddContributor(Contributor contributor);
 
         Project AddContributor(IContributor contributor);
     }

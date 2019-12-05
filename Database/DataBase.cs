@@ -24,12 +24,16 @@ namespace EPJ
             
         }
 
-        public static List<Contributor> GetContributors()
+        public static List<Contributor> GetContributors(long projectID)
         {
 
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
-                var output = connection.Query<Contributor>("select * from contributor", new DynamicParameters());
+                var output = connection.Query<Contributor>(
+                    "SELECT FirstName, LastName " +
+                    "FROM contributors c " +
+                    "INNER JOIN project_contributors p ON p.contributorID = c.Id " +
+                    $"INNER JOIN projects pr on pr.ID = p.projectID WHERE pr.Id = {projectID}", new DynamicParameters());
                 connection.Dispose();
                 return output.ToList();
             }
@@ -37,10 +41,19 @@ namespace EPJ
            
         }
 
-        public static void GetProjects ()
+        public static List<Project> GetProjects()
         {
-            List<IProject> projects = new List<IProject>();
-               
+            //List<IProject> projects = new List<IProject>();
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            {
+                var output = connection.Query<Project>("select * from projects", new DynamicParameters());
+                foreach (var project in output)
+                {
+                    project.AddContributors(GetContributors(project.ID));
+                }
+                connection.Dispose();
+                return output.ToList();
+            }
         }
 
         private static string GetConnectionString (string id = "Default")

@@ -62,7 +62,7 @@ namespace EPJ
         /// <summary>
         /// List of all projects
         /// </summary>
-        public ObservableCollection<Project> Projects { get; } = new ObservableCollection<Project>();
+        public ObservableCollection<Project> Projects { get; private set; } 
 
 
         public List<string> SortBy
@@ -80,7 +80,7 @@ namespace EPJ
             WindowViewModel.Instance.CurrentPage = ApplicationPage.AddProject;
             try
             {
-                MessageBox.Show($"Contributor size {DataBase.GetContributors().Count}");
+                //MessageBox.Show($"Contributor size {DataBase.GetContributors().Count}");
             }
             catch(Exception e)
             {
@@ -96,8 +96,11 @@ namespace EPJ
 
         public void AddFakeData ()
         {
-            List<Contributor> contributors = DataBase.GetContributors();
+            //List<Contributor> contributors = DataBase.GetContributors();
+            Projects = new ObservableCollection<Project>(DataBase.GetProjects());
 
+          
+            /*
             var mProject = new Project(0);
             mProject.AddContributor(contributors[0])
                     .AddContributor(contributors[1])
@@ -184,6 +187,7 @@ namespace EPJ
             Projects.Add(mProject4);
             Projects.Add(mProject5);
             Projects.Add(mProject6);
+            */
         }
 
     }

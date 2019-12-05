@@ -104,7 +104,7 @@
                             </Grid.RowDefinitions>
 
                             <!-- Project name -->
-                            <TextBlock Text="{Binding Name}" Style="{StaticResource ProjectName}"/>
+                            <TextBlock Text="{Binding Title}" Style="{StaticResource ProjectName}"/>
 
                             <!-- Project deadline -->
                             <StackPanel Grid.Column="1" Grid.ColumnSpan="2"
