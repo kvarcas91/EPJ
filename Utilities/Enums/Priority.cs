@@ -5,14 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EPJ
+namespace EPJ.Utilities
 {
     public enum Priority
     {
 
         Default = 0,
-        LOW = 1,
-        MEDIUM = 2,
-        HIGH = 4
+        Low = 1,
+        Medium = 2,
+        High = 4
     }
 }

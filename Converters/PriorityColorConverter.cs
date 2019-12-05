@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EPJ.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -21,13 +22,13 @@ namespace EPJ
                 case Priority.Default:
                     color = Application.Current.Resources["PriorityDefault"].ToString();
                     break;
-                case Priority.LOW:
+                case Priority.Low:
                     color = Application.Current.Resources["PriorityLow"].ToString();
                     break;
-                case Priority.MEDIUM:
+                case Priority.Medium:
                     color = Application.Current.Resources["PriorityMedium"].ToString();
                     break;
-                case Priority.HIGH:
+                case Priority.High:
                     color = Application.Current.Resources["PriorityHigh"].ToString();
                     break;
                 default:
