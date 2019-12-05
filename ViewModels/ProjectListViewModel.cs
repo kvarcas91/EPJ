@@ -1,68 +1,46 @@
-﻿using System;
+﻿using Caliburn.Micro;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 
-namespace EPJ
+namespace EPJ.ViewModels
 {
-    public class ProjectListViewModel : BaseViewModel
+    public class ProjectListViewModel : Screen
     {
 
         #region Constructors
         
-        private ProjectListViewModel()
+        public ProjectListViewModel()
         {
             //for (int i = 0; i < 100; i++)
             //{
                 AddFakeData();
             //}
 
-            mAddProjectCommand = new RelayCommand(ShowMessage);
-            mShowListItemSettingsCommand = new RelayCommand(ShowListItemSettings);
+            //mAddProjectCommand = new RelayCommand(ShowMessage);
+            //mShowListItemSettingsCommand = new RelayCommand(ShowListItemSettings);
         }
 
-        #endregion
-
-        #region Singleton
-        /// <summary>
-        /// Instance with lock to prevent creation of multiple instances
-        /// </summary>
-        public static ProjectListViewModel Instance {
-            get
-            {
-                if (instance != null) return instance;
-
-                lock(syncLock)
-                {
-                    if (instance == null)
-                    {
-                        instance = new ProjectListViewModel();
-                    }
-                }
-                return instance;
-            }
+        public ProjectListViewModel(Project project)
+        {
+            Projects.Add(project);
         }
 
         #endregion
 
         #region Properties
 
-        public ICommand mAddProjectCommand { get; set; }
+       // public ICommand mAddProjectCommand { get; set; }
 
-        public ICommand mShowListItemSettingsCommand { get; set; }
+       // public ICommand mShowListItemSettingsCommand { get; set; }
 
-        /// <summary>
-        /// ProjectList view model instance
-        /// </summary>
-        private static volatile ProjectListViewModel instance = null;
-
-        private static readonly object syncLock = new object();
 
         /// <summary>
         /// List of all projects
         /// </summary>
-        public ObservableCollection<Project> Projects { get; private set; } 
+        public BindableCollection<Project> Projects { get; private set; } 
 
 
         public List<string> SortBy
@@ -75,18 +53,12 @@ namespace EPJ
 
         #endregion
 
-        public void ShowMessage(object param)
+       public void LoadAddProjectPage ()
         {
-            Project project = new Project();
-                project.AddContributors(DataBase.GetContributors(0));
-                project.Priority = Priority.MEDIUM;
-                project.Title = "Antras projektas";
-                project.ProjectPath = "somewhere in C";
-            project.Date = DateTime.Now; 
-            project.Description = "test priority";
-                DataBase.InsertProject(project);
-            
-
+           // MessageBox.Show("test");
+            AddProjectViewModel lg = new AddProjectViewModel();
+            var parentConductor = (Conductor<object>)(this.Parent);
+            parentConductor.ActivateItem(lg);
         }
 
         public void ShowListItemSettings (object param)
@@ -97,7 +69,7 @@ namespace EPJ
         public void AddFakeData ()
         {
             //List<Contributor> contributors = DataBase.GetContributors();
-            Projects = new ObservableCollection<Project>(DataBase.GetProjects());
+            Projects = new BindableCollection<Project>(DataBase.GetProjects());
 
           
             /*

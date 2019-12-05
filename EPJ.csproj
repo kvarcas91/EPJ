@@ -37,8 +37,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Caliburn.Micro, Version=3.2.0.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
+      <HintPath>packages\Caliburn.Micro.Core.3.2.0\lib\net45\Caliburn.Micro.dll</HintPath>
+    </Reference>
+    <Reference Include="Caliburn.Micro.Platform, Version=3.2.0.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
+      <HintPath>packages\Caliburn.Micro.3.2.0\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
+    </Reference>
+    <Reference Include="Caliburn.Micro.Platform.Core, Version=3.2.0.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
+      <HintPath>packages\Caliburn.Micro.3.2.0\lib\net45\Caliburn.Micro.Platform.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Dapper, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\Dapper.2.0.30\lib\net461\Dapper.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -50,6 +60,9 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Caliburn.Micro.3.2.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -68,48 +81,55 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Code\DataModel\ApplicationPage.cs" />
-    <Compile Include="Code\Enums\SortBy.cs" />
-    <Compile Include="Code\Model\Comment\IComment.cs" />
-    <Compile Include="Code\Model\Contributor\IContributor.cs" />
-    <Compile Include="Code\Model\Project\IProject.cs" />
-    <Compile Include="Code\Model\RelatedFile\IRelatedFile.cs" />
-    <Compile Include="Code\Model\Task\IProjectElement.cs" />
-    <Compile Include="Code\Model\Task\ITask.cs" />
-    <Compile Include="Code\Model\Task\Note.cs" />
-    <Compile Include="Code\Model\Task\Task.cs" />
-    <Compile Include="Code\Utilities\ColourPool.cs" />
-    <Compile Include="Code\Utilities\Converters\ApplicationPageConverter.cs" />
-    <Compile Include="Code\Utilities\Converters\BaseValueConverter.cs" />
-    <Compile Include="Code\Utilities\Converters\TrimTextConverter.cs" />
-    <Compile Include="Code\Utilities\EnumHelper.cs" />
-    <Compile Include="Code\Utilities\Validators\ValidateUserInput.cs" />
-    <Compile Include="Code\ViewModel\Base\BaseViewModel.cs" />
-    <Compile Include="Code\ViewModel\Base\RelayCommand.cs" />
-    <Compile Include="Code\ViewModel\ProjectListViewModel.cs" />
-    <Compile Include="Code\Utilities\Converters\PriorityColorConverter.cs" />
-    <Compile Include="Code\Utilities\Converters\PriorityToStringConverter.cs" />
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
+    <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Utilities\Enums\SortBy.cs" />
+    <Compile Include="Models\Comment\IComment.cs" />
+    <Compile Include="Models\Contributor\IContributor.cs" />
+    <Compile Include="Models\Project\IProject.cs" />
+    <Compile Include="Models\RelatedFile\IRelatedFile.cs" />
+    <Compile Include="Models\Task\IProjectElement.cs" />
+    <Compile Include="Models\Task\ITask.cs" />
+    <Compile Include="Models\Task\Note.cs" />
+    <Compile Include="Models\Task\Task.cs" />
+    <Compile Include="Utilities\ColourPool.cs" />
+    <Compile Include="Converters\BaseValueConverter.cs" />
+    <Compile Include="Converters\TrimTextConverter.cs" />
+    <Compile Include="Utilities\EnumHelper.cs" />
+    <Compile Include="Utilities\Validators\ValidateUserInput.cs" />
+    <Compile Include="ViewModels\AddProjectViewModel.cs" />
+    <Compile Include="Views\AddProjectView.xaml.cs">
+      <DependentUpon>AddProjectView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MainView.xaml.cs">
+      <DependentUpon>MainView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="ViewModels\ProjectListViewModel.cs" />
+    <Compile Include="Converters\PriorityColorConverter.cs" />
+    <Compile Include="Converters\PriorityToStringConverter.cs" />
+    <Compile Include="Views\ProjectListView.xaml.cs">
+      <DependentUpon>ProjectListView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ShellView.xaml.cs">
+      <DependentUpon>ShellView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Code\Enums\Priority.cs" />
-    <Compile Include="Code\Utilities\Converters\SortByConverter.cs" />
-    <Compile Include="Code\ViewModel\WindowViewModel.cs" />
+    <Compile Include="Utilities\Enums\Priority.cs" />
+    <Compile Include="Converters\SortByConverter.cs" />
+    <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="Database\DataBase.cs" />
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Page Include="View\Pages\AddProjectPage.xaml">
+    <Page Include="Resources\Styles\ListViewStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Pages\ProjectListPage.xaml">
+    <Page Include="Views\AddProjectView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MainView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -133,18 +153,20 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\ProjectListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ShellView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Code\Model\Comment\Comment.cs" />
-    <Compile Include="Code\Model\Contributor\Contributor.cs" />
-    <Compile Include="Code\Model\Project\Project.cs" />
-    <Compile Include="Code\Model\RelatedFile\RelatedFile.cs" />
-    <Compile Include="View\Pages\AddProjectPage.xaml.cs">
-      <DependentUpon>AddProjectPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Pages\ProjectListPage.xaml.cs">
-      <DependentUpon>ProjectListPage.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="Models\Comment\Comment.cs" />
+    <Compile Include="Models\Contributor\Contributor.cs" />
+    <Compile Include="Models\Project\Project.cs" />
+    <Compile Include="Models\RelatedFile\RelatedFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -182,6 +204,9 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Code\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\System.Data.SQLite.Core.1.0.112.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('packages\System.Data.SQLite.Core.1.0.112.0\build\net46\System.Data.SQLite.Core.targets')" />

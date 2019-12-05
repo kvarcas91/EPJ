@@ -13,23 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace EPJ
+namespace EPJ.Views
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for AddProjectView.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class AddProjectView : UserControl
     {
-        public MainWindow()
+        public AddProjectView()
         {
-            //string executable = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            //string path = (System.IO.Path.GetDirectoryName(executable));
-            //AppDomain.CurrentDomain.SetData("DataDirectory", path);
-            //Console.WriteLine(path);
             InitializeComponent();
-            DataContext = WindowViewModel.Instance;
         }
-
-       
     }
 }

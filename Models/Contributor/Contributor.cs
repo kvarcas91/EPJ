@@ -49,6 +49,13 @@ namespace EPJ
             InitialColor = ColourPool.GetColour();
         }
 
+        public Contributor(string firstName, string lastName)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+            InitialColor = ColourPool.GetColour();
+        }
+
         #endregion
 
         public override string ToString()

@@ -10,17 +10,16 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace EPJ
+namespace EPJ.Views
 {
     /// <summary>
-    /// Interaction logic for AddProjectPage.xaml
+    /// Interaction logic for MainView.xaml
     /// </summary>
-    public partial class AddProjectPage : Page
+    public partial class MainView : Window
     {
-        public AddProjectPage()
+        public MainView()
         {
             InitializeComponent();
         }

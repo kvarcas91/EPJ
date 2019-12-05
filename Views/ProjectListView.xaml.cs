@@ -13,17 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace EPJ
+namespace EPJ.Views
 {
     /// <summary>
-    /// Interaction logic for ProjectListPage.xaml
+    /// Interaction logic for ProjectListView.xaml
     /// </summary>
-    public partial class ProjectListPage : Page
+    public partial class ProjectListView : UserControl
     {
-        public ProjectListPage()
+        public ProjectListView()
         {
             InitializeComponent();
-            DataContext = ProjectListViewModel.Instance;
         }
     }
 }
