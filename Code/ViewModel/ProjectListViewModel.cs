@@ -77,16 +77,16 @@ namespace EPJ
 
         public void ShowMessage(object param)
         {
-            WindowViewModel.Instance.CurrentPage = ApplicationPage.AddProject;
-            try
-            {
-                //MessageBox.Show($"Contributor size {DataBase.GetContributors().Count}");
-            }
-            catch(Exception e)
-            {
-                MessageBox.Show(e.Message);
-            }
+            Project project = new Project();
+                project.AddContributors(DataBase.GetContributors(0));
+                project.Priority = Priority.MEDIUM;
+                project.Title = "Antras projektas";
+                project.ProjectPath = "somewhere in C";
+            project.Date = DateTime.Now; 
+            project.Description = "test priority";
+                DataBase.InsertProject(project);
             
+
         }
 
         public void ShowListItemSettings (object param)

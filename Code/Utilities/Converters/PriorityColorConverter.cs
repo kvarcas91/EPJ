@@ -19,6 +19,7 @@ namespace EPJ
             switch ((Priority)value)
             {
                 case Priority.Default:
+                    color = Application.Current.Resources["PriorityDefault"].ToString();
                     break;
                 case Priority.LOW:
                     color = Application.Current.Resources["PriorityLow"].ToString();

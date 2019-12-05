@@ -2,7 +2,7 @@
 {
     public interface IContributor
     {
-        long ID { get; set; }
+        long Id { get; set; }
         string FirstName { get; }
         string FullName { get; }
         string LastName { get; }

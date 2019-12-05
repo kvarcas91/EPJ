@@ -30,7 +30,7 @@ namespace EPJ
         /// <summary>
         /// Project creation date
         /// </summary>
-        public DateTime Date { get; private set; }
+        public DateTime Date { get; set; }
 
         /// <summary>
         /// Project deadline
@@ -73,7 +73,7 @@ namespace EPJ
 
         public Project()
         {
-           // Date = DateTime.Now;
+           
         }
 
         #endregion
@@ -99,6 +99,7 @@ namespace EPJ
             foreach (var contributor in contributors)
             {
                 Contributors.Add(contributor);
+                Console.WriteLine(contributor.ToString());
             }
         }
 

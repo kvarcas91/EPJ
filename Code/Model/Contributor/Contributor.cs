@@ -13,7 +13,7 @@ namespace EPJ
 
         #region Properties
 
-        public long ID { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// Contributor first name
@@ -44,14 +44,6 @@ namespace EPJ
 
         #region Constructors
 
-        public Contributor(long ID, string firstName, string lastName)
-        {
-            this.ID = ID;
-            FirstName = firstName;
-            LastName = lastName;
-            InitialColor = ColourPool.GetColour();
-        }
-
         public Contributor() 
         {
             InitialColor = ColourPool.GetColour();
@@ -59,11 +51,9 @@ namespace EPJ
 
         #endregion
 
-
-
         public override string ToString()
         {
-            return $"{FirstName} {LastName}";
+            return $"ID: {Id}. {FirstName} {LastName}";
         }
 
 

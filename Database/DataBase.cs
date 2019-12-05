@@ -16,12 +16,22 @@ namespace EPJ
 
         public static void InsertContributor(IContributor contributor)
         {
-           
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
-                connection.Execute("insert into contributor (FirstName, LastName) values (@FirstName, @LastName)", contributor);
+                connection.Execute("insert into contributors (FirstName, LastName) values (@FirstName, @LastName)", contributor);
+                connection.Dispose();
             }
             
+        }
+
+        public static void InsertProject (IProject project)
+        {
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            {
+                connection.Execute("insert into projects (Title, Description, Date, DueDate, ProjectPath, Priority) " +
+                                   $"values (@Title, @Description, @Date, @DueDate, @ProjectPath, @Priority)", project);
+                connection.Dispose();
+            }
         }
 
         public static List<Contributor> GetContributors(long projectID)
@@ -30,7 +40,7 @@ namespace EPJ
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
                 var output = connection.Query<Contributor>(
-                    "SELECT FirstName, LastName " +
+                    "SELECT c.Id, c.FirstName, c.LastName " +
                     "FROM contributors c " +
                     "INNER JOIN project_contributors p ON p.contributorID = c.Id " +
                     $"INNER JOIN projects pr on pr.ID = p.projectID WHERE pr.Id = {projectID}", new DynamicParameters());
@@ -43,7 +53,6 @@ namespace EPJ
 
         public static List<Project> GetProjects()
         {
-            //List<IProject> projects = new List<IProject>();
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
                 var output = connection.Query<Project>("select * from projects", new DynamicParameters());

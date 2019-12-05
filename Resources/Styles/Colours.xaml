@@ -21,5 +21,6 @@
     <Color x:Key="PriorityLow">#FFA800</Color>
     <Color x:Key="PriorityMedium">#FF6A00</Color>
     <Color x:Key="PriorityHigh">#701944</Color>
+    <Color x:Key="PriorityDefault">#000000</Color>
 
 </ResourceDictionary>
