@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace EPJ.ViewModels
@@ -14,18 +15,30 @@ namespace EPJ.ViewModels
 
         public AddProjectViewModel()
         {
-            SelectionChanged = new RelayCommand(ContributorSelected);
+            AddContributorCommand = new RelayCommand(AddContributor);
+            //ShowAddNewContributorToolBarCommand = new RelayCommand(ShowAddNewContributorToolBar);
+            RemoveContributorCommand = new RelayCommand(RemoveContributor);
+          
         }
 
         private Project _project = new Project();
 
         private string _title;
         private string _description;
+        private string _firstName;
+        private string _lastName;
         private bool _isContributorListVisible = false;
+        private bool _isAddContributorPanelVisible = false;
+        private bool _isAddedContributorListVisible = true;
+        private bool _isAddNewContributorPanelVisible = false;
         private DateTime _dueDate = DateTime.Now;
 
         
-        public ICommand SelectionChanged { get; set; }
+        public ICommand AddContributorCommand { get; set; }
+
+        public ICommand RemoveContributorCommand { get; set; }
+
+        //public ICommand ShowAddNewContributorToolBarCommand { get; set; }
 
         public string Title
         {
@@ -53,6 +66,32 @@ namespace EPJ.ViewModels
             }
         }
 
+        public string FirstName
+        {
+            get
+            {
+                return _firstName;
+            }
+            set
+            {
+                _firstName = value;
+                NotifyOfPropertyChange(() => FirstName);
+            }
+        }
+
+        public string LastName
+        {
+            get
+            {
+                return _lastName;
+            }
+            set
+            {
+                _lastName = value;
+                NotifyOfPropertyChange(() => LastName);
+            }
+        }
+
         public bool IsContributorListVisible
         {
             get
@@ -63,6 +102,45 @@ namespace EPJ.ViewModels
             {
                 _isContributorListVisible = value;
                 NotifyOfPropertyChange(() => IsContributorListVisible);
+            }
+        }
+
+        public bool IsAddContributorPanelVisible
+        {
+            get
+            {
+                return _isAddContributorPanelVisible;
+            }
+            set
+            {
+                _isAddContributorPanelVisible = value;
+                NotifyOfPropertyChange(() => IsAddContributorPanelVisible);
+            }
+        }
+
+        public bool IsAddedContributorListVisible
+        {
+            get
+            {
+                return _isAddedContributorListVisible;
+            }
+            set
+            {
+                _isAddedContributorListVisible = value;
+                NotifyOfPropertyChange(() => IsAddedContributorListVisible);
+            }
+        }
+
+        public bool IsAddNewContributorPanelVisible
+        {
+            get
+            {
+                return _isAddNewContributorPanelVisible;
+            }
+            set
+            {
+                _isAddNewContributorPanelVisible = value;
+                NotifyOfPropertyChange(() => IsAddNewContributorPanelVisible);
             }
         }
 
@@ -90,11 +168,11 @@ namespace EPJ.ViewModels
             }
         }
 
-        public List<Contributor> AllContributors { get; } = new List<Contributor>(DataBase.GetContributors());
+        public BindableCollection<Contributor> AllContributors { get; } = new BindableCollection<Contributor>(DataBase.GetContributors());
 
-        public BindableCollection<Contributor> AddedContributors = new BindableCollection<Contributor>();
+        public BindableCollection<Contributor> AddedContributors { get; } = new BindableCollection<Contributor>();
 
-
+     
         public bool CanAddProject(string title, string description)
         {
             //return true;
@@ -122,14 +200,54 @@ namespace EPJ.ViewModels
 
         public void ShowContributorList()
         {
-            IsContributorListVisible = true;
+            IsAddedContributorListVisible = IsAddContributorPanelVisible;
+            IsAddContributorPanelVisible = !IsAddContributorPanelVisible;
+            IsContributorListVisible = !IsContributorListVisible;
+            //Console.WriteLine($"IsAddedContributorListVisible {IsAddedContributorListVisible}; IsAddNewContributorPanelVisible {IsAddNewContributorPanelVisible}");
         }
 
-        private void ContributorSelected (object param)
+        private void AddContributor (object param)
+        {
+           // MessageBox.Show("test");
+            var contributor = (Contributor)param;
+
+            if(!AddedContributors.Contains(contributor)) AddedContributors.Add(contributor);
+           
+
+            IsContributorListVisible = false;
+            IsAddedContributorListVisible = true;
+            IsAddContributorPanelVisible = false;
+        }
+
+        public bool CanAddNewContributor(string firstName, string lastName)
+        {
+            return ValidateUserInput.IsNullOrWhiteSpace(firstName, lastName);
+        }
+
+        public void AddNewContributor (string firstName, string lastName)
+        {
+            var contributor = new Contributor(firstName, lastName);
+            DataBase.InsertContributor(contributor);
+            AllContributors.Add(contributor);
+            ShowAddNewContributorToolBar();
+        }
+
+        private void RemoveContributor (object param)
         {
             var contributor = (Contributor)param;
-            Console.WriteLine(contributor.ToString());
+            AddedContributors.Remove(contributor);
+           
         }
+
+        public void ShowAddNewContributorToolBar ()
+        {
+            IsContributorListVisible = !IsContributorListVisible;
+            IsAddNewContributorPanelVisible = !IsAddNewContributorPanelVisible;
+            Console.WriteLine($"IsContributorListVisible {IsContributorListVisible}; IsAddNewContributorPanelVisible {IsAddNewContributorPanelVisible}");
+        
+        }
+
+        
 
         public void BackToProjectList()
         {
