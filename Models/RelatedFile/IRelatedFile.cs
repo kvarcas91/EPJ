@@ -2,11 +2,11 @@
 {
     public interface IRelatedFile
     {
-        string FileExtention { get; }
-        string FileName { get; }
-        string FilePath { get; }
+        string FileExtention { get; set; }
+        string FileName { get; set; }
+        string FilePath { get; set; }
         uint FileVersion { get; set; }
-        uint ProjectID { get; }
+        long ID { get; set; }
 
         void Copy();
 

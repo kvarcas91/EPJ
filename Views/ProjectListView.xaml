@@ -139,7 +139,8 @@
                                                         <TextBlock Text="{Binding Initials}"
                                                            Foreground="White"
                                                            VerticalAlignment="Center"
-                                                           HorizontalAlignment="Center"/>
+                                                           HorizontalAlignment="Center"
+                                                                 ToolTip="{Binding FullName}"/>
                                                     </Grid>
                                                 </DataTemplate>
                                             </ListView.ItemTemplate>

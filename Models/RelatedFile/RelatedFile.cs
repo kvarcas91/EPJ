@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,22 +15,22 @@ namespace EPJ
         /// <summary>
         /// Project ID which holds this file
         /// </summary>
-        public uint ProjectID { get; private set; }
+        public long ID { get; set; }
 
         /// <summary>
         /// related to the project file name
         /// </summary>
-        public string FileName { get; private set; }
+        public string FileName { get; set; }
 
         /// <summary>
         /// Related to the project file absolute path
         /// </summary>
-        public string FilePath { get; private set; }
+        public string FilePath { get; set; }
 
         /// <summary>
         /// Related to the project file extention
         /// </summary>
-        public string FileExtention { get; private set; }
+        public string FileExtention { get; set; }
 
         /// <summary>
         /// File version
@@ -40,9 +41,13 @@ namespace EPJ
 
         #region Constructors
 
-        public RelatedFile(uint ID)
+        public RelatedFile() { }
+
+        public RelatedFile(string filePath)
         {
-            ProjectID = ID;
+            FilePath = filePath;
+            FileName = Path.GetFileNameWithoutExtension(filePath);
+            FileExtention = Path.GetExtension(filePath);
         }
 
 

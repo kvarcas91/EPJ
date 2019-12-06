@@ -1,8 +1,10 @@
 ﻿using Caliburn.Micro;
 using EPJ.Utilities;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,32 +16,60 @@ namespace EPJ.ViewModels
     public class AddProjectViewModel : Screen
     {
 
+        #region Public Constructors
+
         public AddProjectViewModel()
         {
             AddContributorCommand = new RelayCommand(AddContributor);
-            //ShowAddNewContributorToolBarCommand = new RelayCommand(ShowAddNewContributorToolBar);
             RemoveContributorCommand = new RelayCommand(RemoveContributor);
-          
+            CreateProjectFolder(_projectPath);
+            ShowFolderContent(_projectPath);
         }
 
-        private Project _project = new Project();
+        #endregion
 
+        #region Private Properties
+
+        private readonly Project _project = new Project();
+
+        // Project Properties
         private string _title;
         private string _description;
+        private DateTime _dueDate = DateTime.Now;
+
+        // Contributor Properties
         private string _firstName;
         private string _lastName;
+
+        //File Properties
+        private readonly string _projectPath = "./projects/temp/";
+
+        // AddContributor toolbar visibilities
         private bool _isContributorListVisible = false;
         private bool _isAddContributorPanelVisible = false;
         private bool _isAddedContributorListVisible = true;
         private bool _isAddNewContributorPanelVisible = false;
-        private DateTime _dueDate = DateTime.Now;
 
-        
+        #endregion
+
+        #region ICommand
+
+        /// <summary>
+        /// Assign Contributor to the project
+        /// </summary>
         public ICommand AddContributorCommand { get; set; }
 
+        /// <summary>
+        /// Remove contributor from the project
+        /// </summary>
         public ICommand RemoveContributorCommand { get; set; }
 
+
         //public ICommand ShowAddNewContributorToolBarCommand { get; set; }
+
+        #endregion
+
+        #region Public Properties
 
         public string Title
         {
@@ -173,7 +203,12 @@ namespace EPJ.ViewModels
 
         public BindableCollection<Contributor> AddedContributors { get; } = new BindableCollection<Contributor>();
 
-     
+        public BindableCollection<RelatedFile> RelatedFiles { get; } = new BindableCollection<RelatedFile>();
+
+        #endregion
+
+        #region Project Methods
+
         public bool CanAddProject(string title, string description)
         {
             //return true;
@@ -199,6 +234,10 @@ namespace EPJ.ViewModels
             parentConductor.ActivateItem(lg);
 
         }
+
+        #endregion
+
+        #region Contributor Methods
 
         public void ShowContributorList()
         {
@@ -257,7 +296,53 @@ namespace EPJ.ViewModels
         
         }
 
-        
+        #endregion
+
+        #region File Methods
+
+        private void CreateProjectFolder (string path)
+        {
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+        }
+
+        private void ShowFolderContent (string path)
+        {
+            string[] contentDirectories = Directory.GetDirectories(path);
+            string[] contentFiles = Directory.GetFiles(path);
+
+            foreach (var item in contentDirectories)
+            {
+                Console.WriteLine($"Directory: {item}");
+            }
+            foreach(var item in contentFiles)
+            {
+                Console.WriteLine($"File: {item}");
+            }
+
+        }
+
+        public void AddFiles()
+        {
+
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Multiselect = true;
+            if (dialog.ShowDialog() == true)
+            {
+                foreach (string filename in dialog.FileNames)
+                {
+                    RelatedFile file = new RelatedFile(filename);
+                    RelatedFiles.Add(file);
+                }
+                    
+            }
+
+        }
+
+        #endregion
+
+
+        #region Navigation
 
         public void BackToProjectList()
         {
@@ -265,5 +350,7 @@ namespace EPJ.ViewModels
             var parentConductor = (Conductor<object>)(this.Parent);
             parentConductor.ActivateItem(lg);
         }
+
+        #endregion
     }
 }
