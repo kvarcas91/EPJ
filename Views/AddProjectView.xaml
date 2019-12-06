@@ -16,17 +16,25 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="100"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
         <Button x:Name="AddProject" Content="Add" Grid.Column="0"/>
-        <ComboBox Grid.Column="1" 
+        <ComboBox Grid.Column="0" Grid.Row="1"
           x:Name="Priorities" 
           SelectedItem="{Binding Path=Priority, Mode=OneWayToSource}"/>
+
+        <TextBox x:Name="Title" Grid.Row="1" Grid.Column="1"/>
+        <TextBox x:Name="Description" Grid.Row="1" Grid.Column="2"/>
+
     </Grid>
 </UserControl>

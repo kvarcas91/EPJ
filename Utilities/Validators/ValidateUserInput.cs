@@ -9,7 +9,18 @@ namespace EPJ
     public class ValidateUserInput
     {
 
-
+        public static bool IsNullOrWhiteSpace(params string[] input)
+        {
+            
+            foreach (var item in input)
+            {
+                if (String.IsNullOrWhiteSpace(item))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
 
     }
 }

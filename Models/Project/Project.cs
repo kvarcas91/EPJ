@@ -128,7 +128,7 @@ namespace EPJ
 
         public override string ToString()
         {
-            return $"title: {Title}; Description: {Description}";
+            return $"priority: {Priority.ToString()}; title: {Title}; Description: {Description}; DueDate: {DueDate.ToString()}; Date: {Date.ToString()}";
         }
 
     }

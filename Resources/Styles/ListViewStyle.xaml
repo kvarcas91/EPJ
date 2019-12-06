@@ -89,8 +89,7 @@
                                 <Button HorizontalAlignment="Right"
                                         VerticalAlignment="Top"
                                         Style="{StaticResource Hoverless}"
-                                        Command="{Binding ElementName=projectsListView, Path=DataContext.mShowListItemSettingsCommand}"
-                                        CommandParameter="{Binding}">
+                                      >
                                     <Image Source="../../Resources/Images/settings.png"/>
                                 </Button>
 

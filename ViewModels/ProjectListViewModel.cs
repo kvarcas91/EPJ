@@ -23,10 +23,6 @@ namespace EPJ.ViewModels
             //mShowListItemSettingsCommand = new RelayCommand(ShowListItemSettings);
         }
 
-        public ProjectListViewModel(Project project)
-        {
-            Projects.Add(project);
-        }
 
         #endregion
 
@@ -55,10 +51,11 @@ namespace EPJ.ViewModels
 
        public void LoadAddProjectPage ()
         {
-           // MessageBox.Show("test");
+            //MessageBox.Show("test");
             AddProjectViewModel lg = new AddProjectViewModel();
             var parentConductor = (Conductor<object>)(this.Parent);
             parentConductor.ActivateItem(lg);
+            
         }
 
         public void ShowListItemSettings (object param)
