@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+               xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:EPJ" 
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -26,12 +27,10 @@
 
             <!-- Add new project -->
             <Button x:Name="LoadAddProjectPage"
-                Background="Transparent"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                ToolTip="Add new project"
-                Style="{StaticResource Hoverless}">
-                <Image Source="../Resources/Images/add.png"/>
+                ToolTip="Add new project">
+                <materialDesign:PackIcon Kind="AddCircleOutline"/>
             </Button>
 
             <TextBlock Text="Sort by" Margin="10" VerticalAlignment="Center"/>
