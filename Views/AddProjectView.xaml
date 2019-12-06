@@ -3,45 +3,165 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:EPJ"
+             xmlns:local="clr-namespace:EPJ" 
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             FontSize="18"
              mc:Ignorable="d"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="700" d:DesignWidth="800">
 
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="boolToVisibility"/>
+    </UserControl.Resources>
 
     
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="200"/>
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Button x:Name="AddProject" Grid.Column="0">
-            <materialDesign:PackIcon Kind="Add" Height="24" Width="24"/>
+        <Button x:Name="BackToProjectList" 
+                Grid.Column="0" Grid.Row="0"
+                Width="60"
+                HorizontalAlignment="Left">
+            <materialDesign:PackIcon Kind="ArrowBackCircle" Height="24" Width="24"/>
         </Button>
-        <ComboBox Grid.Column="0" Grid.Row="1" MinWidth="100"
-          x:Name="Priorities" SelectedIndex="1" 
-          SelectedItem="{Binding Path=Priority, Mode=OneWayToSource}"/>
-        <materialDesign:PackIcon Kind="About" Height="24" Width="24"
-                                 Grid.Column="0" Grid.Row="2"
-                                 Foreground="Blue"/>
-        <TextBox x:Name="Title" Grid.Row="2" Grid.Column="1"
-                 materialDesign:HintAssist.IsFloating="True"
-                 materialDesign:HintAssist.Hint="Project Title"/>
 
-        <TextBox x:Name="Description" Grid.Row="1" Grid.Column="2"
-                 />
-        <DatePicker Grid.Row="1" Grid.Column="3"/>
+        <!-- Files -->
+        <Grid Grid.Row="1" Grid.Column="0" Background="White"
+              Margin="10"
+              HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            
+        </Grid>
+
+        <!-- Project info -->
+        <materialDesign:Card  Grid.Row="1" Grid.Column="1" 
+                              Background="White" Margin="10"
+                               HorizontalAlignment="Stretch" 
+                              VerticalAlignment="Stretch">
+        <Grid HorizontalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                       Margin="10">
+                <TextBlock FontSize="20" Text="Project" FontWeight="Bold" Margin="10"/>
+                <Separator Background="Blue"/>
+            </StackPanel>
+
+            <TextBox x:Name="Title" Margin="10"
+                     Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                     HorizontalAlignment="Stretch"
+                     materialDesign:HintAssist.IsFloating="True"
+                    materialDesign:HintAssist.Hint="Project Title"/>
+            
+            <TextBlock Text="Priority" VerticalAlignment="Center"
+                       Grid.Row="2" Grid.Column="1"
+                       Margin="10"/>
+            <ComboBox  Grid.Row="2" Grid.Column="2" MinWidth="100" Margin="10"
+                        x:Name="Priorities" SelectedIndex="1" FontSize="16"
+                         SelectedItem="{Binding Path=Priority, Mode=OneWayToSource}"/>
+
+            <TextBlock Text="Due Date" VerticalAlignment="Center"
+                       Grid.Row="3" Grid.Column="1"
+                       Margin="10"/>
+            <DatePicker x:Name="DueDate"  FontSize="16" Margin="10"
+                        Grid.Row="3" Grid.Column="2"
+                        SelectedDate="{Binding DueDate, Mode=TwoWay}"/>
+
+            <TextBox Margin="10" x:Name="Description"
+                     Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
+                     MinWidth="280" Height="200" 
+                     TextWrapping="Wrap" TextAlignment="Justify"
+                     materialDesign:HintAssist.Hint="Description"  
+                     materialDesign:HintAssist.IsFloating="True"
+                     VerticalScrollBarVisibility="Auto" SpellCheck.IsEnabled="True"
+                     VerticalContentAlignment="Top"/>
+
+            <Button x:Name="AddProject" Margin="10"
+                    Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                <materialDesign:PackIcon Kind="AddCircleOutline" Height="24" Width="24"/>
+            </Button>
+
+        </Grid>
+
+        </materialDesign:Card>
         
+        <!-- Contributors -->
+        <Grid Grid.Row="1" Grid.Column="2" Background="White"
+              Margin="10">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+
+            <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                       Margin="10">
+                <TextBlock Text="Contributors" FontSize="16" FontWeight="Bold" Margin="10"/>
+                <Separator/>
+            </StackPanel>
+
+            <Button x:Name="ShowContributorList" 
+                    Grid.Row="1" Grid.ColumnSpan="2">
+
+                <materialDesign:PackIcon Kind="AddCircleOutline" Height="24" Width="24"/>
+            </Button>
+            <ListView x:Name="contributorListView" 
+                ItemsSource="{Binding AllContributors}"
+                      Grid.Row="2"
+                      Visibility="{Binding IsContributorListVisible, 
+                Converter={StaticResource boolToVisibility}}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Ellipse Grid.Column="0" Width="20" Height="20" Fill="{Binding InitialColor}"/>
+                            <TextBlock Grid.Column="0" Text="{Binding Initials}"
+                                       Foreground="White"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Margin="4" TextAlignment="Center" Grid.Column="1" 
+                                       Text="{Binding FullName}"
+                                       FontSize="12"/>
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="SelectionChanged">
+                                    <i:InvokeCommandAction Command="{Binding ElementName=contributorListView, Path=SelectionChanged}" 
+                                                           CommandParameter="{Binding}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+        </Grid>
+
     </Grid>
 </UserControl>

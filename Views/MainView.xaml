@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Background="{StaticResource BackgroundLightBrush}"
         Title="Project management Tool" 
-        Height="600" Width="1000" 
+        Height="700" Width="1000" 
         WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.ColumnDefinitions>

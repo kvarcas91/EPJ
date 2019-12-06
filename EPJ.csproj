@@ -103,6 +103,7 @@
     <Compile Include="Utilities\EnumHelper.cs" />
     <Compile Include="Utilities\Validators\ValidateUserInput.cs" />
     <Compile Include="ViewModels\AddProjectViewModel.cs" />
+    <Compile Include="ViewModels\Base\RelayCommand.cs" />
     <Compile Include="Views\AddProjectView.xaml.cs">
       <DependentUpon>AddProjectView.xaml</DependentUpon>
     </Compile>
@@ -186,9 +187,43 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Content Include="bin\Debug\Caliburn.Micro.dll" />
+    <Content Include="bin\Debug\Caliburn.Micro.Platform.Core.dll" />
+    <Resource Include="bin\Debug\Caliburn.Micro.Platform.Core.xml" />
+    <Content Include="bin\Debug\Caliburn.Micro.Platform.dll" />
+    <Resource Include="bin\Debug\Caliburn.Micro.Platform.xml" />
+    <Resource Include="bin\Debug\Caliburn.Micro.xml" />
+    <Content Include="bin\Debug\Dapper.dll" />
+    <Resource Include="bin\Debug\Dapper.xml" />
+    <Content Include="bin\Debug\EPJ.exe" />
+    <Content Include="bin\Debug\EPJ.pdb" />
+    <Content Include="bin\Debug\MaterialDesignColors.dll" />
+    <Content Include="bin\Debug\MaterialDesignColors.pdb" />
+    <Content Include="bin\Debug\MaterialDesignThemes.Wpf.dll" />
+    <Content Include="bin\Debug\MaterialDesignThemes.Wpf.pdb" />
+    <Resource Include="bin\Debug\MaterialDesignThemes.Wpf.xml" />
+    <Content Include="bin\Debug\System.Data.SQLite.dll" />
+    <Resource Include="bin\Debug\System.Data.SQLite.xml" />
+    <Content Include="bin\Debug\System.Windows.Interactivity.dll" />
+    <Content Include="bin\Debug\x64\SQLite.Interop.dll" />
+    <Content Include="bin\Debug\x86\SQLite.Interop.dll" />
+    <Content Include="bin\Release\Dapper.dll" />
+    <Resource Include="bin\Release\Dapper.xml" />
+    <Content Include="bin\Release\EPJ.exe" />
+    <Content Include="bin\Release\EPJ.pdb" />
+    <Content Include="bin\Release\System.Data.SQLite.dll" />
+    <Resource Include="bin\Release\System.Data.SQLite.xml" />
+    <Content Include="bin\Release\x64\SQLite.Interop.dll" />
+    <Content Include="bin\Release\x86\SQLite.Interop.dll" />
     <Content Include="Database\projectDB.db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="bin\Debug\Database\projectDB.db" />
+    <None Include="bin\Debug\EPJ.exe.config" />
+    <None Include="bin\Debug\System.Data.SQLite.dll.config" />
+    <None Include="bin\Release\Database\projectDB.db" />
+    <None Include="bin\Release\EPJ.exe.config" />
+    <None Include="bin\Release\System.Data.SQLite.dll.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -207,7 +242,9 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="bin\Debug\Utilities\Database\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\System.Data.SQLite.Core.1.0.112.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('packages\System.Data.SQLite.Core.1.0.112.0\build\net46\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

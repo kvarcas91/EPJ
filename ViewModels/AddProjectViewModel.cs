@@ -5,37 +5,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace EPJ.ViewModels
 {
     public class AddProjectViewModel : Screen
     {
 
-        public bool CanAddProject(string title, string description)
+        public AddProjectViewModel()
         {
-            //return true;
-            return ValidateUserInput.IsNullOrWhiteSpace(title, description);
+            SelectionChanged = new RelayCommand(ContributorSelected);
         }
 
-        public void AddProject (string title, string description)
-        {
-            Project project = new Project();
-            project.AddContributors(DataBase.GetContributors());
-            project.Priority = Priority;
-            project.Title = Title;
-            project.ProjectPath = "somewhere in C";
-            project.Date = DateTime.Now;
-            project.Description = Description;
-            Console.WriteLine(project.ToString());
-            DataBase.InsertProject(project);
-            ProjectListViewModel lg = new ProjectListViewModel();
-            var parentConductor = (Conductor<object>)(this.Parent);
-            parentConductor.ActivateItem(lg);
-           
-        }
+        private Project _project = new Project();
 
         private string _title;
         private string _description;
+        private bool _isContributorListVisible = false;
+        private DateTime _dueDate = DateTime.Now;
+
+        
+        public ICommand SelectionChanged { get; set; }
 
         public string Title
         {
@@ -63,7 +53,31 @@ namespace EPJ.ViewModels
             }
         }
 
-        public DateTime DueDate { get; set; }
+        public bool IsContributorListVisible
+        {
+            get
+            {
+                return _isContributorListVisible;
+            }
+            set
+            {
+                _isContributorListVisible = value;
+                NotifyOfPropertyChange(() => IsContributorListVisible);
+            }
+        }
+
+        public DateTime DueDate
+        {
+            get
+            {
+                return _dueDate;
+            }
+            set
+            {
+                _dueDate = value;
+                NotifyOfPropertyChange(() => DueDate);
+            }
+        }
 
         public Priority Priority { get; set; }
 
@@ -76,5 +90,52 @@ namespace EPJ.ViewModels
             }
         }
 
+        public List<Contributor> AllContributors { get; } = new List<Contributor>(DataBase.GetContributors());
+
+        public BindableCollection<Contributor> AddedContributors = new BindableCollection<Contributor>();
+
+
+        public bool CanAddProject(string title, string description)
+        {
+            //return true;
+
+            return ValidateUserInput.IsNullOrWhiteSpace(title, description);
+        }
+
+        public void AddProject(string title, string description)
+        {
+
+            _project.Priority = Priority;
+            _project.Title = Title;
+            _project.ProjectPath = "somewhere in C";
+            _project.Date = DateTime.Now;
+            _project.DueDate = DueDate;
+            _project.Description = Description;
+            Console.WriteLine(_project.ToString());
+            // DataBase.InsertProject(project);
+
+            //ProjectListViewModel lg = new ProjectListViewModel();
+            //var parentConductor = (Conductor<object>)(this.Parent);
+            //parentConductor.ActivateItem(lg);
+
+        }
+
+        public void ShowContributorList()
+        {
+            IsContributorListVisible = true;
+        }
+
+        private void ContributorSelected (object param)
+        {
+            var contributor = (Contributor)param;
+            Console.WriteLine(contributor.ToString());
+        }
+
+        public void BackToProjectList()
+        {
+            ProjectListViewModel lg = new ProjectListViewModel();
+            var parentConductor = (Conductor<object>)(this.Parent);
+            parentConductor.ActivateItem(lg);
+        }
     }
 }

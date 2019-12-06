@@ -20,7 +20,7 @@ namespace EPJ.ViewModels
             //}
 
             //mAddProjectCommand = new RelayCommand(ShowMessage);
-            //mShowListItemSettingsCommand = new RelayCommand(ShowListItemSettings);
+            ShowListItemSettingsCommand = new RelayCommand(ShowListItemSettings);
         }
 
 
@@ -30,7 +30,7 @@ namespace EPJ.ViewModels
 
        // public ICommand mAddProjectCommand { get; set; }
 
-       // public ICommand mShowListItemSettingsCommand { get; set; }
+       public ICommand ShowListItemSettingsCommand { get; set; }
 
 
         /// <summary>
@@ -60,7 +60,13 @@ namespace EPJ.ViewModels
 
         public void ShowListItemSettings (object param)
         {
+            MessageBox.Show("Labas");
             var project = (IProject)param;
+        }
+
+        public void ShowMessage (object param)
+        {
+            MessageBox.Show("Labas");
         }
 
         public void AddFakeData ()
