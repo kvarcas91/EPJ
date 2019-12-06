@@ -2,6 +2,7 @@
 using EPJ.Utilities;
 using Microsoft.Win32;
 using System;
+using System.Drawing;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -10,6 +11,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 
 namespace EPJ.ViewModels
 {
@@ -311,16 +315,22 @@ namespace EPJ.ViewModels
             string[] contentDirectories = Directory.GetDirectories(path);
             string[] contentFiles = Directory.GetFiles(path);
 
+           
+
             foreach (var item in contentDirectories)
             {
                 Console.WriteLine($"Directory: {item}");
             }
             foreach(var item in contentFiles)
+
             {
+              
                 Console.WriteLine($"File: {item}");
             }
 
         }
+
+
 
         public void AddFiles()
         {

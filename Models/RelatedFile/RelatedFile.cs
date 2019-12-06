@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -32,6 +33,8 @@ namespace EPJ
         /// </summary>
         public string FileExtention { get; set; }
 
+        public Icon FileIcon { get; set; }
+
         /// <summary>
         /// File version
         /// </summary>
@@ -48,6 +51,8 @@ namespace EPJ
             FilePath = filePath;
             FileName = Path.GetFileNameWithoutExtension(filePath);
             FileExtention = Path.GetExtension(filePath);
+           
+            FileIcon = Icon.ExtractAssociatedIcon(filePath);
         }
 
 

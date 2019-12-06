@@ -1,4 +1,6 @@
-﻿namespace EPJ
+﻿using System.Drawing;
+
+namespace EPJ
 {
     public interface IRelatedFile
     {
@@ -7,6 +9,8 @@
         string FilePath { get; set; }
         uint FileVersion { get; set; }
         long ID { get; set; }
+
+        Icon FileIcon { get; set; }
 
         void Copy();
 

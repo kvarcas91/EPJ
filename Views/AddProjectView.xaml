@@ -12,6 +12,7 @@
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="boolToVisibility"/>
+        <local:ImageConverter x:Key="imageConverter"/>
     </UserControl.Resources>
 
     
@@ -60,8 +61,25 @@
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <materialDesign:Card>
-                            <TextBlock Text="{Binding FileExtention}"/>
+                        <materialDesign:Card VerticalAlignment="Top">
+                            <Grid VerticalAlignment="Top" HorizontalAlignment="Left">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Image Width="40" Height="40" Grid.Row="0"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Top"
+                                       Source="{Binding FileIcon, 
+                                    Converter={StaticResource imageConverter}}"/>
+
+                                <TextBlock FontSize="12" Grid.Row="1"
+                                           Width="80"
+                                           TextWrapping="Wrap"
+                                           Text="{Binding FileName}"/>
+
+                            </Grid>
                         </materialDesign:Card>
                        
                     </DataTemplate>
