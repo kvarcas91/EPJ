@@ -15,8 +15,17 @@ namespace EPJ
         {
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
-                connection.Execute("insert into contributors (FirstName, LastName) values (@FirstName, @LastName)", contributor);
+                var sql = @"insert into contributors (FirstName, LastName) values (@FirstName, @LastName)";
+                connection.Execute(sql,
+                                new
+                                {
+                                    contributor.FirstName,
+                                    contributor.LastName,
+                                   
+                                });
+                
                 connection.Dispose();
+                //return newContributor;
             }
             
         }

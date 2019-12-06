@@ -2,6 +2,7 @@
 using EPJ.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -168,7 +169,7 @@ namespace EPJ.ViewModels
             }
         }
 
-        public BindableCollection<Contributor> AllContributors { get; } = new BindableCollection<Contributor>(DataBase.GetContributors());
+        public ObservableCollection<Contributor> AllContributors { get; } = new ObservableCollection<Contributor>(DataBase.GetContributors());
 
         public BindableCollection<Contributor> AddedContributors { get; } = new BindableCollection<Contributor>();
 
@@ -189,12 +190,13 @@ namespace EPJ.ViewModels
             _project.Date = DateTime.Now;
             _project.DueDate = DueDate;
             _project.Description = Description;
+            _project.AddContributors(AddedContributors.ToList());
             Console.WriteLine(_project.ToString());
-            // DataBase.InsertProject(project);
+            DataBase.InsertProject(_project);
 
-            //ProjectListViewModel lg = new ProjectListViewModel();
-            //var parentConductor = (Conductor<object>)(this.Parent);
-            //parentConductor.ActivateItem(lg);
+            ProjectListViewModel lg = new ProjectListViewModel();
+            var parentConductor = (Conductor<object>)(this.Parent);
+            parentConductor.ActivateItem(lg);
 
         }
 
@@ -212,7 +214,7 @@ namespace EPJ.ViewModels
             var contributor = (Contributor)param;
 
             if(!AddedContributors.Contains(contributor)) AddedContributors.Add(contributor);
-           
+            Console.WriteLine(contributor.ToString());
 
             IsContributorListVisible = false;
             IsAddedContributorListVisible = true;
@@ -228,7 +230,15 @@ namespace EPJ.ViewModels
         {
             var contributor = new Contributor(firstName, lastName);
             DataBase.InsertContributor(contributor);
-            AllContributors.Add(contributor);
+            AllContributors.Clear();
+            var contributors = DataBase.GetContributors();
+            foreach (var item in contributors)
+            {
+                if (!AllContributors.Contains(item)) AllContributors.Add(item);
+   
+            }
+          
+           // AllContributors.Add(contributor);
             ShowAddNewContributorToolBar();
         }
 
