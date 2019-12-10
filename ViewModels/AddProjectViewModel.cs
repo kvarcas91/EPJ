@@ -51,6 +51,7 @@ namespace EPJ.ViewModels
 
         //File Properties
         private readonly string _projectPath = ".\\projects\\temp\\";
+        private readonly string _allProjectPath = ".\\projects\\";
         private string _currentPath;
         private string _newFolderName;
 
@@ -308,6 +309,7 @@ namespace EPJ.ViewModels
             _project.Description = Description;
             _project.AddContributors(AddedContributors.ToList());
             DataBase.InsertProject(_project);
+            Directory.Move(_projectPath, $"{_allProjectPath}{_project.Title}");
 
             ProjectListViewModel lg = new ProjectListViewModel();
             var parentConductor = (Conductor<object>)(this.Parent);
@@ -408,7 +410,6 @@ namespace EPJ.ViewModels
 
         private void ShowFolderContent (string path)
         {
-            Console.WriteLine($"old current path: {_currentPath}; new current path: {path}");
             _currentPath = path;
             RelatedFiles.Clear();
 
@@ -449,6 +450,7 @@ namespace EPJ.ViewModels
 
         public void BackToProjectList()
         {
+            Directory.Delete(_projectPath);
             ProjectListViewModel lg = new ProjectListViewModel();
             var parentConductor = (Conductor<object>)(this.Parent);
             parentConductor.ActivateItem(lg);
@@ -456,12 +458,10 @@ namespace EPJ.ViewModels
 
         public void NavigateFolderBack ()
         {
-            Console.WriteLine($"Current path before navigation: {_currentPath}");
             if (String.Compare(_currentPath, _projectPath) != 0)
             {
                 string[] directories = _currentPath.Split(Path.DirectorySeparatorChar);
                 directories = directories.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToArray();
-                Console.WriteLine($"Directory count: {directories.Length}");
                 StringBuilder builder = new StringBuilder();
                 for (int i = 0; i < directories.Length-1; i++)
                 {
