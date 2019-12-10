@@ -408,20 +408,18 @@ namespace EPJ.ViewModels
 
         private void ShowFolderContent (string path)
         {
+            Console.WriteLine($"old current path: {_currentPath}; new current path: {path}");
             _currentPath = path;
             RelatedFiles.Clear();
-            Console.WriteLine($"Show folder content path: {path}");
+
             string[] contentDirectories = Directory.GetDirectories(path);
             string[] contentFiles = Directory.GetFiles(path);
-
-           
 
             foreach (var item in contentDirectories)
             {
                 RelatedFiles.Add(new RelatedFile(item));
             }
             foreach(var item in contentFiles)
-
             {
                 RelatedFiles.Add(new RelatedFile(item));
             }
@@ -433,12 +431,12 @@ namespace EPJ.ViewModels
             if (String.IsNullOrEmpty(file.FileExtention))
             {
                 CanNavigateBack = true;
-                _currentPath = $"{_currentPath}\\{file.FileName}\\";
+                _currentPath = $"{_currentPath}{Path.DirectorySeparatorChar}{file.FileName}";
                 ShowFolderContent(file.FilePath);
             }
             else
             {
-                Console.WriteLine($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{file.FilePath.Substring(1)}");
+                Console.WriteLine($"Start process at: {Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{file.FilePath.Substring(1)}");
                 Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{file.FilePath.Substring(1)}");
                 
             }
@@ -458,15 +456,22 @@ namespace EPJ.ViewModels
 
         public void NavigateFolderBack ()
         {
+            Console.WriteLine($"Current path before navigation: {_currentPath}");
             if (String.Compare(_currentPath, _projectPath) != 0)
             {
                 string[] directories = _currentPath.Split(Path.DirectorySeparatorChar);
+                directories = directories.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToArray();
+                Console.WriteLine($"Directory count: {directories.Length}");
                 StringBuilder builder = new StringBuilder();
                 for (int i = 0; i < directories.Length-1; i++)
                 {
+                   
                     Console.WriteLine($"directory name: {directories[i]}");
                     builder.Append($"{directories[i]}{Path.DirectorySeparatorChar}");
+       
+                   
                 }
+                Console.WriteLine($"output: {builder.ToString()}");
                 ShowFolderContent(builder.ToString());
             }
         }
