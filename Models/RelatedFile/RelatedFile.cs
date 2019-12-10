@@ -52,9 +52,16 @@ namespace EPJ
             FileName = Path.GetFileNameWithoutExtension(filePath);
             FileExtention = Path.GetExtension(filePath);
            
-            FileIcon = Icon.ExtractAssociatedIcon(filePath);
+            if (String.IsNullOrEmpty(FileExtention))
+            {
+                FileIcon = DefaultIcons.FolderLarge;
+            }
+            else
+            {
+                FileIcon = Icon.ExtractAssociatedIcon(filePath);
+            }
+           
         }
-
 
         #endregion
 

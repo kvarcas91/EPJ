@@ -14,10 +14,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
+using GongSolutions.Wpf.DragDrop;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace EPJ.ViewModels
 {
-    public class AddProjectViewModel : Screen
+    public class AddProjectViewModel : Screen, IDropTarget
     {
 
         #region Public Constructors
@@ -26,6 +29,7 @@ namespace EPJ.ViewModels
         {
             AddContributorCommand = new RelayCommand(AddContributor);
             RemoveContributorCommand = new RelayCommand(RemoveContributor);
+            FileListItemClickCommand = new RelayCommand(FileListItemClick);
             CreateProjectFolder(_projectPath);
             ShowFolderContent(_projectPath);
         }
@@ -46,13 +50,21 @@ namespace EPJ.ViewModels
         private string _lastName;
 
         //File Properties
-        private readonly string _projectPath = "./projects/temp/";
+        private readonly string _projectPath = ".\\projects\\temp\\";
+        private string _currentPath;
+        private string _newFolderName;
 
         // AddContributor toolbar visibilities
         private bool _isContributorListVisible = false;
         private bool _isAddContributorPanelVisible = false;
         private bool _isAddedContributorListVisible = true;
         private bool _isAddNewContributorPanelVisible = false;
+
+        // AddFile toolbar visibilities
+        private bool _isAddFilePanelVisible = false;
+        private bool _canNavigateBack = false;
+        private bool _isDropping = false;
+        private bool _isFileListVisible = true;
 
         #endregion
 
@@ -69,7 +81,7 @@ namespace EPJ.ViewModels
         public ICommand RemoveContributorCommand { get; set; }
 
 
-        //public ICommand ShowAddNewContributorToolBarCommand { get; set; }
+        public ICommand FileListItemClickCommand { get; set; }
 
         #endregion
 
@@ -179,6 +191,71 @@ namespace EPJ.ViewModels
             }
         }
 
+        public bool IsAddFilePanelVisible
+        {
+            get
+            {
+                return _isAddFilePanelVisible;
+            }
+            set
+            {
+                _isAddFilePanelVisible = value;
+                NotifyOfPropertyChange(() => IsAddFilePanelVisible);
+            }
+        }
+
+        public bool IsDropping
+        {
+            get
+            {
+                return _isDropping;
+            }
+            set
+            {
+                _isDropping = value;
+                NotifyOfPropertyChange(() => IsDropping);
+            }
+        }
+
+        public bool IsFileListVisible
+        {
+            get
+            {
+                return _isFileListVisible;
+            }
+            set
+            {
+                _isFileListVisible = value;
+                NotifyOfPropertyChange(() => IsFileListVisible);
+            }
+        }
+
+        public bool CanNavigateBack
+        {
+            get
+            {
+                return _canNavigateBack;
+            }
+            set
+            {
+                _canNavigateBack = value;
+                NotifyOfPropertyChange(() => CanNavigateBack);
+            }
+        }
+
+        public string NewFolderName
+        {
+            get
+            {
+                return _newFolderName;
+            }
+            set
+            {
+                _newFolderName = value;
+                NotifyOfPropertyChange(() => NewFolderName);
+            }
+        }
+
         public DateTime DueDate
         {
             get
@@ -230,7 +307,6 @@ namespace EPJ.ViewModels
             _project.DueDate = DueDate;
             _project.Description = Description;
             _project.AddContributors(AddedContributors.ToList());
-            Console.WriteLine(_project.ToString());
             DataBase.InsertProject(_project);
 
             ProjectListViewModel lg = new ProjectListViewModel();
@@ -253,11 +329,9 @@ namespace EPJ.ViewModels
 
         private void AddContributor (object param)
         {
-           // MessageBox.Show("test");
             var contributor = (Contributor)param;
 
             if(!AddedContributors.Contains(contributor)) AddedContributors.Add(contributor);
-            Console.WriteLine(contributor.ToString());
 
             IsContributorListVisible = false;
             IsAddedContributorListVisible = true;
@@ -296,13 +370,35 @@ namespace EPJ.ViewModels
         {
             IsContributorListVisible = !IsContributorListVisible;
             IsAddNewContributorPanelVisible = !IsAddNewContributorPanelVisible;
-            Console.WriteLine($"IsContributorListVisible {IsContributorListVisible}; IsAddNewContributorPanelVisible {IsAddNewContributorPanelVisible}");
-        
         }
 
         #endregion
 
         #region File Methods
+
+        public void ShowAddFolderPanel ()
+        {
+            IsAddFilePanelVisible = !IsAddFilePanelVisible;
+            //IsFileListVisible = !IsAddFilePanelVisible;
+        }
+
+        public bool CanAddNewFolder(string newFolderName)
+        {
+            return !String.IsNullOrWhiteSpace(newFolderName);
+        }
+
+        public void AddNewFolder(string newFolderName)
+        {
+            Directory.CreateDirectory($"{_currentPath}/{NewFolderName}");
+            NewFolderName = "";
+            IsAddFilePanelVisible = false;
+            ShowFolderContent(_currentPath);
+        }
+
+        public void ShowProjectDirectory ()
+        {
+            ShowFolderContent(_projectPath);
+        }
 
         private void CreateProjectFolder (string path)
         {
@@ -312,6 +408,9 @@ namespace EPJ.ViewModels
 
         private void ShowFolderContent (string path)
         {
+            _currentPath = path;
+            RelatedFiles.Clear();
+            Console.WriteLine($"Show folder content path: {path}");
             string[] contentDirectories = Directory.GetDirectories(path);
             string[] contentFiles = Directory.GetFiles(path);
 
@@ -319,34 +418,30 @@ namespace EPJ.ViewModels
 
             foreach (var item in contentDirectories)
             {
-                Console.WriteLine($"Directory: {item}");
+                RelatedFiles.Add(new RelatedFile(item));
             }
             foreach(var item in contentFiles)
 
             {
-              
-                Console.WriteLine($"File: {item}");
+                RelatedFiles.Add(new RelatedFile(item));
             }
-
         }
 
-
-
-        public void AddFiles()
+        public void FileListItemClick (object param)
         {
-
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Multiselect = true;
-            if (dialog.ShowDialog() == true)
+            var file = (RelatedFile)param;
+            if (String.IsNullOrEmpty(file.FileExtention))
             {
-                foreach (string filename in dialog.FileNames)
-                {
-                    RelatedFile file = new RelatedFile(filename);
-                    RelatedFiles.Add(file);
-                }
-                    
+                CanNavigateBack = true;
+                _currentPath = $"{_currentPath}\\{file.FileName}\\";
+                ShowFolderContent(file.FilePath);
             }
-
+            else
+            {
+                Console.WriteLine($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{file.FilePath.Substring(1)}");
+                Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{file.FilePath.Substring(1)}");
+                
+            }
         }
 
         #endregion
@@ -360,6 +455,56 @@ namespace EPJ.ViewModels
             var parentConductor = (Conductor<object>)(this.Parent);
             parentConductor.ActivateItem(lg);
         }
+
+        public void NavigateFolderBack ()
+        {
+            if (String.Compare(_currentPath, _projectPath) != 0)
+            {
+                string[] directories = _currentPath.Split(Path.DirectorySeparatorChar);
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < directories.Length-1; i++)
+                {
+                    Console.WriteLine($"directory name: {directories[i]}");
+                    builder.Append($"{directories[i]}{Path.DirectorySeparatorChar}");
+                }
+                ShowFolderContent(builder.ToString());
+            }
+        }
+
+        #endregion
+
+        #region DropFile
+
+        public void DragOver(IDropInfo dropInfo)
+        {
+            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
+            dropInfo.Effects = dragFileList.Any(item =>
+            {
+                IsDropping = true;
+                IsFileListVisible = false;
+              
+                var extension = Path.GetExtension(item);
+                return extension != null;
+            }) ? DragDropEffects.Copy : DragDropEffects.None;
+        }
+
+        public void Drop(IDropInfo dropInfo)
+        {
+            IsDropping = false;
+            IsFileListVisible = true;
+
+            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
+            dropInfo.Effects = dragFileList.Any(item =>
+            {
+                var extension = Path.GetExtension(item);
+                var newPath = $"{_currentPath}/{Path.GetFileName(item)}";
+                Directory.Move(item, newPath);
+                RelatedFile file = new RelatedFile(newPath);
+                RelatedFiles.Add(file);
+                return extension != null;
+            }) ? DragDropEffects.Copy : DragDropEffects.None;
+        }
+
 
         #endregion
     }

@@ -50,6 +50,9 @@
       <HintPath>packages\Dapper.2.0.30\lib\net461\Dapper.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
+    <Reference Include="GongSolutions.WPF.DragDrop, Version=2.0.0.0, Culture=neutral, PublicKeyToken=91f1945125b7a587, processorArchitecture=MSIL">
+      <HintPath>packages\gong-wpf-dragdrop.2.2.0\lib\net46\GongSolutions.WPF.DragDrop.dll</HintPath>
+    </Reference>
     <Reference Include="MaterialDesignColors, Version=1.2.0.325, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\MaterialDesignColors.1.2.0\lib\net45\MaterialDesignColors.dll</HintPath>
     </Reference>
@@ -90,6 +93,7 @@
     </ApplicationDefinition>
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Converters\ImageConverter.cs" />
+    <Compile Include="Utilities\DefaultIcons.cs" />
     <Compile Include="Utilities\Enums\SortBy.cs" />
     <Compile Include="Models\Comment\IComment.cs" />
     <Compile Include="Models\Contributor\IContributor.cs" />
@@ -189,43 +193,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Content Include="bin\Debug\Caliburn.Micro.dll" />
-    <Content Include="bin\Debug\Caliburn.Micro.Platform.Core.dll" />
-    <Resource Include="bin\Debug\Caliburn.Micro.Platform.Core.xml" />
-    <Content Include="bin\Debug\Caliburn.Micro.Platform.dll" />
-    <Resource Include="bin\Debug\Caliburn.Micro.Platform.xml" />
-    <Resource Include="bin\Debug\Caliburn.Micro.xml" />
-    <Content Include="bin\Debug\Dapper.dll" />
-    <Resource Include="bin\Debug\Dapper.xml" />
-    <Content Include="bin\Debug\EPJ.exe" />
-    <Content Include="bin\Debug\EPJ.pdb" />
-    <Content Include="bin\Debug\MaterialDesignColors.dll" />
-    <Content Include="bin\Debug\MaterialDesignColors.pdb" />
-    <Content Include="bin\Debug\MaterialDesignThemes.Wpf.dll" />
-    <Content Include="bin\Debug\MaterialDesignThemes.Wpf.pdb" />
-    <Resource Include="bin\Debug\MaterialDesignThemes.Wpf.xml" />
-    <Content Include="bin\Debug\System.Data.SQLite.dll" />
-    <Resource Include="bin\Debug\System.Data.SQLite.xml" />
-    <Content Include="bin\Debug\System.Windows.Interactivity.dll" />
-    <Content Include="bin\Debug\x64\SQLite.Interop.dll" />
-    <Content Include="bin\Debug\x86\SQLite.Interop.dll" />
-    <Content Include="bin\Release\Dapper.dll" />
-    <Resource Include="bin\Release\Dapper.xml" />
-    <Content Include="bin\Release\EPJ.exe" />
-    <Content Include="bin\Release\EPJ.pdb" />
-    <Content Include="bin\Release\System.Data.SQLite.dll" />
-    <Resource Include="bin\Release\System.Data.SQLite.xml" />
-    <Content Include="bin\Release\x64\SQLite.Interop.dll" />
-    <Content Include="bin\Release\x86\SQLite.Interop.dll" />
     <Content Include="Database\projectDB.db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="bin\Debug\Database\projectDB.db" />
-    <None Include="bin\Debug\EPJ.exe.config" />
-    <None Include="bin\Debug\System.Data.SQLite.dll.config" />
-    <None Include="bin\Release\Database\projectDB.db" />
-    <None Include="bin\Release\EPJ.exe.config" />
-    <None Include="bin\Release\System.Data.SQLite.dll.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -245,7 +215,6 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="bin\Debug\Utilities\Database\" />
     <Folder Include="Projects\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
