@@ -70,7 +70,9 @@ namespace EPJ.ViewModels
         public void ShowProject (object param)
         {
             var project = (IProject)param;
-            MessageBox.Show($"project name: {project.Title}");
+            ProjectViewModel lg = new ProjectViewModel(project);
+            var parentConductor = (Conductor<object>)(this.Parent);
+            parentConductor.ActivateItem(lg);
         }
 
         public void AddFakeData ()

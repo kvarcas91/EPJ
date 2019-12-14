@@ -184,6 +184,9 @@
                               Background="White" Margin="10"
                                HorizontalAlignment="Stretch" 
                               VerticalAlignment="Stretch">
+            
+            
+            
         <Grid HorizontalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -203,7 +206,7 @@
             <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
                        Margin="10">
                 <TextBlock FontSize="20" Text="Project" FontWeight="Bold" Margin="10"/>
-                <Separator Background="Blue"/>
+                    <Separator Background="#2196F3"/>
             </StackPanel>
 
             <TextBox x:Name="Title" Margin="10"
