@@ -21,6 +21,7 @@ namespace EPJ.ViewModels
 
             //mAddProjectCommand = new RelayCommand(ShowMessage);
             ShowListItemSettingsCommand = new RelayCommand(ShowListItemSettings);
+            ShowProjectCommand = new RelayCommand(ShowProject);
         }
 
 
@@ -31,6 +32,8 @@ namespace EPJ.ViewModels
        // public ICommand mAddProjectCommand { get; set; }
 
        public ICommand ShowListItemSettingsCommand { get; set; }
+
+        public ICommand ShowProjectCommand { get; set; }
 
 
         /// <summary>
@@ -64,9 +67,10 @@ namespace EPJ.ViewModels
             var project = (IProject)param;
         }
 
-        public void ShowMessage (object param)
+        public void ShowProject (object param)
         {
-            MessageBox.Show("Labas");
+            var project = (IProject)param;
+            MessageBox.Show($"project name: {project.Title}");
         }
 
         public void AddFakeData ()

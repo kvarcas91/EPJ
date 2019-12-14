@@ -57,9 +57,15 @@
                   Style="{StaticResource ListView}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <materialDesign:Card materialDesign:RippleAssist.IsCentered="True">
+                    <materialDesign:Card materialDesign:RippleAssist.IsCentered="True"
+                                         Background="Transparent">
+                        <materialDesign:Card.InputBindings>
+                            <MouseBinding Gesture="LeftDoubleClick"
+                                          Command="{Binding ElementName=listView, Path= DataContext.ShowProjectCommand}"
+                                          CommandParameter="{Binding}"/>
+                        </materialDesign:Card.InputBindings>
 
-                        <Grid>
+                        <Grid Background="White">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
