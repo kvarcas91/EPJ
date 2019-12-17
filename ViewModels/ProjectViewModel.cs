@@ -24,6 +24,8 @@ namespace EPJ.ViewModels
             _projectPath = $".{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}{_project.Title}{Path.DirectorySeparatorChar}";
             FileListItemClickCommand = new RelayCommand(FileListItemClick);
             IsTaskCompletedCommand = new RelayCommand(SetProgress);
+            EditTaskCommand = new RelayCommand(EditTask);
+            CloseAddTaskPanelCommand = new RelayCommand(CloseAddTaskPanel);
             InitializeProject();
             ShowFolderContent(_projectPath);
         }
@@ -45,6 +47,8 @@ namespace EPJ.ViewModels
         private bool _isDropping = false;
         private bool _isFileListVisible = true;
         private string _newFolderName;
+        private string _taskContent;
+        private Priority _taskPriority = Priority.Default;
 
         #endregion
 
@@ -123,7 +127,18 @@ namespace EPJ.ViewModels
 
         public Priority Priority { get; set; }
 
-        public Priority TaskPriority { get; set; }
+        public Priority TaskPriority
+        {
+            get
+            {
+                return _taskPriority;
+            }
+            set
+            {
+                _taskPriority = value;
+                NotifyOfPropertyChange(() => TaskPriority);
+            }
+        }
 
         public bool IsAddTaskPanelVisible
         {
@@ -203,9 +218,37 @@ namespace EPJ.ViewModels
             }
         }
 
+        public string TaskContent
+        {
+            get
+            {
+                return _taskContent;
+            }
+            set
+            {
+                _taskContent = value;
+                NotifyOfPropertyChange(() => TaskContent);
+            }
+        }
+
+        public double Progress
+        {
+            get
+            {
+                return _project.Progress;
+            }
+            set
+            {
+                _project.Progress = value;
+                NotifyOfPropertyChange(() => Progress);
+            }
+        }
+
         public ObservableCollection<ITask> ProjectTasks { get; set; }
 
         public ObservableCollection<IRelatedFile> RelatedFiles { get; } = new ObservableCollection<IRelatedFile>();
+
+        public ObservableCollection<Note> Notes { get; set; }
 
         #endregion
 
@@ -213,6 +256,11 @@ namespace EPJ.ViewModels
 
         public ICommand FileListItemClickCommand { get; set; }
         public ICommand IsTaskCompletedCommand { get; set; }
+        public ICommand EditNoteCommand { get; set; }
+        public ICommand DeleteNoteCommand { get; set; }
+        public ICommand EditTaskCommand { get; set; }
+        public ICommand DeleteTaskCommand { get; set; }
+        public ICommand CloseAddTaskPanelCommand { get; set; }
 
         #endregion
 
@@ -227,11 +275,13 @@ namespace EPJ.ViewModels
             _currentPath = _project.ProjectPath;
             Priority = _project.Priority;
             GetTasks();
+            GetComments();
         }
 
         private void ResetNewTaskProperties()
         {
             TaskPriority = Priority.Low;
+            TaskContent = "";
             TaskDueDate = DateTime.Now.AddDays(7);
         }
 
@@ -303,6 +353,12 @@ namespace EPJ.ViewModels
             ProjectTasks = new ObservableCollection<ITask>(DataBase.GetProjectTasks(_project.ID));
         }
 
+        private void CloseAddTaskPanel (object param)
+        {
+            ResetNewTaskProperties();
+            ShowAddTaskPanel();
+        }
+
         public void ShowAddTaskPanel() => IsAddTaskPanelVisible = !IsAddTaskPanelVisible;
 
 
@@ -312,17 +368,27 @@ namespace EPJ.ViewModels
         }
         public void SaveTask(string taskContent)
         {
+  
             var task = new Task
             {
-                Description = taskContent,
+                Content = taskContent,
                 DueDate = TaskDueDate,
                 Priority = TaskPriority
             };
             DataBase.InsertTask(task, _project.ID);
             ProjectTasks.Add(task);
             ShowAddTaskPanel();
-
+            
             ResetNewTaskProperties();
+        }
+
+        public void EditTask(object task)
+        {
+            var mTask = (ITask)task;
+            ShowAddTaskPanel();
+            TaskContent = mTask.Content;
+            TaskDueDate = mTask.DueDate;
+            TaskPriority = mTask.Priority;
         }
 
 
@@ -333,7 +399,7 @@ namespace EPJ.ViewModels
 
         private void SetProgress (object param)
         {
-            //((CheckBox)param).IsChecked = !((CheckBox)param).IsChecked;
+            var mTask = (Task)param;
             var totalTaskCount = ProjectTasks.Count;
             var completedTaskCount = 0;
             foreach (var task in ProjectTasks)
@@ -343,10 +409,21 @@ namespace EPJ.ViewModels
                     completedTaskCount++;
                 }
             }
-            _project.Progress = (completedTaskCount * 100) / totalTaskCount;
-            Console.WriteLine($"progress: {_project.Progress.ToString()}");
+            Progress = (completedTaskCount * 100) / totalTaskCount;
+            DataBase.UpdateTask(mTask);
+
         }
-             
+
+        #endregion
+
+        #region Notes
+
+        private void GetComments ()
+        {
+            Notes = new ObservableCollection<Note>(DataBase.GetProjectComments(_project.ID));
+            Console.WriteLine($"size: {Notes.Count}");
+        }
+
         #endregion
 
         #endregion

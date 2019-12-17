@@ -50,14 +50,17 @@
       <HintPath>packages\Dapper.2.0.30\lib\net461\Dapper.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
+    <Reference Include="Dapper.Contrib, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Dapper.Contrib.2.0.30\lib\net461\Dapper.Contrib.dll</HintPath>
+    </Reference>
     <Reference Include="GongSolutions.WPF.DragDrop, Version=2.0.0.0, Culture=neutral, PublicKeyToken=91f1945125b7a587, processorArchitecture=MSIL">
       <HintPath>packages\gong-wpf-dragdrop.2.2.0\lib\net46\GongSolutions.WPF.DragDrop.dll</HintPath>
     </Reference>
-    <Reference Include="MaterialDesignColors, Version=1.2.0.325, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\MaterialDesignColors.1.2.0\lib\net45\MaterialDesignColors.dll</HintPath>
+    <Reference Include="MaterialDesignColors, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\MaterialDesignColors.1.2.1\lib\net45\MaterialDesignColors.dll</HintPath>
     </Reference>
-    <Reference Include="MaterialDesignThemes.Wpf, Version=2.6.0.325, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\MaterialDesignThemes.2.6.0\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
+    <Reference Include="MaterialDesignThemes.Wpf, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\MaterialDesignThemes.3.0.0\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -96,6 +99,7 @@
     <Compile Include="Converters\BoolToTextDecorationConverter.cs" />
     <Compile Include="Converters\DateToStringConverter.cs" />
     <Compile Include="Converters\ImageConverter.cs" />
+    <Compile Include="Models\Task\INote.cs" />
     <Compile Include="Utilities\DefaultIcons.cs" />
     <Compile Include="Utilities\Enums\SortBy.cs" />
     <Compile Include="Models\Comment\IComment.cs" />
@@ -235,5 +239,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('packages\System.Data.SQLite.Core.1.0.112.0\build\net46\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\System.Data.SQLite.Core.1.0.112.0\build\net46\System.Data.SQLite.Core.targets'))" />
+    <Error Condition="!Exists('packages\MaterialDesignThemes.3.0.0\build\MaterialDesignThemes.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\MaterialDesignThemes.3.0.0\build\MaterialDesignThemes.targets'))" />
   </Target>
+  <Import Project="packages\MaterialDesignThemes.3.0.0\build\MaterialDesignThemes.targets" Condition="Exists('packages\MaterialDesignThemes.3.0.0\build\MaterialDesignThemes.targets')" />
 </Project>

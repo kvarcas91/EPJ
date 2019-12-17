@@ -1,4 +1,5 @@
-﻿using EPJ.Utilities;
+﻿using Dapper.Contrib.Extensions;
+using EPJ.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +13,11 @@ namespace EPJ
 
         #region Properties
 
-        public string Description { get; set; }
+        [Key]
+        public long ID { get; set; }
+        public string Content { get; set; }
 
+        [Computed]
         public List<IContributor> Contributors { get; } = new List<IContributor>();
 
         public bool IsCompleted { get; set; } = false;

@@ -9,8 +9,9 @@ namespace EPJ
     public interface IProjectElement
     {
 
+        long ID { get; set; }
         List<IContributor> Contributors { get; }
-        string Description { get; set; }
+        string Content { get; set; }
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dapper.Contrib.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,12 +7,15 @@ using System.Threading.Tasks;
 
 namespace EPJ
 {
-    public class Note : IProjectElement
+    public class Note : INote
     {
-        public List<IContributor> Contributors { get; } = new List<IContributor>();
+        [Key]
+        public long ID { get; set; }
 
-        public string Description { get; set; }
+        public string Content { get; set; }
 
-        public uint ProjectID { get; private set; }
+        public DateTime SubmitionDate { get; set; }
+
+        public List<IContributor> Contributors => throw new NotImplementedException();
     }
 }
