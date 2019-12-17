@@ -150,8 +150,8 @@ namespace EPJ
         {
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
-                var sql = @"insert into tasks (Description, Priority, IsCompleted, DueDate) 
-                            values (@Description, @Priority, @IsCompleted, @DueDate)";
+                var sql = @"insert into tasks (Content, Priority, IsCompleted, DueDate) 
+                            values (@Content, @Priority, @IsCompleted, @DueDate)";
                 connection.Execute(sql,
                                 new
                                 {

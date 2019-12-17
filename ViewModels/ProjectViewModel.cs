@@ -48,7 +48,9 @@ namespace EPJ.ViewModels
         private bool _isFileListVisible = true;
         private string _newFolderName;
         private string _taskContent;
+        private Task _updateableTask = null;
         private Priority _taskPriority = Priority.Default;
+        private ObservableCollection<ITask> _projectTasks;  
 
         #endregion
 
@@ -244,7 +246,18 @@ namespace EPJ.ViewModels
             }
         }
 
-        public ObservableCollection<ITask> ProjectTasks { get; set; }
+        public ObservableCollection<ITask> ProjectTasks
+        {
+            get
+            {
+                return _projectTasks;
+            }
+            set
+            {
+                _projectTasks = value;
+                NotifyOfPropertyChange(() => ProjectTasks);
+            }
+        }
 
         public ObservableCollection<IRelatedFile> RelatedFiles { get; } = new ObservableCollection<IRelatedFile>();
 
@@ -368,27 +381,39 @@ namespace EPJ.ViewModels
         }
         public void SaveTask(string taskContent)
         {
-  
-            var task = new Task
+
+            if (_updateableTask != null)
             {
-                Content = taskContent,
-                DueDate = TaskDueDate,
-                Priority = TaskPriority
-            };
-            DataBase.InsertTask(task, _project.ID);
-            ProjectTasks.Add(task);
-            ShowAddTaskPanel();
+                _updateableTask.Content = TaskContent;
+                _updateableTask.DueDate = TaskDueDate;
+                _updateableTask.Priority = TaskPriority;
+                DataBase.UpdateTask(_updateableTask);
+                _updateableTask = null;
+                ShowAddTaskPanel();
+            }
+            else
+            {
+                var mTask = new Task
+                {
+                    Content = TaskContent,
+                    DueDate = TaskDueDate,
+                    Priority = TaskPriority
+                };
+                DataBase.InsertTask(mTask, _project.ID);
+                ProjectTasks.Add(mTask);
+                ShowAddTaskPanel();
+            }
             
             ResetNewTaskProperties();
         }
 
         public void EditTask(object task)
         {
-            var mTask = (ITask)task;
+            _updateableTask = (Task)task;
             ShowAddTaskPanel();
-            TaskContent = mTask.Content;
-            TaskDueDate = mTask.DueDate;
-            TaskPriority = mTask.Priority;
+            TaskContent = _updateableTask.Content;
+            TaskDueDate = _updateableTask.DueDate;
+            TaskPriority = _updateableTask.Priority;
         }
 
 
