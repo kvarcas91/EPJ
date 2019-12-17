@@ -11,7 +11,6 @@ namespace EPJ
 
         List<IContributor> Contributors { get; }
         string Description { get; set; }
-        uint ProjectID { get; }
 
     }
 }

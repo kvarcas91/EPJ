@@ -13,6 +13,6 @@ namespace EPJ.Utilities
         Default = 0,
         Low = 1,
         Medium = 2,
-        High = 4
+        High = 3
     }
 }

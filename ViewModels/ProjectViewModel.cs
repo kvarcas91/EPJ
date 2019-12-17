@@ -1,8 +1,10 @@
 ﻿using Caliburn.Micro;
+using EPJ.Utilities;
 using GongSolutions.Wpf.DragDrop;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,10 +23,14 @@ namespace EPJ.ViewModels
 
         #region Private Properties
 
-        private IProject _project;
+        private string _projectPath;
+        private readonly IProject _project;
         private string _projectTitle;
         private string _submitionDate;
         private string _description;
+        private DateTime _dueDate;
+        private DateTime _taskDueDate  = (DateTime.Now).AddDays(7);
+        private bool _isAddTaskPanelVisible = false;
 
         #endregion
 
@@ -41,6 +47,7 @@ namespace EPJ.ViewModels
                 NotifyOfPropertyChange(() => ProjectTitle);
             }
         }
+
         public string SubmitionDate { get
             {
                 return _submitionDate;
@@ -51,6 +58,33 @@ namespace EPJ.ViewModels
                 NotifyOfPropertyChange(() => SubmitionDate);
             }
         }
+
+        public DateTime DueDate
+        {
+            get
+            {
+                return _dueDate;
+            }
+            set
+            {
+                _dueDate = value;
+                NotifyOfPropertyChange(() => DueDate);
+            }
+        }
+
+        public DateTime TaskDueDate
+        {
+            get
+            {
+                return _taskDueDate;
+            }
+            set
+            {
+                _taskDueDate = value;
+                NotifyOfPropertyChange(() => TaskDueDate);
+            }
+        }
+
         public string Description
         {
             get
@@ -63,6 +97,33 @@ namespace EPJ.ViewModels
                 NotifyOfPropertyChange(() => Description);
             }
         }
+
+        public IEnumerable<Priority> Priorities
+        {
+            get
+            {
+                return Enum.GetValues(typeof(Priority))
+                    .Cast<Priority>();
+            }
+        }
+
+        public Priority Priority { get; set; }
+
+        public Priority TaskPriority { get; set; }
+
+        public bool IsAddTaskPanelVisible
+        {
+            get
+            {
+                return _isAddTaskPanelVisible;
+            }
+            set
+            {
+                _isAddTaskPanelVisible = value;
+                NotifyOfPropertyChange(() => IsAddTaskPanelVisible);
+            }
+        }
+
         public ObservableCollection<ITask> ProjectTasks { get; set; } = new ObservableCollection<ITask>();
 
         #endregion
@@ -74,7 +135,46 @@ namespace EPJ.ViewModels
             ProjectTitle = _project.Title;
             Description = _project.Description;
             SubmitionDate = _project.Date.ToString();
+            DueDate = _project.DueDate;
+            _projectPath = $".{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}";
+            Priority = _project.Priority;
+            
         }
+
+        private void ResetNewTaskProperties()
+        {
+            TaskPriority = Priority.Low;
+            TaskDueDate = DateTime.Now.AddDays(7);
+        }
+
+        #endregion
+
+        #region Public methods
+
+        public void ShowAddTaskPanel() => IsAddTaskPanelVisible = !IsAddTaskPanelVisible;
+
+
+        public bool CanSaveTask(string taskContent)
+        {
+            return ValidateUserInput.IsNullOrWhiteSpace(taskContent);
+        }
+        public void SaveTask (string taskContent)
+        {
+            var task = new Task
+            {
+                Description = taskContent,
+                DueDate = TaskDueDate,
+                Priority = TaskPriority
+            };
+
+            ProjectTasks.Add(task);
+            ShowAddTaskPanel();
+
+            ResetNewTaskProperties();
+        }
+
+       
+
 
         #endregion
 
@@ -88,6 +188,17 @@ namespace EPJ.ViewModels
         public void Drop(IDropInfo dropInfo)
         {
             throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Navigation
+
+        public void BackToProjectList ()
+        {
+            ProjectListViewModel lg = new ProjectListViewModel();
+            var parentConductor = (Conductor<object>)(this.Parent);
+            parentConductor.ActivateItem(lg);
         }
 
         #endregion

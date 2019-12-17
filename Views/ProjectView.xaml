@@ -6,12 +6,13 @@
              xmlns:local="clr-namespace:EPJ"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="800"
-               xmlns:dragDrop="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
-              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+             xmlns:dragDrop="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="boolToVisibility"/>
         <local:ImageConverter x:Key="imageConverter"/>
+        <local:DateToStringConverter x:Key="dateConverter"/>
     </UserControl.Resources>
 
     <Grid>
@@ -29,12 +30,24 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Button x:Name="BackToProjectList" 
+        <StackPanel Orientation="Horizontal" 
+                    Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left">
+            <Button x:Name="BackToProjectList" 
                 Grid.Column="0" Grid.Row="0"
-                Width="60"
+                Width="60" ToolTip="Back to project list"
                 HorizontalAlignment="Left">
-            <materialDesign:PackIcon Kind="ArrowBackCircle" Height="24" Width="24"/>
-        </Button>
+                <materialDesign:PackIcon Kind="ArrowBackCircle" Height="24" Width="24"/>
+            </Button>
+           
+        </StackPanel>
+
+        <StackPanel Grid.Column="2" Grid.ColumnSpan="3" 
+                    HorizontalAlignment="Right" Orientation="Horizontal">
+            <ComboBox x:Name="Priorities" SelectedIndex="{Binding Priority}"
+                                  MinWidth="100" FontSize="12"
+                         SelectedItem="{Binding Path=Priority, Mode=TwoWay}"/>
+        </StackPanel>
+
 
         <!-- File -->
         <Grid Grid.Row="1" Grid.Column="0" Background="White"
@@ -185,75 +198,135 @@
                               Background="White" Margin="10"
                                HorizontalAlignment="Stretch" 
                               VerticalAlignment="Stretch">
-            
-            <!-- Old ProjectView 
-            <Grid HorizontalAlignment="Center">
+
+            <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="20"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                
+                <!-- Project Title and submition date -->
+                <StackPanel Grid.Row="0" Grid.Column="0"
+                            Grid.ColumnSpan="2" HorizontalAlignment="Stretch"
                        Margin="10">
-                    <TextBlock x:Name="ProjectTitle" FontSize="20" Text="Project" FontWeight="Bold" Margin="10"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox x:Name="ProjectTitle" FontSize="20" 
+                             Text="Project" FontWeight="Bold" TextWrapping="Wrap"
+                             Margin="10" BorderThickness="0"/>
+                        <Button x:Name="EditProjectTitle" Background="Transparent"
+                                BorderThickness="0">
+                            <materialDesign:PackIcon Kind="Edit" Foreground="Black"
+                                                     Width="20" Height="20"/>
+                        </Button>
+                        <Button x:Name="SaveProjectTitle" Background="Transparent"
+                                BorderThickness="0" Content="Save" Foreground="Black"/>
+                    </StackPanel>
                     <TextBlock x:Name="SubmitionDate" Text="2019-10-24"
                                Margin="20 0 0 10"/>
                     <Separator Background="#2196F3"/>
-                    <ListView ItemsSource="{Binding Contributors}"
-                              Margin="10">
-                        
-                    </ListView>
+                </StackPanel>
+               
+                <!-- Project deadline -->
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="10"
+                            Orientation="Vertical" 
+                            VerticalAlignment="Center">
+                    <TextBlock Text="DueTo" HorizontalAlignment="Center"/>
+                    <DatePicker x:Name="DueDate" />
                 </StackPanel>
 
-                <TextBlock Text="Priority" VerticalAlignment="Center"
-                       Grid.Row="2" Grid.Column="1"
-                       Margin="5"/>
-                <ComboBox  Grid.Row="2" Grid.Column="2" MinWidth="100" Margin="5"
-                        x:Name="Priorities" SelectedIndex="1" FontSize="14"
-                         SelectedItem="{Binding Path=Priority, Mode=OneWayToSource}"/>
+                <!-- Project information -->
+                <StackPanel Orientation="Vertical"  Margin="10"
+                            Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
 
-                <TextBlock Text="Due Date" VerticalAlignment="Center"
-                       Grid.Row="3" Grid.Column="1"
-                       Margin="5"/>
-                <DatePicker x:Name="DueDate"  FontSize="16" Margin="5"
-                        Grid.Row="3" Grid.Column="2"
-                        SelectedDate="{Binding DueDate, Mode=TwoWay}"/>
+                    <StackPanel Orientation="Vertical" Grid.Row="2" Grid.Column="0"
+                           Grid.ColumnSpan="2">
 
-                <TextBox Margin="5" x:Name="Description"
-                     Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
-                     MinWidth="280" 
+                        <TextBox x:Name="Description" Margin="0 10 0 0"
+                     MinWidth="280" BorderThickness="0" FontSize="14"
                      TextWrapping="Wrap" TextAlignment="Justify"
                      materialDesign:HintAssist.Hint="Description"  
                      materialDesign:HintAssist.IsFloating="True"
                      VerticalScrollBarVisibility="Auto" SpellCheck.IsEnabled="True"
                      VerticalContentAlignment="Top"/>
 
-                <TextBlock x:Name="Tasks" Grid.Row="5" Grid.Column="1"
-                           FontSize="20" Text="Tasks" FontWeight="Bold" Margin="10"/>
+                    </StackPanel>
 
-                <Separator Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Background="#2196F3"/>
-                
-                <ListView Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2"
-                          ItemsSource="{Binding ProjectTasks}">
-                    
+                    <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0"
+                            Grid.ColumnSpan="2">
+                        <TextBlock x:Name="Tasks" 
+                           FontSize="20" Text="Tasks" FontWeight="Bold" Margin="10"/>
+                        <Button x:Name="ShowAddTaskPanel" Background="Transparent"
+                                BorderThickness="0" ToolTip="Add new task">
+                            <materialDesign:PackIcon Kind="AddCircleOutline" Foreground="Black"
+                                                     Width="20" Height="20"/>
+                        </Button>
+                    </StackPanel>
+
+                    <Separator Background="#2196F3"/>
+
+                    <Border BorderThickness="2" BorderBrush="#2196F3"
+                             Visibility="{Binding IsAddTaskPanelVisible, Mode=TwoWay,Converter={StaticResource boolToVisibility}}">
+                        <StackPanel Orientation="Vertical" Margin="10">
+                            <TextBox x:Name="TaskContent" FontSize="12"
+                            materialDesign:HintAssist.Hint="Task" TextWrapping="Wrap"
+                            materialDesign:HintAssist.IsFloating="True"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Priority  " Margin="10" VerticalAlignment="Center"/>
+                                <ComboBox SelectedIndex="1" Margin=" 10"
+                                      ItemsSource="{Binding Priorities}"
+                                  MinWidth="100" FontSize="12"
+                         SelectedItem="{Binding Path=TaskPriority, Mode=OneWayToSource}"/>
+                                <TextBlock Text="  DueTo  " VerticalAlignment="Center"/>
+                                <DatePicker x:Name="TaskDueDate" />
+                            </StackPanel>
+                            <Button x:Name="SaveTask" Content="Add" Margin="10"/>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+
+                <!-- Task list -->
+                <ListView ItemsSource="{Binding ProjectTasks}" HorizontalContentAlignment="Stretch"
+                          Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                          >
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <materialDesign:Card HorizontalAlignment="Stretch">
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <!-- Priority -->
+                                    <TextBlock Style="{StaticResource Priority}"
+                                         Background="{Binding Priority, Converter={StaticResource priorityColorConverter}}">
+                                         <ItemsControl 
+                                         ItemsSource="{Binding Priority, Converter={StaticResource priorityToStringConverter}}"/>
+                                    </TextBlock>
+                                    <CheckBox Grid.Column="1" x:Name="IsCompleted" Content="{Binding Description}"/>
+                                    <StackPanel Orientation="Vertical" Grid.Column="2" HorizontalAlignment="Right"
+                                                VerticalAlignment="Center" Margin="10 0 10 0">
+                                        <TextBlock Text="DueTo" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding DueDate, Converter={StaticResource dateConverter}}" 
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Grid>
+                            </materialDesign:Card>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
                 </ListView>
-                
+
             </Grid>
             
-            -->
-
         </materialDesign:Card>
 
         <GridSplitter Grid.Row="1" Grid.Column="3"

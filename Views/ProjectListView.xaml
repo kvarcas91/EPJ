@@ -10,6 +10,7 @@
 
     <UserControl.Resources>
         <local:SortByConverter x:Key="sortByConverter"/>
+        <local:DateToStringConverter x:Key="dateConverter"/>
     </UserControl.Resources>
     
     <Grid>
@@ -103,7 +104,7 @@
                                         VerticalAlignment="Center" HorizontalAlignment="Right">
 
                                     <TextBlock Text="Due to " Style="{StaticResource DueToStatic}"/>
-                                    <TextBlock Text="{Binding DueDate}" Style="{StaticResource DueTo}"/>
+                                    <TextBlock Text="{Binding DueDate, Converter={StaticResource dateConverter}}" Style="{StaticResource DueTo}"/>
                                 </StackPanel>
 
                                 <!-- Project description-->

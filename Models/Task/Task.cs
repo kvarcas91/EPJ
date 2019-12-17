@@ -12,13 +12,11 @@ namespace EPJ
 
         #region Properties
 
-        public uint ProjectID { get; private set; }
-
         public string Description { get; set; }
 
         public List<IContributor> Contributors { get; } = new List<IContributor>();
 
-        public bool IsCompleted { get; set; }
+        public bool IsCompleted { get; set; } = false;
 
         public DateTime DueDate { get; set; }
 
@@ -28,9 +26,9 @@ namespace EPJ
 
         #region Constructors
 
-        public Task(uint ID)
+        public Task()
         {
-            ProjectID = ID;
+
         }
 
         #endregion
