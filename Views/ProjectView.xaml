@@ -13,6 +13,8 @@
         <BooleanToVisibilityConverter x:Key="boolToVisibility"/>
         <local:ImageConverter x:Key="imageConverter"/>
         <local:DateToStringConverter x:Key="dateConverter"/>
+        <local:BoolToTextDecorationConverter x:Key="textDecorationConverter"/>
+        <local:BoolToTaskBackgroundConverter x:Key="backgroundConverter"/>
     </UserControl.Resources>
 
     <Grid>
@@ -38,7 +40,7 @@
                 HorizontalAlignment="Left">
                 <materialDesign:PackIcon Kind="ArrowBackCircle" Height="24" Width="24"/>
             </Button>
-           
+
         </StackPanel>
 
         <StackPanel Grid.Column="2" Grid.ColumnSpan="3" 
@@ -121,8 +123,12 @@
                       dragDrop:DragDrop.DropHandler="{Binding}"
                   Visibility="{Binding IsDropping, Converter={StaticResource boolToVisibility}}"
                         Margin="0 10 0 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="17*"/>
+                </Grid.ColumnDefinitions>
 
-                <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Grid.ColumnSpan="2" Margin="0,215,0,214.6">
                     <materialDesign:PackIcon Kind="Cloud" Foreground="White"
                                          VerticalAlignment="Center"
                                              Width="80" Height="80"
@@ -209,7 +215,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                
+
                 <!-- Project Title and submition date -->
                 <StackPanel Grid.Row="0" Grid.Column="0"
                             Grid.ColumnSpan="2" HorizontalAlignment="Stretch"
@@ -230,7 +236,7 @@
                                Margin="20 0 0 10"/>
                     <Separator Background="#2196F3"/>
                 </StackPanel>
-               
+
                 <!-- Project deadline -->
                 <StackPanel Grid.Row="0" Grid.Column="1" Margin="10"
                             Orientation="Vertical" 
@@ -291,13 +297,15 @@
                 </StackPanel>
 
                 <!-- Task list -->
-                <ListView ItemsSource="{Binding ProjectTasks}" HorizontalContentAlignment="Stretch"
-                          Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                          >
+                <ListView x:Name="projectTaskList"
+                    ItemsSource="{Binding ProjectTasks}" Style="{StaticResource ListView}"
+                          HorizontalContentAlignment="Stretch"
+                          Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <materialDesign:Card HorizontalAlignment="Stretch">
-                                <Grid HorizontalAlignment="Stretch">
+                            <materialDesign:Card 
+                               Background="{Binding IsCompleted, Converter={StaticResource backgroundConverter}}">
+                                <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
@@ -306,13 +314,19 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
+                                    
                                     <!-- Priority -->
                                     <TextBlock Style="{StaticResource Priority}"
                                          Background="{Binding Priority, Converter={StaticResource priorityColorConverter}}">
                                          <ItemsControl 
                                          ItemsSource="{Binding Priority, Converter={StaticResource priorityToStringConverter}}"/>
                                     </TextBlock>
-                                    <CheckBox Grid.Column="1" x:Name="IsCompleted" Content="{Binding Description}"/>
+                                    <CheckBox Grid.Column="1" x:Name="IsCompleted" 
+                                              IsChecked="{Binding IsCompleted}">
+                                        <TextBlock Text="{Binding Description}" 
+                                                   TextAlignment="Justify" TextWrapping="Wrap"
+                                                    TextDecorations="{Binding IsCompleted, Converter={StaticResource textDecorationConverter}}"/>
+                                    </CheckBox>
                                     <StackPanel Orientation="Vertical" Grid.Column="2" HorizontalAlignment="Right"
                                                 VerticalAlignment="Center" Margin="10 0 10 0">
                                         <TextBlock Text="DueTo" HorizontalAlignment="Center"/>
@@ -326,7 +340,7 @@
                 </ListView>
 
             </Grid>
-            
+
         </materialDesign:Card>
 
         <GridSplitter Grid.Row="1" Grid.Column="3"

@@ -92,6 +92,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Converters\BoolToTaskBackgroundConverter.cs" />
+    <Compile Include="Converters\BoolToTextDecorationConverter.cs" />
     <Compile Include="Converters\DateToStringConverter.cs" />
     <Compile Include="Converters\ImageConverter.cs" />
     <Compile Include="Utilities\DefaultIcons.cs" />

@@ -300,10 +300,9 @@ namespace EPJ.ViewModels
 
         public void AddProject(string title, string description)
         {
-
             _project.Priority = Priority;
             _project.Title = Title;
-            _project.ProjectPath = "somewhere in C";
+            _project.ProjectPath = $"Projects{Path.DirectorySeparatorChar}{Title}{Path.DirectorySeparatorChar}";
             _project.Date = DateTime.Now;
             _project.DueDate = DueDate;
             _project.Description = Description;
@@ -437,9 +436,7 @@ namespace EPJ.ViewModels
             }
             else
             {
-                Console.WriteLine($"Start process at: {Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{file.FilePath.Substring(1)}");
-                Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{file.FilePath.Substring(1)}");
-                
+                Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{file.FilePath.Substring(1)}"); 
             }
         }
 

@@ -27,7 +27,6 @@ namespace EPJ
                 connection.Dispose();
                 //return newContributor;
             }
-            
         }
 
         public static void AssignContributors (long pID, long cID)
@@ -40,11 +39,11 @@ namespace EPJ
             }
         }
     
-        private static int GetLastRowID()
+        private static int GetLastRowID(string table)
         {
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
-                var count = connection.ExecuteScalar<int>("select seq from sqlite_sequence where name='projects'");
+                var count = connection.ExecuteScalar<int>($"select seq from sqlite_sequence where name='{table}'");
                 //var count = connection.Query("SELECT COUNT(*) FROM projects;");
                 connection.Dispose();
                 return count;
@@ -58,7 +57,7 @@ namespace EPJ
                 
                 connection.Execute("insert into projects (Title, Description, Date, DueDate, ProjectPath, Priority) " +
                                    $"values (@Title, @Description, @Date, @DueDate, @ProjectPath, @Priority)", project);
-                project.ID = GetLastRowID();
+                project.ID = GetLastRowID("projects");
                 Console.WriteLine($"ID: {project.ID }");
                 connection.Dispose();
 
@@ -66,6 +65,48 @@ namespace EPJ
                 {
                     AssignContributors(project.ID, contributor.Id);
                 }
+            }
+        }
+
+        public static void InsertTask (ITask task, long projectID)
+        {
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            {
+                var sql = @"insert into tasks (Description, Priority, IsCompleted, DueDate) 
+                            values (@Description, @Priority, @IsCompleted, @DueDate)";
+                connection.Execute(sql,
+                                new
+                                {
+                                    task.Description,
+                                    task.Priority,
+                                    task.IsCompleted,
+                                    task.DueDate
+                                });
+
+                connection.Dispose();
+                
+            }
+            AssignTaskToTheProject(projectID, GetLastRowID("tasks"));
+        }
+
+        private static void AssignTaskToTheProject (long projectID, long taskID)
+        {
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            {
+                connection.Execute("INSERT INTO project_tasks (projectID, taskID) values (@projectID, @taskID)",
+                    new { projectID, taskID });
+                connection.Dispose();
+            }
+        }
+
+        public static int GetCount (string table, string rowName, string param)
+        {
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            {
+                var count = connection.ExecuteScalar<int>($"SELECT COUNT(*) FROM {table} WHERE {rowName} = '{param}'");
+                //var count = connection.Query("SELECT COUNT(*) FROM projects;");
+                connection.Dispose();
+                return count;
             }
         }
 
@@ -93,6 +134,20 @@ namespace EPJ
                 connection.Dispose();
                 return output.ToList();
             }    
+        }
+
+        public static List<Task> GetProjectTasks(long projectID)
+        {
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            {
+                var output = connection.Query<Task>(
+                    "SELECT t.ID, t.Description, t.IsCompleted, t.Priority, t.DueDate " +
+                    "FROM tasks t " +
+                    "INNER JOIN project_tasks p ON p.taskID = t.ID " +
+                    $"INNER JOIN projects pr on pr.ID = p.projectID WHERE pr.Id = {projectID}");
+                connection.Dispose();
+                return output.ToList();
+            }
         }
 
         public static List<Project> GetProjects()
