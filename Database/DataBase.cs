@@ -60,6 +60,7 @@ namespace EPJ
         {
             var ProjectTasks = GetProjectTasks(projectID);
             var totalTaskCount = ProjectTasks.Count;
+            if (totalTaskCount == 0) return 0;
             var completedTaskCount = 0;
             foreach (var task in ProjectTasks)
             {

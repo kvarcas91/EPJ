@@ -26,6 +26,8 @@ namespace EPJ.ViewModels
             IsTaskCompletedCommand = new RelayCommand(SetProgress);
             EditTaskCommand = new RelayCommand(EditTask);
             CloseAddTaskPanelCommand = new RelayCommand(CloseAddTaskPanel);
+            TitleLostFocusCommand = new RelayCommand(UpdateProjectTitle);
+            DescriptionLostFocusCommand = new RelayCommand(UpdateProjectDescription);
             InitializeProject();
             ShowFolderContent(_projectPath);
         }
@@ -37,10 +39,9 @@ namespace EPJ.ViewModels
         private string _projectPath;
         private readonly IProject _project;
         private string _projectTitle;
-        private string _submitionDate;
         private string _description;
         private DateTime _dueDate;
-        private DateTime _taskDueDate  = (DateTime.Now).AddDays(7);
+        private DateTime _taskDueDate = (DateTime.Now).AddDays(7);
         private bool _isAddTaskPanelVisible = false;
         private bool _isAddFilePanelVisible = false;
         private bool _canNavigateBack = false;
@@ -50,13 +51,12 @@ namespace EPJ.ViewModels
         private string _taskContent;
         private Task _updateableTask = null;
         private Priority _taskPriority = Priority.Default;
-        private ObservableCollection<ITask> _projectTasks;  
 
         #endregion
 
         #region Public Properties
 
-        public string ProjectTitle { 
+        public string ProjectTitle {
             get
             {
                 return _projectTitle;
@@ -68,14 +68,9 @@ namespace EPJ.ViewModels
             }
         }
 
-        public string SubmitionDate { get
+        public String SubmitionDate { get
             {
-                return _submitionDate;
-            }
-            set
-            {
-                _submitionDate = value;
-                NotifyOfPropertyChange(() => SubmitionDate);
+                return _project.Date.ToShortDateString();
             }
         }
 
@@ -88,7 +83,9 @@ namespace EPJ.ViewModels
             set
             {
                 _dueDate = value;
+                UpdateProjectDeadline(null);
                 NotifyOfPropertyChange(() => DueDate);
+               
             }
         }
 
@@ -246,18 +243,7 @@ namespace EPJ.ViewModels
             }
         }
 
-        public ObservableCollection<ITask> ProjectTasks
-        {
-            get
-            {
-                return _projectTasks;
-            }
-            set
-            {
-                _projectTasks = value;
-                NotifyOfPropertyChange(() => ProjectTasks);
-            }
-        }
+        public ObservableCollection<ITask> ProjectTasks { get; set; }
 
         public ObservableCollection<IRelatedFile> RelatedFiles { get; } = new ObservableCollection<IRelatedFile>();
 
@@ -274,6 +260,8 @@ namespace EPJ.ViewModels
         public ICommand EditTaskCommand { get; set; }
         public ICommand DeleteTaskCommand { get; set; }
         public ICommand CloseAddTaskPanelCommand { get; set; }
+        public ICommand TitleLostFocusCommand {get; set; }
+        public ICommand DescriptionLostFocusCommand { get; set; }
 
         #endregion
 
@@ -283,7 +271,6 @@ namespace EPJ.ViewModels
         {
             ProjectTitle = _project.Title;
             Description = _project.Description;
-            SubmitionDate = _project.Date.ToString();
             DueDate = _project.DueDate;
             _currentPath = _project.ProjectPath;
             Priority = _project.Priority;
@@ -384,10 +371,13 @@ namespace EPJ.ViewModels
 
             if (_updateableTask != null)
             {
+                var index = ProjectTasks.IndexOf(_updateableTask);
                 _updateableTask.Content = TaskContent;
                 _updateableTask.DueDate = TaskDueDate;
                 _updateableTask.Priority = TaskPriority;
+                ProjectTasks.Insert(index, _updateableTask);
                 DataBase.UpdateTask(_updateableTask);
+                ProjectTasks[index] = _updateableTask;
                 _updateableTask = null;
                 ShowAddTaskPanel();
             }
@@ -437,6 +427,45 @@ namespace EPJ.ViewModels
             Progress = (completedTaskCount * 100) / totalTaskCount;
             DataBase.UpdateTask(mTask);
 
+        }
+
+        private void UpdateProjectTitle (object param)
+        {
+            if (String.Equals(_project.Title, ProjectTitle)) return;
+
+            if (!ValidateUserInput.IsNullOrWhiteSpace(ProjectTitle))
+            {
+                ProjectTitle = _project.Title;
+                return;
+            }
+            _projectPath = $".{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}{ProjectTitle}{Path.DirectorySeparatorChar}";
+            Directory.Move(_project.ProjectPath, _projectPath.Substring(2));
+            _project.Title = ProjectTitle;
+            _project.ProjectPath = _projectPath;
+            DataBase.UpdateProject((Project)_project);
+        }
+
+        private void UpdateProjectDescription (object param)
+        {
+            if (!ValidateUserInput.IsNullOrWhiteSpace(Description))
+            {
+                Description = _project.Description;
+                return;
+            }
+
+            _project.Description = Description;
+            DataBase.UpdateProject((Project)_project);
+        }
+
+        private void UpdateProjectDeadline(object param)
+        {
+            if (DateTime.Compare(_dueDate, DateTime.Now) < 0)
+            {
+                _dueDate = _project.DueDate;
+                return;
+            }
+            _project.DueDate = DueDate;
+            DataBase.UpdateProject((Project)_project);
         }
 
         #endregion

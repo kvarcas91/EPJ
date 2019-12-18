@@ -1,4 +1,5 @@
-﻿using EPJ.Utilities;
+﻿using Dapper.Contrib.Extensions;
+using EPJ.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,6 +14,7 @@ namespace EPJ
 
         #region Properties
 
+        [Key]
         /// <summary>
         /// Current project ID
         /// </summary>
@@ -43,26 +45,31 @@ namespace EPJ
         /// </summary>
         public Priority Priority { get; set; } = Priority.Default;
 
+        [Computed]
         /// <summary>
         /// Project progress
         /// </summary>
         public double Progress { get; set; } = 0;
 
+        [Computed]
         /// <summary>
         /// Contributors for the project
         /// </summary>
         public ObservableCollection<IContributor> Contributors { get; } = new ObservableCollection<IContributor>();
 
+        [Computed]
         /// <summary>
         /// Related files to the project
         /// </summary>
         public List<IRelatedFile> RelatedFiles { get; } = new List<IRelatedFile>();
 
+        [Computed]
         /// <summary>
         /// Comments for the project
         /// </summary>
         public List<IComment> Comments { get; } = new List<IComment>();
 
+        [Computed]
         public List<IProjectElement> ProjectBodyElements { get; } = new List<IProjectElement>();
 
         public string ProjectPath { get; set; }
