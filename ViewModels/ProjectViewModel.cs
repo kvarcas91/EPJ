@@ -444,7 +444,7 @@ namespace EPJ.ViewModels
 
         private void UpdateProjectTitle (object param)
         {
-            if (String.Equals(_project.Title, ProjectTitle)) return;
+            if (String.Equals(_project.Title, ProjectTitle.Trim())) return;
 
             if (!ValidateUserInput.IsNullOrWhiteSpace(ProjectTitle))
             {
@@ -466,6 +466,7 @@ namespace EPJ.ViewModels
                 return;
             }
 
+            Console.WriteLine("updating");
             _project.Description = Description;
             DataBase.UpdateProject((Project)_project);
         }

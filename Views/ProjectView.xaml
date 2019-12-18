@@ -259,6 +259,10 @@
                                 <i:InvokeCommandAction Command="{Binding Path=TitleLostFocusCommand}"/>
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
+                        <TextBox.InputBindings>
+                            <KeyBinding Command="{Binding TitleLostFocusCommand}" Key="Return" />
+                            <KeyBinding Command="{Binding TitleLostFocusCommand}" Key="Enter" />
+                        </TextBox.InputBindings>
                     </TextBox>
 
                    
@@ -303,6 +307,11 @@
                                     <i:InvokeCommandAction Command="{Binding Path=DescriptionLostFocusCommand}"/>
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
+
+                            <TextBox.InputBindings>
+                                <KeyBinding Command="{Binding DescriptionLostFocusCommand}" Key="Return" />
+                                <KeyBinding Command="{Binding DescriptionLostFocusCommand}" Key="Enter" />
+                            </TextBox.InputBindings>
                         </TextBox>
 
                     </StackPanel>
@@ -504,9 +513,19 @@
         
         <!-- Progress -->
         <Grid Grid.Row="2" Grid.ColumnSpan="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Progress text -->
+            <TextBlock 
+                Text="{Binding Progress, StringFormat=' {0}%'}" 
+                       Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
             <!-- Progress bar -->
-            <ProgressBar Value="{Binding Progress}" Background="#F2F2F2" BorderThickness="0">
+            <ProgressBar Value="{Binding Progress}" Grid.Row="1"
+                         Background="#F2F2F2" BorderThickness="0">
                 <ProgressBar.Foreground>
                     <LinearGradientBrush EndPoint="1,0" StartPoint="0.0, 0">
                         <GradientStop Color="#90caf9" Offset="0"/>
@@ -515,8 +534,7 @@
                 </ProgressBar.Foreground>
             </ProgressBar>
 
-            <!-- Progress text -->
-            <TextBlock Text="{Binding Progress, StringFormat=' {0}%'}" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+           
         </Grid>
 
     </Grid>
