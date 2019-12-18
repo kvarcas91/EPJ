@@ -51,6 +51,7 @@ namespace EPJ.ViewModels
         private string _taskContent;
         private Task _updateableTask = null;
         private Priority _taskPriority = Priority.Default;
+        private Priority _priority = Priority.Default;
 
         #endregion
 
@@ -83,7 +84,7 @@ namespace EPJ.ViewModels
             set
             {
                 _dueDate = value;
-                UpdateProjectDeadline(null);
+                UpdateProjectDeadline();
                 NotifyOfPropertyChange(() => DueDate);
                
             }
@@ -124,7 +125,19 @@ namespace EPJ.ViewModels
             }
         }
 
-        public Priority Priority { get; set; }
+        public Priority Priority
+        {
+            get
+            {
+                return _priority;
+            }
+            set
+            {
+                _priority = value;
+                UpdateProjectPriority();
+                NotifyOfPropertyChange(() => Priority);
+            }
+        }
 
         public Priority TaskPriority
         {
@@ -457,7 +470,7 @@ namespace EPJ.ViewModels
             DataBase.UpdateProject((Project)_project);
         }
 
-        private void UpdateProjectDeadline(object param)
+        private void UpdateProjectDeadline()
         {
             if (DateTime.Compare(_dueDate, DateTime.Now) < 0)
             {
@@ -465,6 +478,13 @@ namespace EPJ.ViewModels
                 return;
             }
             _project.DueDate = DueDate;
+            DataBase.UpdateProject((Project)_project);
+        }
+
+        private void UpdateProjectPriority ()
+        {
+            if (_priority == _project.Priority) return;
+            _project.Priority = _priority;
             DataBase.UpdateProject((Project)_project);
         }
 
