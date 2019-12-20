@@ -4,8 +4,8 @@ namespace EPJ
 {
     public interface IComment
     {
-        string ProjectComment { get; set; }
-        uint ProjectID { get; }
-        DateTime SubmitDate { get; }
+        string Content { get; set; }
+        long ID { get; set; }
+        DateTime SubmitionDate { get; set; }
     }
 }

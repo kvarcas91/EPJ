@@ -40,6 +40,15 @@ namespace EPJ
             }
         }
 
+        public static void DeleteProject(IProject project)
+        {
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            {
+                connection.Delete(project);
+                connection.Dispose();
+            }
+        }
+
 
         public static List<Project> GetProjects()
         {
@@ -187,11 +196,20 @@ namespace EPJ
             }
         }
 
+        public static void DeleteTask(Task task)
+        {
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            {
+                connection.Delete(task);
+                connection.Dispose();
+            }
+        }
+
         #endregion
 
         #region Comments
 
-        public static List<Note> GetProjectComments (long projectID)
+        public static List<Comment> GetProjectComments (long projectID)
         {
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
@@ -199,12 +217,59 @@ namespace EPJ
                     "FROM comments c " +
                     "INNER JOIN project_comments p ON p.commentID = c.ID " +
                     $"INNER JOIN projects pr on pr.ID = p.projectID WHERE pr.Id = {projectID}";
-                var output = connection.Query<Note>(sql).ToList();
+                var output = connection.Query<Comment>(sql).ToList();
                 connection.Dispose();
                 return output;
             }
         }
 
+        public static void InsertComment(IComment comment, long projectID)
+        {
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            {
+                var sql = @"insert into comments (Content, SubmitionDate) 
+                            values (@Content, @SubmitionDate)";
+                connection.Execute(sql,
+                                new
+                                {
+                                    comment.Content,
+                                    comment.SubmitionDate
+                                });
+
+                connection.Dispose();
+
+            }
+            AssigCommentToTheProject(projectID, GetLastRowID("comments"));
+        }
+
+        private static void AssigCommentToTheProject(long projectID, long commentID)
+        {
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            {
+                connection.Execute("INSERT INTO project_comments (projectID, commentID) values (@projectID, @commentID)",
+                    new { projectID, commentID });
+                connection.Dispose();
+            }
+        }
+
+
+        public static void DeleteComment(Comment comment)
+        {
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            {
+                connection.Delete(comment);
+                connection.Dispose();
+            }
+        }
+
+        public static void UpdateComment (Comment comment)
+        {
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            {
+                connection.Update(comment);
+                connection.Dispose();
+            }
+        }
 
         #endregion
 

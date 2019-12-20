@@ -15,19 +15,19 @@ namespace EPJ
         #region Properties
 
         /// <summary>
-        /// Project ID which holds this comment
+        /// CommentID
         /// </summary>
-        public uint ProjectID { get; private set; }
+        public long ID { get; set; }
 
         /// <summary>
         /// Comment date
         /// </summary>
-        public DateTime SubmitDate { get; private set; }
+        public DateTime SubmitionDate { get; set; }
 
         /// <summary>
         /// Project comment
         /// </summary>
-        public string ProjectComment { get; set; }
+        public string Content { get; set; }
 
         #endregion
 
@@ -36,19 +36,13 @@ namespace EPJ
         /// <summary>
         /// Initializing Comment object
         /// </summary>
-        /// <param name="ID">project ID</param>
-        public Comment(uint ID, string text)
+        public Comment()
         {
-            ProjectID = ID;
-            SubmitDate = DateTime.Now;
-            ProjectComment = text;
+           
         }
 
         #endregion
 
-        public override string ToString()
-        {
-            return $"ID: {ProjectID}; {SubmitDate.ToString("yyyy-MM-dd hh:mm:ss")} {ProjectComment}";
-        }
+       
     }
 }

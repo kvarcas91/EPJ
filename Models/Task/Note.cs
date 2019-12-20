@@ -16,6 +16,7 @@ namespace EPJ
 
         public DateTime SubmitionDate { get; set; }
 
+        [Computed]
         public List<IContributor> Contributors => throw new NotImplementedException();
     }
 }

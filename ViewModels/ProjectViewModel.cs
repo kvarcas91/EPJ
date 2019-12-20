@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -28,6 +29,9 @@ namespace EPJ.ViewModels
             CloseAddTaskPanelCommand = new RelayCommand(CloseAddTaskPanel);
             TitleLostFocusCommand = new RelayCommand(UpdateProjectTitle);
             DescriptionLostFocusCommand = new RelayCommand(UpdateProjectDescription);
+            DeleteTaskCommand = new RelayCommand(DeleteTask);
+            EditCommentCommand = new RelayCommand(EditComment);
+            DeleteCommentCommand = new RelayCommand(DeleteComment);
             InitializeProject();
             ShowFolderContent(_projectPath);
         }
@@ -44,14 +48,17 @@ namespace EPJ.ViewModels
         private DateTime _taskDueDate = (DateTime.Now).AddDays(7);
         private bool _isAddTaskPanelVisible = false;
         private bool _isAddFilePanelVisible = false;
+        private bool _isAddCommentPanelVisible = false;
         private bool _canNavigateBack = false;
         private bool _isDropping = false;
         private bool _isFileListVisible = true;
         private string _newFolderName;
         private string _taskContent;
         private Task _updateableTask = null;
+        private Comment _editableComment = null;
         private Priority _taskPriority = Priority.Default;
         private Priority _priority = Priority.Default;
+        private string _commentContent;
 
         #endregion
 
@@ -178,6 +185,19 @@ namespace EPJ.ViewModels
             }
         }
 
+        public bool IsAddCommentPanelVisible
+        {
+            get
+            {
+                return _isAddCommentPanelVisible;
+            }
+            set
+            {
+                _isAddCommentPanelVisible = value;
+                NotifyOfPropertyChange(() => IsAddCommentPanelVisible);
+            }
+        }
+
         public bool CanNavigateBack
         {
             get
@@ -243,6 +263,19 @@ namespace EPJ.ViewModels
             }
         }
 
+        public string CommentContent
+        {
+            get
+            {
+                return _commentContent;
+            }
+            set
+            {
+                _commentContent = value;
+                NotifyOfPropertyChange(() => CommentContent);
+            }
+        }
+
         public double Progress
         {
             get
@@ -260,7 +293,7 @@ namespace EPJ.ViewModels
 
         public ObservableCollection<IRelatedFile> RelatedFiles { get; } = new ObservableCollection<IRelatedFile>();
 
-        public ObservableCollection<Note> Notes { get; set; }
+        public ObservableCollection<Comment> Notes { get; set; }
 
         #endregion
 
@@ -275,6 +308,8 @@ namespace EPJ.ViewModels
         public ICommand CloseAddTaskPanelCommand { get; set; }
         public ICommand TitleLostFocusCommand {get; set; }
         public ICommand DescriptionLostFocusCommand { get; set; }
+        public ICommand EditCommentCommand { get; set; }
+        public ICommand DeleteCommentCommand { get; set; }
 
         #endregion
 
@@ -389,8 +424,9 @@ namespace EPJ.ViewModels
                 _updateableTask.DueDate = TaskDueDate;
                 _updateableTask.Priority = TaskPriority;
                 ProjectTasks.Insert(index, _updateableTask);
+                ProjectTasks.RemoveAt(index + 1);
                 DataBase.UpdateTask(_updateableTask);
-                ProjectTasks[index] = _updateableTask;
+                //ProjectTasks[index] = _updateableTask;
                 _updateableTask = null;
                 ShowAddTaskPanel();
             }
@@ -419,7 +455,12 @@ namespace EPJ.ViewModels
             TaskPriority = _updateableTask.Priority;
         }
 
-
+        public void DeleteTask(object param)
+        {
+            var task = (Task)param;
+            DataBase.DeleteTask(task);
+            ProjectTasks.Remove(task);
+        }
 
         #endregion
 
@@ -495,8 +536,55 @@ namespace EPJ.ViewModels
 
         private void GetComments ()
         {
-            Notes = new ObservableCollection<Note>(DataBase.GetProjectComments(_project.ID));
+            Notes = new ObservableCollection<Comment>(DataBase.GetProjectComments(_project.ID));
             Console.WriteLine($"size: {Notes.Count}");
+        }
+
+        public void ShowAddNotePanel ()
+        {
+            IsAddCommentPanelVisible = !IsAddCommentPanelVisible;
+        }
+
+        public void AddComment ()
+        {
+            if (!ValidateUserInput.IsNullOrWhiteSpace(CommentContent)) return;
+
+
+            if (_editableComment != null)
+            {
+                var index = Notes.IndexOf(_editableComment);
+                _editableComment.Content = CommentContent;
+                Notes.Insert(index, _editableComment);
+                Notes.RemoveAt(index + 1);
+                DataBase.UpdateComment(_editableComment);
+                _editableComment = null;
+            }
+            else
+            {
+                var comment = new Comment
+                {
+                    SubmitionDate = DateTime.Now,
+                    Content = CommentContent
+                };
+                DataBase.InsertComment(comment, _project.ID);
+                Notes.Add(comment);
+            }
+            CommentContent = String.Empty;
+            ShowAddNotePanel();
+        }
+
+        public void EditComment (object param)
+        {
+            _editableComment = (Comment)param;
+            CommentContent = _editableComment.Content;
+            ShowAddNotePanel();
+        }
+
+        public void DeleteComment (object param)
+        {
+            var comment = (Comment)param;
+            DataBase.DeleteComment(comment);
+            Notes.Remove(comment);
         }
 
         #endregion
@@ -505,14 +593,34 @@ namespace EPJ.ViewModels
 
         #region Drag and Drop
 
-        public void DragOver(IDropInfo dropInfo)
+          public void DragOver(IDropInfo dropInfo)
         {
-            throw new NotImplementedException();
+            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
+            dropInfo.Effects = dragFileList.Any(item =>
+            {
+                IsDropping = true;
+                IsFileListVisible = false;
+              
+                var extension = Path.GetExtension(item);
+                return extension != null;
+            }) ? DragDropEffects.Copy : DragDropEffects.None;
         }
 
         public void Drop(IDropInfo dropInfo)
         {
-            throw new NotImplementedException();
+            IsDropping = false;
+            IsFileListVisible = true;
+
+            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
+            dropInfo.Effects = dragFileList.Any(item =>
+            {
+                var extension = Path.GetExtension(item);
+                var newPath = $"{_currentPath}/{Path.GetFileName(item)}";
+                Directory.Move(item, newPath);
+                RelatedFile file = new RelatedFile(newPath);
+                RelatedFiles.Add(file);
+                return extension != null;
+            }) ? DragDropEffects.Copy : DragDropEffects.None;
         }
 
         #endregion
