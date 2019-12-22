@@ -114,15 +114,21 @@ namespace EPJ.ViewModels
 
         private void Deleteproject (object param)
         {
-            Project project = (Project)param;
-            DataBase.DeleteProject(project);
-            Projects.Remove(project);
+            MessageBoxResult result = MessageBox.Show("Do you want to delete this project?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                Project project = (Project)param;
+                DataBase.DeleteProject(project);
+                Projects.Remove(project);
+            }
+
+            
         }
 
         private void ArchiveProject (object param)
         {
             var project = (Project)param;
-            project.IsArchived = true;
+            project.IsArchived = !project.IsArchived;
             DataBase.UpdateProject(project);
             Getprojects();
             //Projects.Remove(project);

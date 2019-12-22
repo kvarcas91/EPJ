@@ -54,6 +54,15 @@ namespace EPJ
         public double Progress { get; set; } = 0;
 
         [Computed]
+        public string ArchiveString
+        {
+            get
+            {
+                return IsArchived ? "Unarchive" : "Archive";
+            }
+        }
+
+        [Computed]
         /// <summary>
         /// Contributors for the project
         /// </summary>
