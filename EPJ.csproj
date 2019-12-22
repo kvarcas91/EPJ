@@ -114,6 +114,8 @@
     <Compile Include="Converters\BaseValueConverter.cs" />
     <Compile Include="Converters\TrimTextConverter.cs" />
     <Compile Include="Utilities\EnumHelper.cs" />
+    <Compile Include="Utilities\Enums\ViewType.cs" />
+    <Compile Include="Utilities\FileHelper.cs" />
     <Compile Include="Utilities\Validators\ValidateUserInput.cs" />
     <Compile Include="ViewModels\AddProjectViewModel.cs" />
     <Compile Include="ViewModels\Base\RelayCommand.cs" />

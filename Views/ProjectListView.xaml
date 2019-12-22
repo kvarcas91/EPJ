@@ -3,14 +3,23 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-               xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
+             xmlns:StyleAlias="clr-namespace:EPJ.Utilities"
              xmlns:local="clr-namespace:EPJ" 
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
+        <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
+                            ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="StyleAlias:ViewType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
         <local:SortByConverter x:Key="sortByConverter"/>
         <local:DateToStringConverter x:Key="dateConverter"/>
+        <local:BoolToTaskBackgroundConverter x:Key="backgroundConverter"/>
     </UserControl.Resources>
     
     <Grid>
@@ -38,6 +47,13 @@
 
             <!-- SortBy combo box -->
             <ComboBox VerticalAlignment="Center" SelectedIndex="0"/>
+
+            <TextBlock Margin="20, 0, 10, 0" Text="View" VerticalAlignment="Center"/>
+
+            <ComboBox VerticalAlignment="Center"
+                       ItemsSource="{Binding Source={StaticResource dataFromEnum}}"
+                        SelectedItem="{Binding Path=SelectedViewType, Mode=TwoWay}"
+                      MinWidth="120" FontSize="12"/>
         </StackPanel>
 
 
@@ -59,14 +75,31 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <materialDesign:Card materialDesign:RippleAssist.IsCentered="True"
-                                         >
+                                          Tag="{Binding RelativeSource={RelativeSource 
+                                                        Mode=FindAncestor, 
+                                                        AncestorType={x:Type UserControl}}}"
+                                         Background="{Binding IsArchived, Converter={StaticResource backgroundConverter}}">
                         <materialDesign:Card.InputBindings>
                             <MouseBinding Gesture="LeftDoubleClick"
                                           Command="{Binding ElementName=listView, Path= DataContext.ShowProjectCommand}"
                                           CommandParameter="{Binding}"/>
                         </materialDesign:Card.InputBindings>
+                        <materialDesign:Card.ContextMenu>
+                            <ContextMenu>
+                                <!-- Options -->
 
-                        <Grid Background="White">
+                                <MenuItem Header="Archive" Command="{
+                                                    Binding Path=PlacementTarget.Tag.DataContext.ArchiveProjectCommand,
+                                                    RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
+                                                    CommandParameter="{Binding}"/>
+                                <MenuItem Header="Delete" Command="{
+                                                    Binding Path=PlacementTarget.Tag.DataContext.DeleteProjectCommand,
+                                                    RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
+                                                    CommandParameter="{Binding}"/>
+                            </ContextMenu>
+                        </materialDesign:Card.ContextMenu>
+
+                        <Grid Background="Transparent">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
@@ -120,15 +153,6 @@
                                         <RowDefinition Height="*"/>
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
-
-                                    <!-- Options -->
-                                    <Button HorizontalAlignment="Right"
-                                        VerticalAlignment="Top"
-                                        Style="{StaticResource Hoverless}"
-                                        Command="{Binding ElementName=listView, Path=DataContext.ShowListItemSettingsCommand}"
-                                        CommandParameter="{Binding}">
-                                        <materialDesign:PackIcon Kind="MoreVert"/>
-                                    </Button>
 
                                     <StackPanel Orientation="Vertical" Grid.Row="1">
                                         <Separator Margin="2" VerticalAlignment="Bottom"/>

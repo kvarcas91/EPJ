@@ -20,6 +20,8 @@ namespace EPJ
 
         string ProjectPath { get; set; }
 
+        bool IsArchived { get; set; }
+
         Priority Priority { get; set; }
 
         double Progress { get; set; }

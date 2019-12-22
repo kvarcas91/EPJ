@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Dapper.Contrib.Extensions;
+using EPJ.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -18,8 +19,8 @@ namespace EPJ
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
 
-                connection.Execute("insert into projects (Title, Description, Date, DueDate, ProjectPath, Priority) " +
-                                   $"values (@Title, @Description, @Date, @DueDate, @ProjectPath, @Priority)", project);
+                connection.Execute("insert into projects (Title, Description, Date, DueDate, ProjectPath, Priority, IsArchived) " +
+                                   $"values (@Title, @Description, @Date, @DueDate, @ProjectPath, @Priority, @IsArchived)", project);
                 project.ID = GetLastRowID("projects");
                 Console.WriteLine($"ID: {project.ID }");
                 connection.Dispose();
@@ -50,11 +51,22 @@ namespace EPJ
         }
 
 
-        public static List<Project> GetProjects()
+        public static List<Project> GetProjects(ViewType viewType)
         {
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
-                var output = connection.Query<Project>("select * from projects");
+
+                var sql = "select * from projects";
+                switch (viewType)
+                {
+                    case ViewType.Ongoing:
+                        sql = $"{sql} where IsArchived = '0'";
+                        break;
+                    case ViewType.Archived:
+                        sql = $"{sql} where IsArchived = '1'";
+                        break;
+                }
+                var output = connection.Query<Project>(sql);
                 foreach (var project in output)
                 {
                     project.Progress = GetProjectprogress(project.ID);

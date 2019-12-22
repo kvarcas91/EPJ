@@ -17,10 +17,14 @@
     <Color x:Key="ForegroundLight">#ffffff</Color>
     <SolidColorBrush x:Key="ForegroudLightBrush" Color="{StaticResource ForegroundLight}"/>
 
+    
+
     <!-- Priority colours -->
     <Color x:Key="PriorityLow">#FFA800</Color>
     <Color x:Key="PriorityMedium">#FF6A00</Color>
     <Color x:Key="PriorityHigh">#701944</Color>
     <Color x:Key="PriorityDefault">#000000</Color>
+
+    <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource PriorityDefault}"/>
 
 </ResourceDictionary>

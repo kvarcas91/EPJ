@@ -40,6 +40,8 @@ namespace EPJ
         /// </summary>
         public DateTime DueDate { get; set; }
 
+        public bool IsArchived { get; set; } = false;
+
         /// <summary>
         /// Project priority
         /// </summary>

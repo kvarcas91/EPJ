@@ -276,6 +276,14 @@ namespace EPJ.ViewModels
             }
         }
 
+        public string ArchiveString
+        {
+            get
+            {
+                return _project.IsArchived ? "Unarchive" : "Archive";
+            }
+        }
+
         public double Progress
         {
             get
