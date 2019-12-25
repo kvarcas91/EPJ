@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EPJ
+namespace EPJ.Models
 {
-    public class RelatedFile : IRelatedFile
+    public class RelatedFile : IFile
     {
 
         #region Properties
@@ -16,29 +16,29 @@ namespace EPJ
         /// <summary>
         /// Project ID which holds this file
         /// </summary>
-        public long ID { get; set; }
+        public ulong ID { get; set; }
 
         /// <summary>
         /// related to the project file name
         /// </summary>
-        public string FileName { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Related to the project file absolute path
         /// </summary>
-        public string FilePath { get; set; }
+        public string ComponentPath { get; set; }
 
         /// <summary>
         /// Related to the project file extention
         /// </summary>
-        public string FileExtention { get; set; }
+        public string Extention { get; set; }
 
-        public Icon FileIcon { get; set; }
+        public Icon Icon { get; set; }
 
         /// <summary>
         /// File version
         /// </summary>
-        public uint FileVersion { get; set; } = 0;
+        public ulong Version { get; set; } = 0;
 
         #endregion
 
@@ -48,19 +48,10 @@ namespace EPJ
 
         public RelatedFile(string filePath)
         {
-            FilePath = filePath;
-            FileName = Path.GetFileNameWithoutExtension(filePath);
-            FileExtention = Path.GetExtension(filePath);
-           
-            if (String.IsNullOrEmpty(FileExtention))
-            {
-                FileIcon = DefaultIcons.FolderLarge;
-            }
-            else
-            {
-                FileIcon = Icon.ExtractAssociatedIcon(filePath);
-            }
-           
+            ComponentPath = filePath;
+            Name = Path.GetFileNameWithoutExtension(filePath);
+            Extention = Path.GetExtension(filePath);
+            Icon = Icon.ExtractAssociatedIcon(filePath);
         }
 
         #endregion
@@ -77,7 +68,7 @@ namespace EPJ
             throw new NotImplementedException();
         }
 
-        public void Replace()
+        public void Replace(string destination)
         {
             throw new NotImplementedException();
         }

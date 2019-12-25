@@ -17,6 +17,7 @@ using System.Windows.Media.Imaging;
 using GongSolutions.Wpf.DragDrop;
 using System.Diagnostics;
 using System.Reflection;
+using EPJ.Models;
 
 namespace EPJ.ViewModels
 {
@@ -285,7 +286,7 @@ namespace EPJ.ViewModels
 
         public BindableCollection<Contributor> AddedContributors { get; } = new BindableCollection<Contributor>();
 
-        public BindableCollection<RelatedFile> RelatedFiles { get; } = new BindableCollection<RelatedFile>();
+        public ObservableCollection<IComponent> RelatedFiles { get; set; } 
 
         #endregion
 
@@ -412,32 +413,25 @@ namespace EPJ.ViewModels
             _currentPath = path;
             RelatedFiles.Clear();
 
-            string[] contentDirectories = Directory.GetDirectories(path);
-            string[] contentFiles = Directory.GetFiles(path);
-
-            foreach (var item in contentDirectories)
+            foreach (var item in FileHelper.GetFolderContent(path))
             {
-                RelatedFiles.Add(new RelatedFile(item));
-            }
-            foreach(var item in contentFiles)
-            {
-                RelatedFiles.Add(new RelatedFile(item));
+                RelatedFiles.Add(item);
             }
         }
 
         public void FileListItemClick (object param)
         {
-            var file = (RelatedFile)param;
-            if (String.IsNullOrEmpty(file.FileExtention))
+            var component = (IComponent)param;
+            if (component is IFolder folder)
             {
                 CanNavigateBack = true;
-                _currentPath = $"{_currentPath}{Path.DirectorySeparatorChar}{file.FileName}";
-                ShowFolderContent(file.FilePath);
+                _currentPath = $"{_currentPath}{Path.DirectorySeparatorChar}{folder.Name}";
+                ShowFolderContent(folder.ComponentPath);
+                return;
             }
-            else
-            {
-                Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{file.FilePath.Substring(1)}"); 
-            }
+            
+            Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{component.ComponentPath.Substring(1)}"); 
+            
         }
 
         #endregion
@@ -498,11 +492,20 @@ namespace EPJ.ViewModels
             var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
             dropInfo.Effects = dragFileList.Any(item =>
             {
+                IComponent component;
                 var extension = Path.GetExtension(item);
                 var newPath = $"{_currentPath}/{Path.GetFileName(item)}";
                 Directory.Move(item, newPath);
-                RelatedFile file = new RelatedFile(newPath);
-                RelatedFiles.Add(file);
+                if (String.IsNullOrEmpty(extension))
+                {
+                    component = new RelatedFolder(newPath);
+                }
+                else
+                {
+                    component = new RelatedFile(newPath);
+                }
+               
+                RelatedFiles.Add(component);
                 return extension != null;
             }) ? DragDropEffects.Copy : DragDropEffects.None;
         }

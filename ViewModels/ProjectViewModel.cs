@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using EPJ.Models;
 using EPJ.Utilities;
 using GongSolutions.Wpf.DragDrop;
 using System;
@@ -32,6 +33,9 @@ namespace EPJ.ViewModels
             DeleteTaskCommand = new RelayCommand(DeleteTask);
             EditCommentCommand = new RelayCommand(EditComment);
             DeleteCommentCommand = new RelayCommand(DeleteComment);
+            EditFileCommand = new RelayCommand(EditFile);
+            DeleteFileCommand = new RelayCommand(DeleteFile);
+            ShowInExplorerCommand = new RelayCommand(ShowInExplorer);
             InitializeProject();
             ShowFolderContent(_projectPath);
         }
@@ -42,6 +46,7 @@ namespace EPJ.ViewModels
         private string _currentPath;
         private string _projectPath;
         private readonly IProject _project;
+        private IComponent _editableComponent = null;
         private string _projectTitle;
         private string _description;
         private DateTime _dueDate;
@@ -59,6 +64,7 @@ namespace EPJ.ViewModels
         private Priority _taskPriority = Priority.Default;
         private Priority _priority = Priority.Default;
         private string _commentContent;
+        private bool _canEdit = false;
 
         #endregion
 
@@ -297,9 +303,33 @@ namespace EPJ.ViewModels
             }
         }
 
+        public string CurrentPath { get
+            {
+                return _currentPath;
+            } 
+            set
+            {
+                _currentPath = value;
+                NotifyOfPropertyChange(() => CurrentPath);
+            }
+        }
+
+        public bool CanEdit
+        {
+            get
+            {
+                return _canEdit;
+            }
+            set
+            {
+                _canEdit = value;
+                NotifyOfPropertyChange(() => CanEdit);
+            }
+        }
+
         public ObservableCollection<ITask> ProjectTasks { get; set; }
 
-        public ObservableCollection<IRelatedFile> RelatedFiles { get; } = new ObservableCollection<IRelatedFile>();
+        public ObservableCollection<IComponent> RelatedFiles { get; set; } = new ObservableCollection<IComponent>();
 
         public ObservableCollection<Comment> Notes { get; set; }
 
@@ -318,6 +348,9 @@ namespace EPJ.ViewModels
         public ICommand DescriptionLostFocusCommand { get; set; }
         public ICommand EditCommentCommand { get; set; }
         public ICommand DeleteCommentCommand { get; set; }
+        public ICommand ShowInExplorerCommand { get; set; }
+        public ICommand EditFileCommand { get; set; }
+        public ICommand DeleteFileCommand { get; set; }
 
         #endregion
 
@@ -345,26 +378,20 @@ namespace EPJ.ViewModels
 
         private void ShowFolderContent(string path)
         {
-            _currentPath = path;
+            CurrentPath = path;
+
             RelatedFiles.Clear();
 
-            string[] contentDirectories = Directory.GetDirectories(path);
-            string[] contentFiles = Directory.GetFiles(path);
-
-            foreach (var item in contentDirectories)
+            foreach (var item in FileHelper.GetFolderContent(path))
             {
-                RelatedFiles.Add(new RelatedFile(item));
+                RelatedFiles.Add(item);
             }
-            foreach (var item in contentFiles)
-            {
-                RelatedFiles.Add(new RelatedFile(item));
-            }
+            
         }
 
         public void ShowAddFolderPanel()
         {
             IsAddFilePanelVisible = !IsAddFilePanelVisible;
-            //IsFileListVisible = !IsAddFilePanelVisible;
         }
 
         public bool CanAddNewFolder(string newFolderName)
@@ -379,25 +406,86 @@ namespace EPJ.ViewModels
 
         public void AddNewFolder(string newFolderName)
         {
-            Directory.CreateDirectory($"{_currentPath}/{NewFolderName}");
+            if (_editableComponent == null)
+            {
+                Directory.CreateDirectory($"{_currentPath}/{NewFolderName}");
+                ShowFolderContent(_currentPath);
+            }
+            else
+            {
+                var index = RelatedFiles.IndexOf(_editableComponent);
+                _editableComponent.Name = newFolderName;
+                RelatedFiles.Insert(index, _editableComponent);
+                RelatedFiles.RemoveAt(index + 1);
+                _editableComponent = null;
+            }
             NewFolderName = "";
             IsAddFilePanelVisible = false;
-            ShowFolderContent(_currentPath);
         }
 
         public void FileListItemClick(object param)
         {
-            var file = (RelatedFile)param;
-            if (String.IsNullOrEmpty(file.FileExtention))
+            var component = (IComponent)param;
+            if (component is IFolder folder)
             {
                 CanNavigateBack = true;
-                _currentPath = $"{_currentPath}{Path.DirectorySeparatorChar}{file.FileName}";
-                ShowFolderContent(file.FilePath);
+                _currentPath = $"{_currentPath}{Path.DirectorySeparatorChar}{folder.Name}";
+                ShowFolderContent(folder.ComponentPath);
+                return;
+            }
+
+            CanNavigateBack = false;
+            Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{component.ComponentPath.Substring(1)}");
+        }
+
+        private void EditFile (object param)
+        {
+            _editableComponent = (IComponent)param;
+            CanEdit = true;
+            ShowAddFolderPanel();
+            NewFolderName = _editableComponent.Name;
+            NotifyOfPropertyChange();
+        }
+
+        private void DeleteFile (object param)
+        {
+            var component = (IComponent)param;
+            var message = "";
+            if (component is IFolder)
+            {
+                message = "Do you want to delete this folder?";
             }
             else
             {
-                Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{file.FilePath.Substring(1)}");
+                message = "Do you want to delete this file?";
             }
+
+            MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                if (component is IFolder)
+                {
+                    Directory.Delete(component.ComponentPath);
+                }
+                else
+                {
+                    File.Delete(component.ComponentPath);
+                }
+               
+                RelatedFiles.Remove(component);
+            }
+           
+        }
+
+        private void ShowInExplorer (object param)
+        {
+            var component = (IComponent)param;
+            if (component is IFile)
+            {
+                Process.Start(Directory.GetParent(component.ComponentPath).FullName);
+                return;
+            }
+            Process.Start(component.ComponentPath);
         }
 
         #endregion
@@ -606,8 +694,6 @@ namespace EPJ.ViewModels
             var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
             dropInfo.Effects = dragFileList.Any(item =>
             {
-                IsDropping = true;
-                IsFileListVisible = false;
               
                 var extension = Path.GetExtension(item);
                 return extension != null;
@@ -616,17 +702,23 @@ namespace EPJ.ViewModels
 
         public void Drop(IDropInfo dropInfo)
         {
-            IsDropping = false;
-            IsFileListVisible = true;
-
+          
             var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
             dropInfo.Effects = dragFileList.Any(item =>
             {
+                IComponent component;
                 var extension = Path.GetExtension(item);
                 var newPath = $"{_currentPath}/{Path.GetFileName(item)}";
                 Directory.Move(item, newPath);
-                RelatedFile file = new RelatedFile(newPath);
-                RelatedFiles.Add(file);
+                if (String.IsNullOrEmpty(extension))
+                {
+                    component = new RelatedFolder(newPath);
+                }
+                else
+                {
+                    component = new RelatedFile(newPath);
+                }
+                RelatedFiles.Add(component);
                 return extension != null;
             }) ? DragDropEffects.Copy : DragDropEffects.None;
         }
@@ -644,9 +736,9 @@ namespace EPJ.ViewModels
 
         public void NavigateFolderBack()
         {
-            if (String.Compare(_currentPath, _projectPath) != 0)
+            if (String.Compare(CurrentPath, _projectPath) != 0)
             {
-                string[] directories = _currentPath.Split(Path.DirectorySeparatorChar);
+                string[] directories = CurrentPath.Split(Path.DirectorySeparatorChar);
                 directories = directories.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToArray();
                 StringBuilder builder = new StringBuilder();
                 for (int i = 0; i < directories.Length - 1; i++)

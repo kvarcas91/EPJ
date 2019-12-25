@@ -1,4 +1,5 @@
 ﻿using Dapper.Contrib.Extensions;
+using EPJ.Models;
 using EPJ.Utilities;
 using System;
 using System.Collections.Generic;
@@ -72,7 +73,7 @@ namespace EPJ
         /// <summary>
         /// Related files to the project
         /// </summary>
-        public List<IRelatedFile> RelatedFiles { get; } = new List<IRelatedFile>();
+        public List<IComponent> RelatedComponents { get; } = new List<IComponent>();
 
         [Computed]
         /// <summary>

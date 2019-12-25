@@ -1,4 +1,5 @@
-﻿using EPJ.Utilities;
+﻿using EPJ.Models;
+using EPJ.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,7 +33,7 @@ namespace EPJ
         List<IProjectElement> ProjectBodyElements { get; }
       
        
-        List<IRelatedFile> RelatedFiles { get; }
+        List<IComponent> RelatedComponents { get; }
      
         Project AddElement(IProjectElement element);
         Project AddComment(IComment comment);

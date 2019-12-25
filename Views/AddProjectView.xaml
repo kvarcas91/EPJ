@@ -153,14 +153,14 @@
                                 <Image Width="24" Height="24"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Top"
-                                       Source="{Binding FileIcon, 
+                                       Source="{Binding Icon, 
                                     Converter={StaticResource imageConverter}}"/>
 
                                 <TextBlock FontSize="12" 
                                            Width="80"
                                            TextAlignment="Center"
                                            TextWrapping="Wrap"
-                                           Text="{Binding FileName}"/>
+                                           Text="{Binding Name}"/>
 
                             </StackPanel>
                         </materialDesign:Card>
