@@ -286,7 +286,7 @@ namespace EPJ.ViewModels
 
         public BindableCollection<Contributor> AddedContributors { get; } = new BindableCollection<Contributor>();
 
-        public ObservableCollection<IComponent> RelatedFiles { get; set; } 
+        public ObservableCollection<IComponent> RelatedFiles { get; set; } = new ObservableCollection<IComponent>();
 
         #endregion
 

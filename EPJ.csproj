@@ -106,6 +106,10 @@
     <Compile Include="Models\RelatedFile\RelatedFolder.cs" />
     <Compile Include="Models\Task\INote.cs" />
     <Compile Include="Utilities\DefaultIcons.cs" />
+    <Compile Include="Utilities\DragDrop\DragAdorner.cs" />
+    <Compile Include="Utilities\DragDrop\FindAnchestor.cs" />
+    <Compile Include="Utilities\DragDrop\ListViewDragDropManager.cs" />
+    <Compile Include="Utilities\DragDrop\MouseUtilities.cs" />
     <Compile Include="Utilities\Enums\SortBy.cs" />
     <Compile Include="Models\Comment\IComment.cs" />
     <Compile Include="Models\Contributor\IContributor.cs" />

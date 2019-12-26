@@ -17,6 +17,8 @@ namespace EPJ
         public long ID { get; set; }
         public string Content { get; set; }
 
+        public ulong OrderNumber { get; set; }
+
         [Computed]
         public List<IContributor> Contributors { get; } = new List<IContributor>();
 

@@ -10,6 +10,7 @@ namespace EPJ
     {
 
         long ID { get; set; }
+
         List<IContributor> Contributors { get; }
         string Content { get; set; }
 

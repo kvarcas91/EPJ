@@ -11,6 +11,8 @@ namespace EPJ
 
         long ID { get; set; }
 
+        ulong OrderNumber { get; set; }
+
         string Title { get; set; }
 
         string Description { get; set; }

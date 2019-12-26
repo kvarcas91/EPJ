@@ -58,11 +58,6 @@ namespace EPJ.Models
 
         #region Public Methods
 
-        public void Copy()
-        {
-            throw new NotImplementedException();
-        }
-
         public void Copy(string newName)
         {
             throw new NotImplementedException();
@@ -71,6 +66,12 @@ namespace EPJ.Models
         public void Replace(string destination)
         {
             throw new NotImplementedException();
+        }
+
+        public void Move (string destination)
+        {
+            var fullFileDestination = $"{destination}{Path.DirectorySeparatorChar}{Path.GetFileName(ComponentPath)}";
+            File.Move(ComponentPath, fullFileDestination);
         }
 
         #endregion

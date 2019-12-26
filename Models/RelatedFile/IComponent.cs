@@ -17,6 +17,7 @@ namespace EPJ.Models
 
         void Copy(string destination);
         void Replace(string destination);
+        void Move(string destination);
 
     }
 }

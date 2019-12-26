@@ -21,6 +21,8 @@ namespace EPJ
         /// </summary>
         public long ID { get; set; }
 
+        public ulong OrderNumber { get; set; }
+
         /// <summary>
         /// Project name
         /// </summary>

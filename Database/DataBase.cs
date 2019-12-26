@@ -18,7 +18,8 @@ namespace EPJ
         {
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
-
+                var order = (ulong)GetCount("projects");
+                project.OrderNumber = order;
                 connection.Execute("insert into projects (Title, Description, Date, DueDate, ProjectPath, Priority, IsArchived) " +
                                    $"values (@Title, @Description, @Date, @DueDate, @ProjectPath, @Priority, @IsArchived)", project);
                 project.ID = GetLastRowID("projects");
@@ -66,6 +67,7 @@ namespace EPJ
                         sql = $"{sql} where IsArchived = '1'";
                         break;
                 }
+                sql = $"{sql} order by OrderNumber";
                 var output = connection.Query<Project>(sql);
                 foreach (var project in output)
                 {
@@ -163,7 +165,7 @@ namespace EPJ
                     "SELECT t.ID, t.Content, t.IsCompleted, t.Priority, t.DueDate " +
                     "FROM tasks t " +
                     "INNER JOIN project_tasks p ON p.taskID = t.ID " +
-                    $"INNER JOIN projects pr on pr.ID = p.projectID WHERE pr.Id = {projectID}");
+                    $"INNER JOIN projects pr on pr.ID = p.projectID WHERE pr.Id = {projectID} order by t.OrderNumber");
                 connection.Dispose();
                 return output.ToList();
             }
@@ -172,6 +174,8 @@ namespace EPJ
         {
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
+                var order = (ulong)GetCount("tasks");
+                task.OrderNumber = order;
                 var sql = @"insert into tasks (Content, Priority, IsCompleted, DueDate) 
                             values (@Content, @Priority, @IsCompleted, @DueDate)";
                 connection.Execute(sql,
@@ -296,6 +300,16 @@ namespace EPJ
             }
         }
 
+        public static int GetCount (string table)
+        {
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            {
+                var count = connection.ExecuteScalar<int>($"SELECT COUNT(*) FROM {table}");
+                //var count = connection.Query("SELECT COUNT(*) FROM projects;");
+                connection.Dispose();
+                return count;
+            }
+        }
         public static int GetCount (string table, string rowName, string param)
         {
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))

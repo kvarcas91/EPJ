@@ -9,7 +9,7 @@
              xmlns:System="clr-namespace:System;assembly=mscorlib"
              xmlns:StyleAlias="clr-namespace:EPJ.Utilities"
              d:DesignHeight="700" d:DesignWidth="800"
-             xmlns:dragDrop="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
+             xmlns:utils="clr-namespace:EPJ.Utilities"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
 
     <UserControl.Resources>
@@ -79,9 +79,7 @@
         <Grid Grid.Row="1" Grid.Column="0" Background="White"
               Margin="10"
               HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-               AllowDrop="True"
-                dragDrop:DragDrop.IsDropTarget="True"
-                      dragDrop:DragDrop.DropHandler="{Binding}">
+              >
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -147,16 +145,19 @@
 
             <!-- FileList -->
             <ListView Grid.Row="4" x:Name="FileListView" 
-                      ItemsSource="{Binding RelatedFiles}"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      Margin="0 10 0 0" 
                       AllowDrop="True"
-                      dragDrop:DragDrop.IsDropTarget="True"
-                      dragDrop:DragDrop.DropHandler="{Binding}"
-                      Margin="0 10 0 0"
+                      PreviewMouseLeftButtonDown="ListViewPreviewMouseLeftButtonDown"
+                      MouseMove="FileListView_MouseMove"
+                      DragEnter="FileListView_DragEnter"
+                      Drop="FileListView_Drop"
+                      ItemsSource="{Binding RelatedFiles}"
                       Visibility="{Binding IsFileListVisible, Converter={StaticResource boolToVisibility}}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <materialDesign:Card VerticalAlignment="Top" 
+                        <materialDesign:Card
+                            VerticalAlignment="Top" 
                                              Background="Transparent"
                                              Tag="{Binding RelativeSource={RelativeSource 
                                                         Mode=FindAncestor, 
@@ -212,12 +213,11 @@
                                             <Setter Property="Foreground" Value="Black"/>
                                         </Style>
                                     </TextBox.Style>
-                                    
+
                                 </TextBox>
 
                             </StackPanel>
                         </materialDesign:Card>
-
                     </DataTemplate>
                 </ListView.ItemTemplate>
                 <ListView.ItemsPanel>
@@ -225,6 +225,7 @@
                         <WrapPanel Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
+                
             </ListView>
 
         </Grid>
@@ -381,9 +382,16 @@
 
                 <!-- Task list -->
                 <ListView x:Name="projectTaskList"
-                    ItemsSource="{Binding ProjectTasks}" Style="{StaticResource ListView}"
+                    ItemsSource="{Binding ProjectTasks}" 
+                          Style="{StaticResource ListView}"
                           HorizontalContentAlignment="Stretch"
-                          Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+                          Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                          AllowDrop="True"
+                          PreviewMouseLeftButtonDown="ListViewPreviewMouseLeftButtonDown"
+                          MouseMove="projectTaskList_MouseMove"
+                          DragEnter="projectTaskList_DragEnter"
+                          DragOver="projectTaskList_DragOver"
+                          Drop="projectTaskList_Drop">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <materialDesign:Card 

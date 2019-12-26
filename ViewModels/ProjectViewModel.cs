@@ -17,7 +17,7 @@ using System.Windows.Input;
 
 namespace EPJ.ViewModels
 {
-    class ProjectViewModel : Screen, IDropTarget
+    class ProjectViewModel : Screen
     {
 
         public ProjectViewModel(IProject project)
@@ -326,6 +326,8 @@ namespace EPJ.ViewModels
                 NotifyOfPropertyChange(() => CanEdit);
             }
         }
+
+        public bool CanAcceptChildren { get; set; }
 
         public ObservableCollection<ITask> ProjectTasks { get; set; }
 
@@ -689,42 +691,103 @@ namespace EPJ.ViewModels
 
         #region Drag and Drop
 
-          public void DragOver(IDropInfo dropInfo)
+        public void OnDrop (IComponent sourceItem, IComponent destinationItem)
         {
-            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
-            dropInfo.Effects = dragFileList.Any(item =>
-            {
-              
-                var extension = Path.GetExtension(item);
-                return extension != null;
-            }) ? DragDropEffects.Copy : DragDropEffects.None;
+            if (Object.Equals(sourceItem, destinationItem)) return;
+            if (destinationItem is IFile) return;
+           
+            sourceItem.Move(destinationItem.ComponentPath);
+            ShowFolderContent(CurrentPath);
         }
 
-        public void Drop(IDropInfo dropInfo)
+        public void OnDropTask(ITask source, ITask destination)
         {
-          
-            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
-            dropInfo.Effects = dragFileList.Any(item =>
+            var startIndex = ProjectTasks.IndexOf(source);
+            var destinationIndex = ProjectTasks.IndexOf(destination);
+
+            if (startIndex >= 0 && destinationIndex >= 0)
             {
-                IComponent component;
-                var extension = Path.GetExtension(item);
-                var newPath = $"{_currentPath}/{Path.GetFileName(item)}";
-                Directory.Move(item, newPath);
-                if (String.IsNullOrEmpty(extension))
-                {
-                    component = new RelatedFolder(newPath);
-                }
-                else
-                {
-                    component = new RelatedFile(newPath);
-                }
-                RelatedFiles.Add(component);
-                return extension != null;
-            }) ? DragDropEffects.Copy : DragDropEffects.None;
+                //Console.WriteLine($"start: {startIndex}; end: {destinationIndex}");
+                ProjectTasks.Move(startIndex, destinationIndex);
+                source.OrderNumber = (ulong)destinationIndex;
+                destination.OrderNumber = (ulong)startIndex;
+                DataBase.UpdateTask((Task)source);
+                DataBase.UpdateTask((Task)destination);
+            }
+
+            //if (Object.Equals(sourceItem, destinationItem)) return;
+
+            //if (destinationItem is IFile) return;
+
+            //sourceItem.Move(destinationItem.ComponentPath);
+            //ShowFolderContent(CurrentPath);
         }
 
         #endregion
 
+
+        /*
+        #region Drag and Drop
+
+          public void DragOver(IDropInfo dropInfo)
+        {
+            
+            try
+            {
+            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
+            dropInfo.Effects = dragFileList.Any(item =>
+            {
+
+                var extension = Path.GetExtension(item);
+                return extension != null;
+            }) ? DragDropEffects.Copy : DragDropEffects.None;
+
+            }
+            catch
+            {
+                var dragFileList = (IComponent)dropInfo.Data;
+                dropInfo.Effects = dragFileList != null ? DragDropEffects.Copy : DragDropEffects.None;
+            };
+            
+        }
+
+        public void Drop(IDropInfo dropInfo)
+        {
+            try
+            {
+                var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
+                dropInfo.Effects = dragFileList.Any(item =>
+                {
+                    dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
+                    IComponent component;
+                    var extension = Path.GetExtension(item);
+                    var newPath = $"{_currentPath}/{Path.GetFileName(item)}";
+                    Directory.Move(item, newPath);
+                    if (String.IsNullOrEmpty(extension))
+                    {
+                        component = new RelatedFolder(newPath);
+                    }
+                    else
+                    {
+                        component = new RelatedFile(newPath);
+                    }
+                    RelatedFiles.Add(component);
+                    return extension != null;
+                }) ? DragDropEffects.Copy : DragDropEffects.None;
+            }
+            catch
+            {
+                var component = (IComponent)dropInfo.Data;
+                //var target = (IComponent)dropInfo.TargetItem;
+                Console.WriteLine($"sourse: {component.ComponentPath}");
+                
+                //Console.WriteLine($"destination: {target.ComponentPath}");
+            }
+        }
+
+        #endregion
+
+    */
         #region Navigation
 
         public void BackToProjectList ()

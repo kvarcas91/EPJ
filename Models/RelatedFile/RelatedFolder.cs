@@ -35,5 +35,13 @@ namespace EPJ.Models
         {
             throw new NotImplementedException();
         }
+
+        public void Move (string destination)
+        {
+            Console.WriteLine($"Move from: {ComponentPath}");
+            Console.WriteLine($"Move to: {destination}");
+            var destinationDirectorry = $"{destination}{Path.DirectorySeparatorChar}{Name}";
+            Directory.Move(ComponentPath, destinationDirectorry);
+        }
     }
 }
