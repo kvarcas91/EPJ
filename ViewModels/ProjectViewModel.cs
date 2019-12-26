@@ -35,6 +35,7 @@ namespace EPJ.ViewModels
             EditFileCommand = new RelayCommand(EditFile);
             DeleteFileCommand = new RelayCommand(DeleteFile);
             ShowInExplorerCommand = new RelayCommand(ShowInExplorer);
+            ExpandCommentCommand = new RelayCommand(ExpandCommentView);
             InitializeProject();
             ShowFolderContent(_projectPath);
         }
@@ -64,6 +65,10 @@ namespace EPJ.ViewModels
         private Priority _priority = Priority.Default;
         private string _commentContent;
         private bool _canEdit = false;
+        private bool _isProjectVisible = true;
+        private bool _isExpandedCommentVisible = false;
+        private DateTime _previewCommentSubmitionDate;
+        private string _previewCommentContent;
 
         #endregion
 
@@ -326,7 +331,58 @@ namespace EPJ.ViewModels
             }
         }
 
+        public bool IsProjectVisible
+        {
+            get
+            {
+                return _isProjectVisible;
+            }
+            set
+            {
+                _isProjectVisible = value;
+                NotifyOfPropertyChange(() => IsProjectVisible);
+            }
+        }
+
+        public bool IsExpandedCommentVisible
+        {
+            get
+            {
+                return _isExpandedCommentVisible;
+            }
+            set
+            {
+                _isExpandedCommentVisible = value;
+                NotifyOfPropertyChange(() => IsExpandedCommentVisible);
+            }
+        }
+
         public bool CanAcceptChildren { get; set; }
+
+        public DateTime PreviewCommentSubmitionDate
+        {
+            get
+            {
+                return _previewCommentSubmitionDate;
+            }
+            set
+            {
+                _previewCommentSubmitionDate = value;
+                NotifyOfPropertyChange(() => PreviewCommentSubmitionDate);
+            }
+        }
+        public string PreviewCommentContent
+        {
+            get
+            {
+                return _previewCommentContent;
+            }
+            set
+            {
+                _previewCommentContent = value;
+                NotifyOfPropertyChange(() => PreviewCommentContent);
+            }
+        }
 
         public ObservableCollection<ITask> ProjectTasks { get; set; }
 
@@ -352,6 +408,7 @@ namespace EPJ.ViewModels
         public ICommand ShowInExplorerCommand { get; set; }
         public ICommand EditFileCommand { get; set; }
         public ICommand DeleteFileCommand { get; set; }
+        public ICommand ExpandCommentCommand { get; set; }
 
         #endregion
 
@@ -676,6 +733,29 @@ namespace EPJ.ViewModels
             ShowAddNotePanel();
         }
 
+        public void ExpandCommentView (object param)
+        {
+            if (param == null)
+            {
+                ChangeCommentView();
+                _editableComment = null;
+                return;
+            }
+            if (_editableComment == null) ChangeCommentView();
+
+            _editableComment = (Comment)param;
+            PreviewCommentSubmitionDate = _editableComment.SubmitionDate;
+            PreviewCommentContent = _editableComment.Content;
+            
+           
+        }
+
+        private void ChangeCommentView ()
+        {
+            IsExpandedCommentVisible = IsProjectVisible;
+            IsProjectVisible = !IsProjectVisible;
+        }
+
         public void EditComment (object param)
         {
             _editableComment = (Comment)param;
@@ -709,7 +789,16 @@ namespace EPJ.ViewModels
         {
             foreach (var file in files)
             {
-                FileAttributes attr = File.GetAttributes(file);
+                FileAttributes attr = 0;
+                try
+                {
+                   attr = File.GetAttributes(file);
+                }
+                catch (FileNotFoundException e)
+                {
+                    MessageBox.Show("Sorry, coulnd't drop file. It might not exist");
+                    return;
+                }
                 IComponent component;
                 if (attr.HasFlag(FileAttributes.Directory)) component = new RelatedFolder(file);
                 else component = new RelatedFile(file);

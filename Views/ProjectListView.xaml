@@ -124,7 +124,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto" MinHeight="30"/>
-                                    <RowDefinition Height="15"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
                                 <!-- Project name -->
@@ -201,8 +201,21 @@
                                 <!-- Progress bar -->
                                 <Grid Grid.Row="2" Grid.ColumnSpan="3">
 
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Progress text -->
+                                    <TextBlock Text="{Binding Progress, StringFormat=' {0}%'}" 
+                                               Foreground="Gray" 
+                                               HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center"/>
+
                                     <!-- Progress bar -->
-                                    <ProgressBar Value="{Binding Progress}" Background="#F2F2F2" BorderThickness="0">
+                                    <ProgressBar Value="{Binding Progress}" Grid.Row="1"
+                                                 Background="#F2F2F2" 
+                                                 BorderThickness="0">
                                         <ProgressBar.Foreground>
                                             <LinearGradientBrush EndPoint="1,0" StartPoint="0.0, 0">
                                                 <GradientStop Color="#90caf9" Offset="0"/>
@@ -211,8 +224,7 @@
                                         </ProgressBar.Foreground>
                                     </ProgressBar>
 
-                                    <!-- Progress text -->
-                                    <TextBlock Text="{Binding Progress, StringFormat=' {0}%'}" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                   
                                 </Grid>
                             </Grid>
 
