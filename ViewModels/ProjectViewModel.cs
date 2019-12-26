@@ -36,6 +36,7 @@ namespace EPJ.ViewModels
             DeleteFileCommand = new RelayCommand(DeleteFile);
             ShowInExplorerCommand = new RelayCommand(ShowInExplorer);
             ExpandCommentCommand = new RelayCommand(ExpandCommentView);
+            DisableAddFolderViewCommand = new RelayCommand(DisableAddFolderView);
             InitializeProject();
             ShowFolderContent(_projectPath);
         }
@@ -409,6 +410,7 @@ namespace EPJ.ViewModels
         public ICommand EditFileCommand { get; set; }
         public ICommand DeleteFileCommand { get; set; }
         public ICommand ExpandCommentCommand { get; set; }
+        public ICommand DisableAddFolderViewCommand { get; set; }
 
         #endregion
 
@@ -472,7 +474,7 @@ namespace EPJ.ViewModels
             else
             {
                 var index = RelatedFiles.IndexOf(_editableComponent);
-                _editableComponent.Name = newFolderName;
+                _editableComponent.Rename(newFolderName);
                 RelatedFiles.Insert(index, _editableComponent);
                 RelatedFiles.RemoveAt(index + 1);
                 _editableComponent = null;
@@ -494,6 +496,11 @@ namespace EPJ.ViewModels
 
             CanNavigateBack = false;
             Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{component.ComponentPath.Substring(1)}");
+        }
+
+        private void DisableAddFolderView (object param)
+        {
+            Console.WriteLine("Disable");
         }
 
         private void EditFile (object param)
@@ -692,6 +699,7 @@ namespace EPJ.ViewModels
 
         #endregion
 
+        
         #region Notes
 
         private void GetComments ()
@@ -756,6 +764,17 @@ namespace EPJ.ViewModels
             IsProjectVisible = !IsProjectVisible;
         }
 
+        public void EditPreviewComment ()
+        {
+            var index = Notes.IndexOf(_editableComment);
+            _editableComment.Content = PreviewCommentContent;
+            Notes.Insert(index, _editableComment);
+            Notes.RemoveAt(index + 1);
+            DataBase.UpdateComment(_editableComment);
+            _editableComment = null;
+            ChangeCommentView();
+        }
+
         public void EditComment (object param)
         {
             _editableComment = (Comment)param;
@@ -765,9 +784,13 @@ namespace EPJ.ViewModels
 
         public void DeleteComment (object param)
         {
-            var comment = (Comment)param;
-            DataBase.DeleteComment(comment);
-            Notes.Remove(comment);
+            MessageBoxResult result = MessageBox.Show("Do you want to delete this Comment?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                var comment = (Comment)param;
+                DataBase.DeleteComment(comment);
+                Notes.Remove(comment);
+            }
         }
 
         #endregion
@@ -837,6 +860,11 @@ namespace EPJ.ViewModels
 
         public void BackToProjectList ()
         {
+            if (_editableComment != null)
+            {
+                ExpandCommentView(null);
+                return;
+            }
             ProjectListViewModel lg = new ProjectListViewModel();
             var parentConductor = (Conductor<object>)(this.Parent);
             parentConductor.ActivateItem(lg);

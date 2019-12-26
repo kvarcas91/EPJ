@@ -74,6 +74,15 @@ namespace EPJ.Models
             File.Move(ComponentPath, fullFileDestination);
         }
 
+        public void Rename(string newName)
+        {
+            var parent = Directory.GetParent(ComponentPath);
+            var destination = $"{parent}{Path.DirectorySeparatorChar}{newName}{Extention}";
+            File.Move(ComponentPath, destination);
+            ComponentPath = destination;
+            Name = newName;
+        }
+
         #endregion
     }
 }

@@ -43,5 +43,14 @@ namespace EPJ.Models
             var destinationDirectorry = $"{destination}{Path.DirectorySeparatorChar}{Name}";
             Directory.Move(ComponentPath, destinationDirectorry);
         }
+
+        public void Rename (string newName)
+        {
+            var parent = Directory.GetParent(ComponentPath);
+            var destination = ($"{parent}{Path.DirectorySeparatorChar}{newName}");
+            Directory.Move(ComponentPath, destination);
+            ComponentPath = destination;
+            Name = newName;
+        }
     }
 }

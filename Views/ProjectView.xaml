@@ -148,11 +148,11 @@
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                       Margin="0 10 0 0" 
                       AllowDrop="True"
+                      VerticalAlignment="Stretch"
                       PreviewMouseLeftButtonDown="ListViewPreviewMouseLeftButtonDown"
                       MouseMove="FileListView_MouseMove"
                       DragEnter="FileListView_DragEnter"
                       Drop="FileListView_Drop"
-                      
                       ItemsSource="{Binding RelatedFiles}"
                       Visibility="{Binding IsFileListVisible, Converter={StaticResource boolToVisibility}}">
                 <ListView.ItemTemplate>
@@ -304,10 +304,7 @@
                 <StackPanel Orientation="Vertical"  Margin="10"
                             Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
 
-                    <StackPanel Orientation="Vertical" Grid.Row="2" Grid.Column="0"
-                           Grid.ColumnSpan="2">
-
-                        <TextBox x:Name="Description" 
+                    <TextBox x:Name="Description" MaxHeight="200"
                      MinWidth="280" BorderThickness="0" FontSize="14"
                      TextWrapping="Wrap" TextAlignment="Justify"
                      materialDesign:HintAssist.Hint="Description"  
@@ -315,20 +312,17 @@
                                  
                      VerticalScrollBarVisibility="Auto" SpellCheck.IsEnabled="True"
                      VerticalContentAlignment="Top">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="LostFocus">
-                                    <i:InvokeCommandAction Command="{Binding Path=DescriptionLostFocusCommand}"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="LostFocus">
+                                <i:InvokeCommandAction Command="{Binding Path=DescriptionLostFocusCommand}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
 
-                            <TextBox.InputBindings>
-                                <KeyBinding Command="{Binding DescriptionLostFocusCommand}" Key="Return" />
-                                <KeyBinding Command="{Binding DescriptionLostFocusCommand}" Key="Enter" />
-                            </TextBox.InputBindings>
-                        </TextBox>
-
-                    </StackPanel>
-
+                        <TextBox.InputBindings>
+                            <KeyBinding Command="{Binding DescriptionLostFocusCommand}" Key="Return" />
+                            <KeyBinding Command="{Binding DescriptionLostFocusCommand}" Key="Enter" />
+                        </TextBox.InputBindings>
+                    </TextBox>
 
                     <Separator Background="#2196F3"/>
 
@@ -513,7 +507,8 @@
                 <TextBox Grid.Row="2" Grid.ColumnSpan="2" TextWrapping="Wrap"
                          TextAlignment="Justify"
                          Text="{Binding PreviewCommentContent, Mode=TwoWay}"/>
-                <Button Grid.Row=" 3" Margin="10" Grid.Column="0" Grid.ColumnSpan="2"
+                <Button x:Name="EditPreviewComment"
+                    Grid.Row=" 3" Margin="10" Grid.Column="0" Grid.ColumnSpan="2"
                         Content="Commit"/>
             </Grid>
             
@@ -626,9 +621,10 @@
       
                                 <Separator Grid.Row="1"/>
 
-                                <TextBlock Text="{Binding Content}"
+                                <TextBlock Text="{Binding Content, Converter={StaticResource trimTextConverter}}"
                                            Grid.Row="2" Margin="10 0 0 0"
-                                   TextWrapping="Wrap" TextAlignment="Justify"/>
+                                   TextWrapping="Wrap" TextAlignment="Justify"
+                                           />
                             </Grid>
                         </materialDesign:Card>
                         

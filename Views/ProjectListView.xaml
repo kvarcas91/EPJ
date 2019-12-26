@@ -247,6 +247,7 @@
                     </Setter>
                 </Style>
             </ListView.ItemContainerStyle>
+           
         </ListView>
     </Grid>
 </UserControl>

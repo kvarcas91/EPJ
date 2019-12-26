@@ -13,9 +13,9 @@ namespace EPJ
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var text = (string)value;
-            if (text.Length > 600)
+            if (text.Length > 200)
             {
-                var trimmedText = $"{text.Substring(0, 297)}...";
+                var trimmedText = $"{text.Substring(0, 197)}...";
                 return trimmedText;
             }
 
