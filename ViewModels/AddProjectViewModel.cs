@@ -14,14 +14,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
-using GongSolutions.Wpf.DragDrop;
 using System.Diagnostics;
 using System.Reflection;
 using EPJ.Models;
 
 namespace EPJ.ViewModels
 {
-    public class AddProjectViewModel : Screen, IDropTarget
+    public class AddProjectViewModel : Screen
     {
 
         #region Public Constructors
@@ -471,43 +470,29 @@ namespace EPJ.ViewModels
 
         #region DropFile
 
-        public void DragOver(IDropInfo dropInfo)
+
+
+        public void OnDrop(IComponent sourceItem, IComponent destinationItem)
         {
-            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
-            dropInfo.Effects = dragFileList.Any(item =>
-            {
-                IsDropping = true;
-                IsFileListVisible = false;
-              
-                var extension = Path.GetExtension(item);
-                return extension != null;
-            }) ? DragDropEffects.Copy : DragDropEffects.None;
+            if (Object.Equals(sourceItem, destinationItem)) return;
+            if (destinationItem is IFile) return;
+
+            sourceItem.Move(destinationItem.ComponentPath);
+            ShowFolderContent(_currentPath);
         }
 
-        public void Drop(IDropInfo dropInfo)
+        public void OnDropOuterFile(string[] files)
         {
-            IsDropping = false;
-            IsFileListVisible = true;
-
-            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
-            dropInfo.Effects = dragFileList.Any(item =>
+            foreach (var file in files)
             {
+                FileAttributes attr = File.GetAttributes(file);
                 IComponent component;
-                var extension = Path.GetExtension(item);
-                var newPath = $"{_currentPath}/{Path.GetFileName(item)}";
-                Directory.Move(item, newPath);
-                if (String.IsNullOrEmpty(extension))
-                {
-                    component = new RelatedFolder(newPath);
-                }
-                else
-                {
-                    component = new RelatedFile(newPath);
-                }
-               
-                RelatedFiles.Add(component);
-                return extension != null;
-            }) ? DragDropEffects.Copy : DragDropEffects.None;
+                if (attr.HasFlag(FileAttributes.Directory)) component = new RelatedFolder(file);
+                else component = new RelatedFile(file);
+                component.Move(_currentPath);
+                ShowFolderContent(_currentPath);
+            }
+
         }
 
 

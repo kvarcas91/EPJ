@@ -1,7 +1,6 @@
 ﻿using Caliburn.Micro;
 using EPJ.Models;
 using EPJ.Utilities;
-using GongSolutions.Wpf.DragDrop;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -628,6 +627,12 @@ namespace EPJ.ViewModels
             DataBase.UpdateProject((Project)_project);
         }
 
+        public void Archive ()
+        {
+            _project.IsArchived = !_project.IsArchived;
+            DataBase.UpdateProject((Project)_project);
+        }
+
         #endregion
 
         #region Notes
@@ -700,6 +705,20 @@ namespace EPJ.ViewModels
             ShowFolderContent(CurrentPath);
         }
 
+        public void OnDropOuterFile (string[] files)
+        {
+            foreach (var file in files)
+            {
+                FileAttributes attr = File.GetAttributes(file);
+                IComponent component;
+                if (attr.HasFlag(FileAttributes.Directory)) component = new RelatedFolder(file);
+                else component = new RelatedFile(file);
+                component.Move(CurrentPath);
+                ShowFolderContent(CurrentPath);
+            }
+            
+        }
+
         public void OnDropTask(ITask source, ITask destination)
         {
             var startIndex = ProjectTasks.IndexOf(source);
@@ -725,69 +744,6 @@ namespace EPJ.ViewModels
 
         #endregion
 
-
-        /*
-        #region Drag and Drop
-
-          public void DragOver(IDropInfo dropInfo)
-        {
-            
-            try
-            {
-            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
-            dropInfo.Effects = dragFileList.Any(item =>
-            {
-
-                var extension = Path.GetExtension(item);
-                return extension != null;
-            }) ? DragDropEffects.Copy : DragDropEffects.None;
-
-            }
-            catch
-            {
-                var dragFileList = (IComponent)dropInfo.Data;
-                dropInfo.Effects = dragFileList != null ? DragDropEffects.Copy : DragDropEffects.None;
-            };
-            
-        }
-
-        public void Drop(IDropInfo dropInfo)
-        {
-            try
-            {
-                var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
-                dropInfo.Effects = dragFileList.Any(item =>
-                {
-                    dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
-                    IComponent component;
-                    var extension = Path.GetExtension(item);
-                    var newPath = $"{_currentPath}/{Path.GetFileName(item)}";
-                    Directory.Move(item, newPath);
-                    if (String.IsNullOrEmpty(extension))
-                    {
-                        component = new RelatedFolder(newPath);
-                    }
-                    else
-                    {
-                        component = new RelatedFile(newPath);
-                    }
-                    RelatedFiles.Add(component);
-                    return extension != null;
-                }) ? DragDropEffects.Copy : DragDropEffects.None;
-            }
-            catch
-            {
-                var component = (IComponent)dropInfo.Data;
-                //var target = (IComponent)dropInfo.TargetItem;
-                Console.WriteLine($"sourse: {component.ComponentPath}");
-                
-                //Console.WriteLine($"destination: {target.ComponentPath}");
-            }
-        }
-
-        #endregion
-
-    */
         #region Navigation
 
         public void BackToProjectList ()

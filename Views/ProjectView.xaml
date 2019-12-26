@@ -390,7 +390,6 @@
                           PreviewMouseLeftButtonDown="ListViewPreviewMouseLeftButtonDown"
                           MouseMove="projectTaskList_MouseMove"
                           DragEnter="projectTaskList_DragEnter"
-                          DragOver="projectTaskList_DragOver"
                           Drop="projectTaskList_Drop">
                     <ListView.ItemTemplate>
                         <DataTemplate>

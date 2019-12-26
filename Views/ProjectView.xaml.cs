@@ -5,6 +5,7 @@ using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,27 +27,12 @@ namespace EPJ.Views
     public partial class ProjectView : UserControl
     {
 
-        //ListViewDragDropManager<IComponent> fileDragManager;
         Point startPoint;
         int startIndex = -1;
 
         public ProjectView()
         {
             InitializeComponent();
-            //Loaded += ProjectView_Loaded;
-        }
-
-        void ProjectView_Loaded (object sender, RoutedEventArgs e)
-        {
-            //fileDragManager = new ListViewDragDropManager<IComponent>(this.FileListView);
-
-            //this.fileDragManager.ProcessDrop += OnDrop;
-          
-            //this.FileListView.DragEnter += OnListViewDragEnter;
-            //this.FileListView.Drop += OnListViewDrop;
-          
-
-
         }
 
         private void ListViewPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -86,8 +72,14 @@ namespace EPJ.Views
 
         private void FileListView_Drop(object sender, DragEventArgs e)
         {
-
-            if (startIndex < 0) return;         
+            /**
+             * Checks if item has been droped from within the list or outside
+             */
+            if (startIndex < 0)
+            {
+                OuterFileDrop(sender, e);
+                return;
+            }
 
             if (e.Data.GetDataPresent("componentItem") && sender == e.Source)
             {
@@ -95,15 +87,23 @@ namespace EPJ.Views
                 ListViewItem listViewItem = FindAnchestor.Find<ListViewItem>((DependencyObject)e.OriginalSource);
                 if (listViewItem == null)
                 {
+                    startIndex = -1;
                     e.Effects = DragDropEffects.None;
                     return;
                 }
 
                 IComponent component = (IComponent)listView.ItemContainerGenerator.ItemFromContainer(listViewItem);
                 IComponent source = (IComponent)FileListView.Items.GetItemAt(startIndex);
-
+                startIndex = -1;
                 ((ProjectViewModel)this.DataContext).OnDrop(source, component);
             }
+        }
+
+        private void OuterFileDrop (object sender, DragEventArgs e)
+        {
+            Console.WriteLine("OuterFileDrop");
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            ((ProjectViewModel)this.DataContext).OnDropOuterFile(files);
         }
 
 
