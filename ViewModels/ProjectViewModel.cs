@@ -36,7 +36,6 @@ namespace EPJ.ViewModels
             DeleteFileCommand = new RelayCommand(DeleteFile);
             ShowInExplorerCommand = new RelayCommand(ShowInExplorer);
             ExpandCommentCommand = new RelayCommand(ExpandCommentView);
-            DisableAddFolderViewCommand = new RelayCommand(DisableAddFolderView);
             InitializeProject();
             ShowFolderContent(_projectPath);
         }
@@ -70,6 +69,12 @@ namespace EPJ.ViewModels
         private bool _isExpandedCommentVisible = false;
         private DateTime _previewCommentSubmitionDate;
         private string _previewCommentContent;
+        private bool _isProjectInfoPanelVisible = true;
+        private bool _isAddContributorPanelVisible = false;
+        private bool _isAddNewContributorPanelVisible = false;
+        private bool _isAllContributorListVisible = false;
+        private bool _isContributorPanelVisible = true;
+        private bool _isCommentPanelVisible = true;
 
         #endregion
 
@@ -385,9 +390,87 @@ namespace EPJ.ViewModels
             }
         }
 
+        public bool IsProjectInfoPanelVisible
+        {
+            get
+            {
+                return _isProjectInfoPanelVisible;
+            }
+            set
+            {
+                _isProjectInfoPanelVisible = value;
+                NotifyOfPropertyChange(() => IsProjectInfoPanelVisible);
+            }
+        }
+
+        public bool IsAddContributorPanelVisible
+        {
+            get
+            {
+                return _isAddContributorPanelVisible;
+            }
+            set
+            {
+                _isAddContributorPanelVisible = value;
+                NotifyOfPropertyChange(() => IsAddContributorPanelVisible);
+            }
+        }
+        public bool IsAddNewContributorPanelVisible
+        {
+            get
+            {
+                return _isAddNewContributorPanelVisible;
+            }
+            set
+            {
+                _isAddNewContributorPanelVisible = value;
+                NotifyOfPropertyChange(() => IsAddNewContributorPanelVisible);
+            }
+        }
+
+        public bool IsAllContributorListVisible
+        {
+            get
+            {
+                return _isAllContributorListVisible;
+            }
+            set
+            {
+                _isAllContributorListVisible = value;
+                NotifyOfPropertyChange(() => IsAllContributorListVisible);
+            }
+        }
+
+        public bool IsContributorPanelVisible
+        {
+            get
+            {
+                return _isContributorPanelVisible;
+            }
+            set
+            {
+                _isContributorPanelVisible = value;
+                NotifyOfPropertyChange(() => IsContributorPanelVisible);
+            }
+        }
+
+        public bool IsCommentPanelVisible
+        {
+            get
+            {
+                return _isCommentPanelVisible;
+            }
+            set
+            {
+                _isCommentPanelVisible = value;
+                NotifyOfPropertyChange(() => IsCommentPanelVisible);
+            }
+        }
+
         public ObservableCollection<ITask> ProjectTasks { get; set; }
 
         public ObservableCollection<IComponent> RelatedFiles { get; set; } = new ObservableCollection<IComponent>();
+        public ObservableCollection<IContributor> ProjectContributors { get; set; }
 
         public ObservableCollection<Comment> Notes { get; set; }
 
@@ -410,7 +493,6 @@ namespace EPJ.ViewModels
         public ICommand EditFileCommand { get; set; }
         public ICommand DeleteFileCommand { get; set; }
         public ICommand ExpandCommentCommand { get; set; }
-        public ICommand DisableAddFolderViewCommand { get; set; }
 
         #endregion
 
@@ -425,6 +507,7 @@ namespace EPJ.ViewModels
             Priority = _project.Priority;
             GetTasks();
             GetComments();
+            GetContributors();
         }
 
         private void ResetNewTaskProperties()
@@ -496,12 +579,7 @@ namespace EPJ.ViewModels
 
             CanNavigateBack = false;
             Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{component.ComponentPath.Substring(1)}");
-        }
-
-        private void DisableAddFolderView (object param)
-        {
-            Console.WriteLine("Disable");
-        }
+        } 
 
         private void EditFile (object param)
         {
@@ -566,6 +644,11 @@ namespace EPJ.ViewModels
         {
             ResetNewTaskProperties();
             ShowAddTaskPanel();
+        }
+
+        public void ExpandTaskPanel ()
+        {
+            IsProjectInfoPanelVisible = !IsProjectInfoPanelVisible;
         }
 
         public void ShowAddTaskPanel() => IsAddTaskPanelVisible = !IsAddTaskPanelVisible;
@@ -699,9 +782,12 @@ namespace EPJ.ViewModels
 
         #endregion
 
-        
         #region Notes
 
+        public void ExpandCommentPanel()
+        {
+            IsCommentPanelVisible = !IsCommentPanelVisible;
+        }
         private void GetComments ()
         {
             Notes = new ObservableCollection<Comment>(DataBase.GetProjectComments(_project.ID));
@@ -794,6 +880,20 @@ namespace EPJ.ViewModels
         }
 
         #endregion
+
+        #region Contributors 
+
+        public void ExpandContributorsPanel ()
+        {
+            IsContributorPanelVisible = !IsContributorPanelVisible;
+        }
+
+        private void GetContributors ()
+        {
+            ProjectContributors = new ObservableCollection<IContributor>(DataBase.GetProjectContributors(_project.ID));
+        }
+
+        #endregion //Contributors
 
         #endregion
 

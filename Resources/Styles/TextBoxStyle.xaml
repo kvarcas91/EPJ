@@ -11,5 +11,10 @@
     <Style x:Key="TextBoxStyle" TargetType="{x:Type TextBox}">
         <Setter Property="materialDesign:HintAssist.IsFloating" Value="True"/>
     </Style>
+
+    <Style x:Key="AddContributorTextBox" TargetType="{x:Type TextBox}" BasedOn="{StaticResource TextBoxStyle}">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Margin" Value="5"/>
+    </Style>
     
 </ResourceDictionary>

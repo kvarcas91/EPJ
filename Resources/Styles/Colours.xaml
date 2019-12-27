@@ -17,7 +17,8 @@
     <Color x:Key="ForegroundLight">#ffffff</Color>
     <SolidColorBrush x:Key="ForegroudLightBrush" Color="{StaticResource ForegroundLight}"/>
 
-    
+    <Color x:Key="AccentColor">#2196F3</Color>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
 
     <!-- Priority colours -->
     <Color x:Key="PriorityLow">#FFA800</Color>

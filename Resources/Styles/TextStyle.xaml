@@ -34,12 +34,35 @@
         <Setter Property="FontStyle" Value="Italic"/>
     </Style>
 
+    <!-- New in use -->
     <Style x:Key="ProjectDescriptionTrimmed" TargetType="{x:Type TextBlock}">
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="Margin" Value="20, 0, 20, 20"/>
         <Setter Property="VerticalAlignment" Value="Top"/>
         <Setter Property="TextAlignment" Value="Justify"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <Style x:Key="Headers" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+
+    <Style x:Key="ContributorFullNameInList" TargetType="{x:Type TextBlock}">
+        <Setter Property="Margin" Value="4"/>
+        <Setter Property="TextAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+
+    <Style x:Key="InitialsStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="0 -2 0 0"/>
     </Style>
 
 </ResourceDictionary>

@@ -123,7 +123,7 @@
             </StackPanel>
 
             <TextBlock Grid.Row="2" Text="{Binding CurrentPath}"
-                       FontSize="10"/>
+                       FontSize="10" ToolTip="{Binding CurrentPath}"/>
 
             <Grid Grid.Row="3"
                 Visibility="{Binding IsAddFilePanelVisible, Mode=TwoWay, 
@@ -245,6 +245,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -302,6 +303,7 @@
 
                 <!-- Project information -->
                 <StackPanel Orientation="Vertical"  Margin="10"
+                            Visibility="{Binding IsProjectInfoPanelVisible, Converter={StaticResource boolToVisibility}}"
                             Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
 
                     <TextBox x:Name="Description" MaxHeight="200"
@@ -326,20 +328,38 @@
 
                     <Separator Background="#2196F3"/>
 
-                    <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0"
-                            Grid.ColumnSpan="2">
-                        <TextBlock x:Name="Tasks" 
+                </StackPanel>
+
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+ 
+                        <TextBlock x:Name="Tasks" Grid.Column="0"
                            FontSize="20" Text="Tasks" FontWeight="Bold" Margin="10"/>
                         <Button x:Name="ShowAddTaskPanel" Background="Transparent"
+                                Grid.Column="1"
                                 BorderThickness="0" ToolTip="Add new task">
                             <materialDesign:PackIcon Kind="AddCircleOutline" Foreground="Black"
                                                      Width="20" Height="20"/>
                         </Button>
-                    </StackPanel>
+                    <Button x:Name="ExpandTaskPanel" Background="Transparent"
+                            Grid.Column="2" HorizontalAlignment="Right"
+                            BorderThickness="0" ToolTip="Expand Task View">
+                        <materialDesign:PackIcon Kind="CircleExpand" Foreground="Black"
+                                                 Width="20" Height="20"/>
+                    </Button>
 
-
+                    <!-- Add Task Panel -->
                     <Border BorderThickness="4" BorderBrush="{Binding TaskPriority, Converter={StaticResource priorityColorConverter}, Mode=TwoWay}"
-                             Visibility="{Binding IsAddTaskPanelVisible, Mode=TwoWay,Converter={StaticResource boolToVisibility}}">
+                             Visibility="{Binding IsAddTaskPanelVisible, Mode=TwoWay,Converter={StaticResource boolToVisibility}}"
+                            Grid.Row="1" Grid.ColumnSpan="3">
                         <StackPanel Orientation="Vertical" Margin="10">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -355,9 +375,9 @@
                                 <TextBox x:Name="TaskContent" FontSize="12" Grid.Row="1"
                             materialDesign:HintAssist.Hint="Task" TextWrapping="Wrap"
                             materialDesign:HintAssist.IsFloating="True"/>
-                               
+
                             </Grid>
-                           
+
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="Priority  " Margin="10" VerticalAlignment="Center"/>
                                 <ComboBox SelectedIndex="1" Margin=" 10"
@@ -370,15 +390,14 @@
                             <Button x:Name="SaveTask" Content="Submit" Margin="10"/>
                         </StackPanel>
                     </Border>
-
-                </StackPanel>
+                </Grid>
 
                 <!-- Task list -->
                 <ListView x:Name="projectTaskList"
                     ItemsSource="{Binding ProjectTasks}" 
                           Style="{StaticResource ListView}"
                           HorizontalContentAlignment="Stretch"
-                          Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                          Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                           AllowDrop="True"
                           PreviewMouseLeftButtonDown="ListViewPreviewMouseLeftButtonDown"
                           MouseMove="projectTaskList_MouseMove"
@@ -517,123 +536,368 @@
         <GridSplitter Grid.Row="1" Grid.Column="3"
                       Width="5" HorizontalAlignment="Stretch" />
 
-        <!-- Comments -->
-        <Grid Grid.Row="1" Grid.Column="4" Background="White"
+       <!-- Contributors and Comments -->
+        <Grid Grid.Row="1" Grid.Column="4" 
+              Background="White"
               Margin="10">
 
             <Grid.RowDefinitions>
+                <!-- Contributors row -->
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <!-- Comments row -->
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Header -->
-            <StackPanel Grid.Row="0" Grid.Column="0" 
-                       Margin="10">
-                <TextBlock Text="Comments" FontSize="16" FontWeight="Bold" Margin="10"/>
-                <Separator/>
-            </StackPanel>
-
-            
-            <!-- Add Note panel -->
-            <Grid Grid.Row="1">
+            <!-- Contributors -->
+            <Grid Grid.Row="0" Margin="10">
+                
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
+                    <!-- Header and expandable button row -->
                     <RowDefinition Height="Auto"/>
+                    <!-- Separator Row -->
                     <RowDefinition Height="Auto"/>
+                    <!-- Body -->
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Button x:Name="ShowAddNotePanel" Grid.Row="0"
-                    Content="Add Comment"/>
 
-                <materialDesign:Card Grid.Row="1" Margin="10"
-                                     Visibility="{Binding IsAddCommentPanelVisible, 
-                    Converter={StaticResource boolToVisibility}}">
+                <!--  Header and expandable button -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <!-- Header row -->
+                        <ColumnDefinition Width="*"/>
+                        <!-- Expandalbe button row -->
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
+                    <!-- Header -->
+                    <TextBlock Text="Contributors" 
+                               Grid.Column="0"
+                               Style="{StaticResource Headers}"/>
 
-                    <Grid Grid.Row="1" Margin="10">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+                    <!-- Expandable button -->
+                    <Button x:Name="ExpandContributorsPanel"
+                            Grid.Column="1"
+                            Style="{StaticResource ExpandButton}"
+                            ToolTip="Expand Contributors View">
+                        <materialDesign:PackIcon Kind="CircleExpand"/>
+                    </Button>
+                </Grid>
 
-                        <TextBox Text="{Binding CommentContent, Mode=TwoWay}"
-                            materialDesign:HintAssist.Hint="Comment"
-                               materialDesign:HintAssist.IsFloating="True"
-                                   TextWrapping="Wrap" TextAlignment="Justify"/>
+                <!-- Separates Header and body -->
+                <Separator Grid.Row="1" 
+                           Background="{StaticResource AccentBrush}"
+                           Margin="0 5 0 5"/>
 
-                        <Button x:Name="AddComment" Grid.Row="1" Margin="10"
-                                ToolTip="Add new comment">
-                            <materialDesign:PackIcon Kind="AddCircleOutline"
-                                                     Width="24" Height="24"/>
-                        </Button>
-                    </Grid>
-                </materialDesign:Card>
-            </Grid>
+                <!-- Contributors Body -->
+                <Grid Grid.Row="2"
+                      Visibility="{Binding IsContributorPanelVisible,
+                                           Converter={StaticResource boolToVisibility}}">
 
-            <ListView x:Name="noteListView" ItemsSource="{Binding Notes}"
-                      Grid.Row="2" Style="{StaticResource ListView}"
-                      HorizontalContentAlignment="Stretch">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <materialDesign:Card
+                    <Grid.RowDefinitions>
+                        <!-- Show 'Add Contributor' button -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Body -->
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Show 'Add Contributor' Panel -->
+                    <Button x:Name="ShowContributorList"
+                            Grid.Row="0">
+                        <materialDesign:PackIcon Kind="AddCircleOutline"
+                                                 Width="24"
+                                                 Height="24"/>
+                    </Button>
+
+                    <!-- All available Contributors Panel-->
+                    <materialDesign:Card Grid.Row="1"
+                                         Margin="5"
+                                         Visibility="{Binding IsAddContributorPanelVisible,
+                                                      Mode=TwoWay,
+                                                      Converter={StaticResource boolToVisibility}}">
+                        
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <!-- Add New Contributor Button -->
+                                <RowDefinition Height="Auto"/>
+                                <!-- All Contributors list and Add New -->
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
                             
-                            Tag="{Binding RelativeSource={RelativeSource 
-                                                        Mode=FindAncestor, 
-                                                        AncestorType={x:Type UserControl}}}">
-                            <materialDesign:Card.ContextMenu>
-                                <ContextMenu>
-                                    <!-- Options -->
+                            <!-- Add New Contributor Button-->
+                            <Button x:Name="ShowAddNewContributorPanel"
+                                    Grid.Row="0"
+                                    Content="Add New"/>
 
-                                    <MenuItem Header="Edit" Command="{
-                                                    Binding Path=PlacementTarget.Tag.DataContext.EditCommentCommand,
-                                                    RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
-                                                    CommandParameter="{Binding}"/>
-                                    <MenuItem Header="Expand" Command="{
-                                                    Binding Path=PlacementTarget.Tag.DataContext.ExpandCommentCommand,
-                                                    RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
-                                                    CommandParameter="{Binding}"/>
-                                    <MenuItem Header="Delete" Command="{
-                                                    Binding Path=PlacementTarget.Tag.DataContext.DeleteCommentCommand,
-                                                    RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
-                                                    CommandParameter="{Binding}"/>
-                                </ContextMenu>
-                            </materialDesign:Card.ContextMenu>
-                            <materialDesign:Card.InputBindings>
-                                <MouseBinding Gesture="LeftDoubleClick"
-                                          Command="{Binding ElementName=noteListView, Path= DataContext.ExpandCommentCommand}"
-                                          CommandParameter="{Binding}"/>
-                            </materialDesign:Card.InputBindings>
-                            <Grid Margin="5" Background="Transparent">
+                            <!-- Add New Panel -->
+                            <Grid Grid.Row="1"
+                                  Visibility="{Binding IsAddNewContributorPanelVisible,
+                                               Mode=TwoWay,
+                                               Converter={StaticResource boolToVisibility}}">
+
                                 <Grid.RowDefinitions>
+                                    <!-- FirstName -->
                                     <RowDefinition Height="Auto"/>
+                                    <!-- LastName -->
                                     <RowDefinition Height="Auto"/>
+                                    <!-- Confirm -->
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
 
-                                <TextBlock Text="{Binding SubmitionDate, Converter={local:DateToStringConverter}}" 
-                                           FontSize="10"
-                                           FontStyle="Italic"/>
-      
-                                <Separator Grid.Row="1"/>
+                                <!-- First Name -->
+                                <TextBox x:Name="FirstName"
+                                         Grid.Row="0"
+                                         Margin="5"
+                                         FontSize="12"
+                                         materialDesign:HintAssist.Hint="First Name*"
+                                         materialDesign:HintAssist.IsFloating="True"/>
 
-                                <TextBlock Text="{Binding Content, Converter={StaticResource trimTextConverter}}"
-                                           Grid.Row="2" Margin="10 0 0 0"
-                                   TextWrapping="Wrap" TextAlignment="Justify"
-                                           />
+                                <!-- Last Name -->
+                                <TextBox x:Name="LastName"
+                                         Grid.Row="1"
+                                         Margin="5"
+                                         FontSize="12"
+                                         materialDesign:HintAssist.Hint="Last Name*"
+                                         materialDesign:HintAssist.IsFloating="True"/>
+                                
+                                <!-- Confirm Button -->
+                                <Button x:Name="AddNewContributor"
+                                        Grid.Row="2"
+                                        Margin="5"
+                                        HorizontalAlignment="Center"
+                                        Content="Add"/>
                             </Grid>
-                        </materialDesign:Card>
+
+                            <!-- All Contributors List -->
+                            <ListView x:Name="allContributorsListView"
+                                      Grid.Row="1"
+                                      ItemsSource="{Binding AllContributors}"
+                                      Visibility="{Binding IsAllContributorListVisible,
+                                                   Mode=TwoWay,
+                                                   Converter={StaticResource boolToVisibility}}">
+
+                                <!-- Item Template -->
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <!-- Add Contributor -->
+                                                <ColumnDefinition Width="Auto"/>
+                                                <!-- Contributor Full Name -->
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Add Contributor Button -->
+                                            <Button Grid.Column="0"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    VerticalAlignment="Center"
+                                                    HorizontalAlignment="Center"
+                                                    Command="{Binding ElementName=allContributorsListView,
+                                                              Path=DataContext.AddContributorCommand}"
+                                                    CommandParameter="{Binding}">
+                                                <materialDesign:PackIcon Kind="AddCircleOutline"
+                                                                         Width="20"
+                                                                         Height="20"
+                                                                         Foreground="{Binding InitialColor}"/>
+                                            </Button>
+
+                                            <!-- Full Name -->
+                                            <TextBlock Grid.Column="1"
+                                                       Style="{StaticResource ContributorFullNameInList}"
+                                                       Text="{Binding FullName}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+
+                                <!-- Disable hover effect -->
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                                    <ContentPresenter />
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                            </ListView>
+                        </Grid>
+                    </materialDesign:Card>
+                    
+                    <!-- Added Contributors List -->
+                    <ListView x:Name="AddedContributorsList"
+                              Grid.Row="1"
+                              Margin="0 5 0 0"
+                              ItemsSource="{Binding ProjectContributors}"
+                              Visibility="{Binding IsAddedContributorListVisible,
+                                           Mode=TwoWay,
+                                           Converter={StaticResource boolToVisibility}}">
                         
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-            
-            
-            
+                        <!-- Item Template -->
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="2"
+                                      ToolTip="{Binding FullName}">
+                                    <Ellipse Width="20" 
+                                             Height="20" 
+                                             Fill="{Binding InitialColor}"/>
+                                    <TextBlock Text="{Binding Initials}"
+                                               Style="{StaticResource InitialsStyle}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+
+                        <!-- Item orientation -->
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+
+                        <!-- Disable hover effect -->
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                            <ContentPresenter />
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                    
+                </Grid>
+                
+            </Grid>
+
+            <!-- Comments -->
+            <Grid Grid.Row="1" Margin="10 0 10 10">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <!-- Header and expandable button row -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Separator Row -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Body -->
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!--  Header and expandable button -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <!-- Header row -->
+                        <ColumnDefinition Width="*"/>
+                        <!-- Expandalbe button row -->
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Header -->
+                    <TextBlock Text="Comments" 
+                               Grid.Column="0"
+                               Style="{StaticResource Headers}"/>
+
+                    <!-- Expandable button -->
+                    <Button x:Name="ExpandCommentPanel"
+                            Grid.Column="1"
+                            Style="{StaticResource ExpandButton}"
+                            ToolTip="Expand Comment View">
+                        <materialDesign:PackIcon Kind="CircleExpand"/>
+                    </Button>
+                </Grid>
+
+                <!-- Separates Header and body -->
+                <Separator Grid.Row="1" 
+                           Background="{StaticResource AccentBrush}"
+                           Margin="0 5 0 5"/>
+                
+                <!-- Comment Body -->
+                <Grid Grid.Row="2"
+                      Visibility="{Binding IsCommentPanelVisible,
+                                   Converter={StaticResource boolToVisibility}}">
+
+                    <Grid.RowDefinitions>
+                      
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Show 'Add Comment' panel -->
+                    <Button x:Name="ShowAddNotePanel"
+                            Grid.Row="0"
+                            Content="Add Comment"/>
+                    
+                    <!-- New Comment Panel -->
+                    <materialDesign:Card Grid.Row="1"
+                                         Margin="10"
+                                         Visibility="{Binding IsAddCommentPanelVisible,
+                                                      Converter={StaticResource boolToVisibility}}">
+
+                        <Grid>
+                            
+                            <Grid.RowDefinitions>
+                                <!-- Comment Header -->
+                                <RowDefinition Height="Auto"/>
+                                <!-- Comment Content -->
+                                <RowDefinition Height="Auto"/>
+                                <!-- Submit button -->
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Comment Header -->
+                            <TextBox Grid.Row="0"
+                                     Text="{Binding CommentHeader,
+                                            Mode=TwoWay}"
+                                     materialDesign:HintAssist.Hint="Header"
+                                     materialDesign:HintAssist.IsFloating="True"
+                                     TextWrapping="Wrap"
+                                     TextAlignment="Justify"/>
+
+                            <!-- Comment Content -->
+                            <TextBox Grid.Row="1"
+                                     Text="{Binding CommentContent,
+                                            Mode=TwoWay}"
+                                     materialDesign:HintAssist.Hint="Comment*"
+                                     materialDesign:HintAssist.IsFloating="True"
+                                     TextWrapping="Wrap"
+                                     TextAlignment="Justify"/>
+                            
+                            <!-- Add Comment -->
+                            <Button x:Name="AddComment"
+                                    Grid.Row="2"
+                                    Margin="10"
+                                    ToolTip="Add new comment"
+                                    Content="Add"/>
+
+                        </Grid>
+                    </materialDesign:Card>
+                    
+                    <!-- Comment List View -->
+                    <ListView x:Name="noteListView"
+                              Grid.Row="1"
+                              Margin="0 5 0 0"
+                              HorizontalContentAlignment="Stretch"
+                              ItemsSource="{Binding Notes}">
+                        
+                        <!-- Item Template -->
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        
+                    </ListView>
+                </Grid>
+                
+            </Grid>
         </Grid>
 
         
