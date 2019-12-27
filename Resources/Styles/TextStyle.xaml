@@ -65,4 +65,16 @@
         <Setter Property="Margin" Value="0 -2 0 0"/>
     </Style>
 
+    <Style x:Key="CommentDate" TargetType="{x:Type TextBlock}">
+        <Setter Property="Margin" Value="4"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontStyle" Value="Italic"/>
+    </Style>
+
+    <Style x:Key="CommentContent" TargetType="{x:Type TextBlock}">
+        <Setter Property="Margin" Value="10 0 0 0"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="TextAlignment" Value="Justify"/>
+    </Style>
+
 </ResourceDictionary>

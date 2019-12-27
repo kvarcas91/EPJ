@@ -440,7 +440,7 @@ namespace EPJ.ViewModels
 
         public void BackToProjectList()
         {
-            Directory.Delete(_projectPath);
+            Directory.Delete(_projectPath, true);
             ProjectListViewModel lg = new ProjectListViewModel();
             var parentConductor = (Conductor<object>)(this.Parent);
             parentConductor.ActivateItem(lg);
