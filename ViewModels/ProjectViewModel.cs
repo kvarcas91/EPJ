@@ -36,6 +36,7 @@ namespace EPJ.ViewModels
             DeleteFileCommand = new RelayCommand(DeleteFile);
             ShowInExplorerCommand = new RelayCommand(ShowInExplorer);
             ExpandCommentCommand = new RelayCommand(ExpandCommentView);
+            AddSubTaskCommand = new RelayCommand(AddSubTask);
             InitializeProject();
             ShowFolderContent(_projectPath);
         }
@@ -43,6 +44,7 @@ namespace EPJ.ViewModels
 
         #region Private Properties
 
+        private bool _isSubTask = false;
         private string _currentPath;
         private string _projectPath;
         private readonly IProject _project;
@@ -493,6 +495,7 @@ namespace EPJ.ViewModels
         public ICommand EditFileCommand { get; set; }
         public ICommand DeleteFileCommand { get; set; }
         public ICommand ExpandCommentCommand { get; set; }
+        public ICommand AddSubTaskCommand { get; set; }
 
         #endregion
 
@@ -682,8 +685,17 @@ namespace EPJ.ViewModels
                     DueDate = TaskDueDate,
                     Priority = TaskPriority
                 };
-                DataBase.InsertTask(mTask, _project.ID);
-                ProjectTasks.Add(mTask);
+                if (_isSubTask)
+                {
+                    DataBase.InsertSubTask(mTask, _updateableTask.ID);
+
+                    _updateableTask.SubTasks.Add(mTask);
+                }
+                else
+                {
+                    DataBase.InsertTask(mTask, _project.ID);
+                    ProjectTasks.Add(mTask);
+                }
                 ShowAddTaskPanel();
             }
             
@@ -697,6 +709,13 @@ namespace EPJ.ViewModels
             TaskContent = _updateableTask.Content;
             TaskDueDate = _updateableTask.DueDate;
             TaskPriority = _updateableTask.Priority;
+        }
+
+        public void AddSubTask (object param)
+        {
+            _updateableTask = (Task)param;
+            _isSubTask = true;
+            ShowAddTaskPanel();
         }
 
         public void DeleteTask(object param)

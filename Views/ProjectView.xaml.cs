@@ -122,7 +122,8 @@ namespace EPJ.Views
                 ITask component = (ITask)listView.ItemContainerGenerator.ItemFromContainer(listViewItem);
                 if (component == null) return;
                 Console.WriteLine($"Mouse move: {component.Content}");
-                startIndex = projectTaskList.SelectedIndex;
+                //startIndex = projectTaskList.SelectedIndex;
+                
                 DataObject dragData = new DataObject("taskItem", component);
                 DragDrop.DoDragDrop(listViewItem, dragData, DragDropEffects.Copy | DragDropEffects.Move);
             }

@@ -393,100 +393,164 @@
                 </Grid>
 
                 <!-- Task list -->
-                <ListView x:Name="projectTaskList"
-                    ItemsSource="{Binding ProjectTasks}" 
-                          Style="{StaticResource ListView}"
-                          HorizontalContentAlignment="Stretch"
+                <TreeView x:Name="projectTaskList"
                           Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                          AllowDrop="True"
-                          PreviewMouseLeftButtonDown="ListViewPreviewMouseLeftButtonDown"
-                          MouseMove="projectTaskList_MouseMove"
-                          DragEnter="projectTaskList_DragEnter"
-                          Drop="projectTaskList_Drop">
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <materialDesign:Card 
-                               Background="{Binding IsCompleted, Converter={StaticResource backgroundConverter}}">
+                          ItemsSource="{Binding ProjectTasks}"
+                          HorizontalContentAlignment="Stretch">
+
+                    <TreeView.ItemTemplate>
+                        <!-- Main Tasks -->
+                        <HierarchicalDataTemplate ItemsSource="{Binding SubTasks}"
+                                                  DataType="{x:Type local:Task}">
+                            
+                            <!-- Body -->
+                            <materialDesign:Card Background="{Binding IsCompleted, 
+                                                              Converter={StaticResource backgroundConverter}}">
+                                
                                 <Grid>
                                     <Grid.RowDefinitions>
+                                        <!-- Task information -->
+                                        <RowDefinition Height="Auto"/>
+                                        
+                                        <!-- Task Contributors -->
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
+
                                     <Grid.ColumnDefinitions>
+                                        <!-- Priority -->
                                         <ColumnDefinition Width="Auto"/>
+                                        
+                                        <!-- Task Content -->
                                         <ColumnDefinition Width="*"/>
+                                        
+                                        <!-- Task Deadline -->
                                         <ColumnDefinition Width="Auto"/>
+                                        
+                                        <!-- Task Controls -->
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    
-                                    <!-- Priority -->
-                                    <TextBlock Style="{StaticResource Priority}"
-                                               Grid.Row="0"
-                                         Background="{Binding Priority, Converter={StaticResource priorityColorConverter}}">
-                                         <ItemsControl 
-                                         ItemsSource="{Binding Priority, Converter={StaticResource priorityToStringConverter}}"/>
-                                    </TextBlock>
-                                    
-                                    <!-- description -->
-                                    <CheckBox Grid.Column="1" Grid.Row="0" x:Name="IsCompleted"
-                                              IsChecked="{Binding IsCompleted}"
-                                               Command="{Binding ElementName=projectTaskList, Path= DataContext.IsTaskCompletedCommand}"
-                                          CommandParameter="{Binding}">
 
-                                        <TextBlock Text="{Binding Content}" 
-                                                   TextAlignment="Justify" TextWrapping="Wrap"
-                                                    TextDecorations="{Binding IsCompleted, Converter={StaticResource textDecorationConverter}}"/>
+                                    <!-- Priority -->
+                                    <TextBlock  Grid.Column="0"
+                                                Style="{StaticResource Priority}"
+                                                Background="{Binding Priority, Converter={StaticResource priorityColorConverter}}">
+                                         <ItemsControl 
+                                             ItemsSource="{Binding Priority, Converter={StaticResource priorityToStringConverter}}"/>
+                                    </TextBlock>
+
+                                    <!-- Task Description -->
+                                    <CheckBox Grid.Row="0" Grid.Column="1"
+                                              x:Name="IsCompleted"
+                                              IsChecked="{Binding IsCompleted}"
+                                              Command="{Binding ElementName=projectTaskList,
+                                                        Path=DataContext.IsTaskCompletedCommand}"
+                                              CommandParameter="{Binding}">
+                                        <TextBlock Text="{Binding Content}"
+                                                   TextAlignment="Justify"
+                                                   TextWrapping="Wrap"
+                                                   TextDecorations="{Binding IsCompleted,
+                                                                     Converter={StaticResource textDecorationConverter}}"/>
                                     </CheckBox>
-                                    
+
                                     <!-- Deadline -->
-                                    <StackPanel Orientation="Vertical" Grid.Column="2" Grid.Row="0"
-                                                HorizontalAlignment="Right"
-                                                VerticalAlignment="Center" Margin="10 0 10 0">
-                                        <TextBlock Text="DueTo" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="{Binding DueDate, Converter={StaticResource dateConverter}}" 
+                                    <Grid Grid.Row="0" Grid.Column="2" Grid.RowSpan="2"
+                                          VerticalAlignment="Center">
+                                        
+                                        <Grid.RowDefinitions>
+                                            <!-- Due to -->
+                                            <RowDefinition Height="Auto"/>
+                                            
+                                            <!-- Deadline -->
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Due to -->
+                                        <TextBlock Grid.Row="0"
+                                                   Text="Due To"
                                                    HorizontalAlignment="Center"/>
-                                    </StackPanel>
-                                    
-                                    <!-- Settings -->
+                                        
+                                        <!-- Deadline -->
+                                        <TextBlock Grid.Row="1"
+                                                   Text="{Binding DueDate,
+                                                          Converter={StaticResource dateConverter}}"
+                                                   HorizontalAlignment="Center"/>
+                                        
+                                    </Grid>
+                               
+                                    <!-- Controls -->
                                     <Grid Grid.Column="3">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="*"/>
                                             <RowDefinition Height="*"/>
+                                            <RowDefinition Height="*"/>
                                         </Grid.RowDefinitions>
 
+                                        <!-- OnMouseOver visibility -->
                                         <Grid.Style>
                                             <Style TargetType="{x:Type Grid}">
                                                 <Setter Property="Visibility" Value="Hidden" />
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type ListViewItem}},Path=IsMouseOver}" Value="True">
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type TreeViewItem}},Path=IsMouseOver}" Value="True">
                                                         <Setter Property="Visibility" Value="Visible" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Grid.Style>
-                                        
-                                        <Button Grid.Row="0" Background="Transparent" BorderThickness="0"
-                                                Command="{Binding ElementName=projectTaskList, Path=DataContext.EditTaskCommand}"
+
+                                        <!-- Add -->
+                                        <Button Grid.Row="0" 
+                                                Style="{StaticResource ControlButton}"
+                                                Command="{Binding ElementName=projectTaskList, 
+                                                                  Path=DataContext.AddSubTaskCommand}"
                                                 CommandParameter="{Binding}"
-                                                ToolTip="Edit task">
-                                            <materialDesign:PackIcon Kind="Edit" Foreground="Black"
-                                                     Width="16" Height="16"/>
+                                                ToolTip="Add sub-task">
+                                            <materialDesign:PackIcon Kind="Add" 
+                                                                     Foreground="Black"
+                                                                     Width="16" Height="16"/>
                                         </Button>
 
-                                        <Button Grid.Row="1" Background="Transparent" BorderThickness="0"
-                              
-                                                Command="{Binding ElementName=projectTaskList, Path=DataContext.DeleteTaskCommand}"
+                                        <!-- Edit -->
+                                        <Button Grid.Row="1" 
+                                                Style="{StaticResource ControlButton}"
+                                                Command="{Binding ElementName=projectTaskList, 
+                                                                  Path=DataContext.EditTaskCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="Edit task">
+                                            <materialDesign:PackIcon Kind="Edit" 
+                                                                     Foreground="Black"
+                                                                     Width="16" Height="16"/>
+                                        </Button>
+
+                                        <!-- Delete -->
+                                        <Button Grid.Row="2" 
+                                                Style="{StaticResource ControlButton}"
+                                                Command="{Binding ElementName=projectTaskList, 
+                                                          Path=DataContext.DeleteTaskCommand}"
                                                 CommandParameter="{Binding}"
                                                 ToolTip="Delete task">
-                                            <materialDesign:PackIcon Kind="Delete" Foreground="Black"
-                                                     Width="16" Height="16"/>
+                                            <materialDesign:PackIcon Kind="Delete" 
+                                                                     Foreground="Black"
+                                                                     Width="16" Height="16"/>
                                         </Button>
+
                                     </Grid>
-                                   
+
                                 </Grid>
                             </materialDesign:Card>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                            
+                            
+                            
+                            <!-- SubTasks -->
+                            <HierarchicalDataTemplate.ItemTemplate>
+                                <HierarchicalDataTemplate>
+                                    <Label Content="{Binding Content}"/>
+                                </HierarchicalDataTemplate>
+                            </HierarchicalDataTemplate.ItemTemplate>
+
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                    
+                </TreeView>
 
             </Grid>
 

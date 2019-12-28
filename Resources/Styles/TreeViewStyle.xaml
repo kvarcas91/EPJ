@@ -1,0 +1,227 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:EPJ"
+                       xmlns:System="clr-namespace:System;assembly=mscorlib"
+             xmlns:StyleAlias="clr-namespace:EPJ.Utilities"
+                      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary>
+            <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
+                            ObjectType="{x:Type System:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="StyleAlias:Priority"/>
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+
+            <BooleanToVisibilityConverter x:Key="boolToVisibility"/>
+            <local:ImageConverter x:Key="imageConverter"/>
+            <local:DateToStringConverter x:Key="dateConverter"/>
+            <local:BoolToTextDecorationConverter x:Key="textDecorationConverter"/>
+            <local:BoolToTaskBackgroundConverter x:Key="backgroundConverter"/>
+        </ResourceDictionary>
+    </ResourceDictionary.MergedDictionaries>
+    
+    <Style TargetType="TreeViewItem">
+        <Style.Resources>
+            <LinearGradientBrush x:Key="ItemAreaBrush" StartPoint="0.5, 0" EndPoint="0.5, 1" Opacity="0.3">
+                <GradientStop Color="#EEFFFFFF" Offset="0" />
+                <GradientStop Color="#22000000" Offset="1" />
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="SelectedItemAreaBrush" StartPoint="0.5, 0" EndPoint="0.5, 1" Opacity="0.4">
+                <GradientStop Color="#22000000" Offset="0" />
+                <GradientStop Color="#EEFFFFFF" Offset="1" />
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="ItemBorderBrush" StartPoint="0.5, 0" EndPoint="0.5, 1">
+                <GradientStop Color="LightGray" Offset="0" />
+                <GradientStop Color="Gray" Offset="1" />
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="SelectedItemBorderBrush" StartPoint="0.5, 0" EndPoint="0.5, 1">
+                <GradientStop Color="Gray" Offset="0" />
+                <GradientStop Color="LightGray" Offset="1" />
+            </LinearGradientBrush>
+            <DropShadowBitmapEffect x:Key="DropShadowEffect" />
+        </Style.Resources>
+
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
+        <Setter Property="BorderThickness" Value="0"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TreeViewItem">
+                    <Grid Margin="8,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- This Border contains elements which display 
+                 the content and child items of the TreeViewItem. -->
+                        <materialDesign:Card Name="Bd"
+                               Background="{Binding IsCompleted, Converter={StaticResource backgroundConverter}}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Priority -->
+                                <TextBlock Style="{StaticResource Priority}"
+                                               Grid.Row="0"
+                                         Background="{Binding Priority, Converter={StaticResource priorityColorConverter}}">
+                                         <ItemsControl 
+                                         ItemsSource="{Binding Priority, Converter={StaticResource priorityToStringConverter}}"/>
+                                </TextBlock>
+
+                                <!-- description -->
+                                <CheckBox Grid.Column="1" Grid.Row="0" x:Name="IsCompleted"
+                                              IsChecked="{Binding IsCompleted}"
+                                               Command="{Binding ElementName=projectTaskList, Path= DataContext.IsTaskCompletedCommand}"
+                                          CommandParameter="{Binding}">
+
+                                    <TextBlock Text="{Binding Content}" 
+                                                   TextAlignment="Justify" TextWrapping="Wrap"
+                                                    TextDecorations="{Binding IsCompleted, Converter={StaticResource textDecorationConverter}}"/>
+                                </CheckBox>
+
+                                <!-- Deadline -->
+                                <StackPanel Orientation="Vertical" Grid.Column="2" Grid.Row="0"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center" Margin="10 0 10 0">
+                                    <TextBlock Text="DueTo" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding DueDate, Converter={StaticResource dateConverter}}" 
+                                                   HorizontalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- Settings -->
+                                <Grid Grid.Column="3">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <Grid.Style>
+                                        <Style TargetType="{x:Type Grid}">
+                                            <Setter Property="Visibility" Value="Hidden" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type ListViewItem}},Path=IsMouseOver}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
+
+                                    <Button Grid.Row="0" Background="Transparent" BorderThickness="0"
+                                                Command="{Binding ElementName=projectTaskList, Path=DataContext.EditTaskCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="Edit task">
+                                        <materialDesign:PackIcon Kind="Edit" Foreground="Black"
+                                                     Width="16" Height="16"/>
+                                    </Button>
+
+                                    <Button Grid.Row="1" Background="Transparent" BorderThickness="0"
+                              
+                                                Command="{Binding ElementName=projectTaskList, Path=DataContext.DeleteTaskCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="Delete task">
+                                        <materialDesign:PackIcon Kind="Delete" Foreground="Black"
+                                                     Width="16" Height="16"/>
+                                    </Button>
+                                </Grid>
+
+                                <Expander Name="Exp" IsExpanded="{TemplateBinding TreeViewItem.IsExpanded}"
+                                          Grid.Row="1">
+                                    <Expander.Header>
+                                        <!-- Displays the item's header in the Expander. -->
+                                        <ContentPresenter ContentSource="Header" />
+                                    </Expander.Header>
+                                    <!-- Displays the item's children. -->
+                                    <ItemsPresenter />
+                                </Expander>
+
+                                <ContentPresenter Name="CntPres" Grid.Row="2"
+                  ContentSource="Header"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  Visibility="Collapsed" 
+                  />
+
+                            </Grid>
+                        </materialDesign:Card>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <!-- If the TreeViewItem has child items,
+                 show it in an Expander.  Otherwise
+                 hide the Expander and show the hidden
+                 ContentPresenter. -->
+                        <Trigger Property="TreeViewItem.HasItems" Value="false">
+                            <Setter 
+                TargetName="Exp" 
+                Property="Visibility" 
+                Value="Collapsed" />
+                            <Setter 
+                TargetName="CntPres" 
+                Property="Visibility" 
+                Value="Visible" />
+                        </Trigger>
+
+                        <!--When the item is selected in the TreeView, use the 
+                "selected" colors and give it a drop shadow. -->
+                        <Trigger Property="IsSelected" Value="true">
+                            <Setter
+                TargetName="Bd"
+                Property="Panel.Background"                     
+                Value="{StaticResource SelectedItemAreaBrush}" />
+                            <Setter
+                TargetName="Bd"
+                Property="Border.BorderBrush"                     
+                Value="{StaticResource SelectedItemBorderBrush}" />
+                            <Setter
+                TargetName="Bd"
+                Property="TextElement.Foreground"                   
+                Value="{DynamicResource 
+                  {x:Static SystemColors.HighlightTextBrushKey}}" />
+                            <Setter
+                TargetName="Bd"
+                Property="Border.BitmapEffect"                  
+                Value="{StaticResource DropShadowEffect}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <!-- Make each TreeViewItem show it's children 
+         in a StackPanel. If it is a root item then
+         the Orientation will be 'Horizontal', else
+         'Vertical'. -->
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <ItemsPanelTemplate.Resources>
+                        <local:ItemsPanelOrientationConverter x:Key="conv" />
+                    </ItemsPanelTemplate.Resources>
+                    <StackPanel 
+            IsItemsHost="True" 
+            Orientation="{Binding 
+              RelativeSource={x:Static RelativeSource.TemplatedParent}, 
+              Converter={StaticResource conv}}" 
+            />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

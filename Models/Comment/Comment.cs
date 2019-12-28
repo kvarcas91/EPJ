@@ -29,6 +29,8 @@ namespace EPJ
         /// </summary>
         public string Content { get; set; }
 
+        public string Header { get; set; }
+
         #endregion
 
         #region Constructors
