@@ -50,6 +50,7 @@ namespace EPJ
         {
             foreach (var item in subTasks)
             {
+                Console.WriteLine("adding subtask");
                 SubTasks.Add(item);
             }
         }

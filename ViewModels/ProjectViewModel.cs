@@ -641,6 +641,10 @@ namespace EPJ.ViewModels
         private void GetTasks ()
         {
             ProjectTasks = new ObservableCollection<ITask>(DataBase.GetProjectTasks(_project.ID));
+            foreach (var item in ProjectTasks)
+            {
+                Console.WriteLine($"subtask count: {item.SubTasks.Count}");
+            }
         }
 
         private void CloseAddTaskPanel (object param)
@@ -664,7 +668,7 @@ namespace EPJ.ViewModels
         public void SaveTask(string taskContent)
         {
 
-            if (_updateableTask != null)
+            if (_updateableTask != null && !_isSubTask)
             {
                 var index = ProjectTasks.IndexOf(_updateableTask);
                 _updateableTask.Content = TaskContent;
@@ -690,6 +694,7 @@ namespace EPJ.ViewModels
                     DataBase.InsertSubTask(mTask, _updateableTask.ID);
 
                     _updateableTask.SubTasks.Add(mTask);
+                    _isSubTask = false;
                 }
                 else
                 {

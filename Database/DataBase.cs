@@ -163,7 +163,7 @@ namespace EPJ
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
                 var output = connection.Query<Task>(
-                    "SELECT t.ID, t.Content, t.IsCompleted, t.Priority, t.DueDate " +
+                    "SELECT t.ID, t.Content, t.IsCompleted, t.Priority, t.DueDate, t.OrderNumber " +
                     "FROM tasks t " +
                     "INNER JOIN project_tasks p ON p.taskID = t.ID " +
                     $"INNER JOIN projects pr on pr.ID = p.projectID WHERE pr.Id = {projectID} order by t.OrderNumber");
@@ -181,9 +181,9 @@ namespace EPJ
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
                 var output = connection.Query<Task>(
-                    "SELECT s.ID, s.Content, s.IsCompleted, s.Priority, s.DueDate " +
+                    "SELECT s.ID, s.Content, s.IsCompleted, s.Priority, s.DueDate, s.OrderNumber " +
                     "FROM subtasks s " +
-                    "INNER JOIN task_subtasks p ON p.taskID = s.ID " +
+                    "INNER JOIN task_subtasks p ON p.subtaskID = s.ID " +
                     $"INNER JOIN tasks ts on ts.ID = p.taskID WHERE ts.Id = {taskID} order by s.OrderNumber");
                 connection.Dispose();
                 return output.ToList();
@@ -219,7 +219,7 @@ namespace EPJ
             {
                 var order = (ulong)GetCount("subtasks");
                 subTask.OrderNumber = order;
-                var sql = @"insert into tasks (Content, Priority, IsCompleted, DueDate) 
+                var sql = @"insert into subtasks (Content, Priority, IsCompleted, DueDate) 
                             values (@Content, @Priority, @IsCompleted, @DueDate)";
                 connection.Execute(sql,
                                 new
@@ -233,7 +233,17 @@ namespace EPJ
                 connection.Dispose();
 
             }
-            AssignTaskToTheProject(taskID, GetLastRowID("subtasks"));
+            AssignSubTaskToTheTask(taskID, GetLastRowID("subtasks"));
+        }
+
+        private static void AssignSubTaskToTheTask (long taskID, long subtaskID)
+        {
+            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            {
+                connection.Execute("INSERT INTO task_subtasks (taskID, subtaskID) values (@taskID, @subtaskID)",
+                    new { taskID, subtaskID });
+                connection.Dispose();
+            }
         }
 
         private static void AssignTaskToTheProject(long projectID, long taskID)

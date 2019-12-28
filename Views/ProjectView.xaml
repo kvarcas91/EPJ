@@ -543,7 +543,132 @@
                             <!-- SubTasks -->
                             <HierarchicalDataTemplate.ItemTemplate>
                                 <HierarchicalDataTemplate>
-                                    <Label Content="{Binding Content}"/>
+                                    <materialDesign:Card Background="{Binding IsCompleted, 
+                                                              Converter={StaticResource backgroundConverter}}"
+                                                         Margin="10 0 0 0">
+
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <!-- Task information -->
+                                                <RowDefinition Height="Auto"/>
+
+                                                <!-- Task Contributors -->
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <Grid.ColumnDefinitions>
+                                                <!-- Priority -->
+                                                <ColumnDefinition Width="Auto"/>
+
+                                                <!-- Task Content -->
+                                                <ColumnDefinition Width="*"/>
+
+                                                <!-- Task Deadline -->
+                                                <ColumnDefinition Width="Auto"/>
+
+                                                <!-- Task Controls -->
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Priority -->
+                                            <TextBlock  Grid.Column="0"
+                                                Style="{StaticResource Priority}"
+                                                Background="{Binding Priority, Converter={StaticResource priorityColorConverter}}">
+                                         <ItemsControl 
+                                             ItemsSource="{Binding Priority, Converter={StaticResource priorityToStringConverter}}"/>
+                                            </TextBlock>
+
+                                            <!-- Task Description -->
+                                            <CheckBox Grid.Row="0" Grid.Column="1"
+                                              x:Name="IsCompleted"
+                                              IsChecked="{Binding IsCompleted}"
+                                              Command="{Binding ElementName=projectTaskList,
+                                                        Path=DataContext.IsTaskCompletedCommand}"
+                                              CommandParameter="{Binding}">
+                                                <TextBlock Text="{Binding Content}"
+                                                   TextAlignment="Justify"
+                                                   TextWrapping="Wrap"
+                                                           FontSize="10"
+                                                   TextDecorations="{Binding IsCompleted,
+                                                                     Converter={StaticResource textDecorationConverter}}"/>
+                                            </CheckBox>
+
+                                            <!-- Deadline -->
+                                            <Grid Grid.Row="0" Grid.Column="2" Grid.RowSpan="2"
+                                          VerticalAlignment="Center">
+
+                                                <Grid.RowDefinitions>
+                                                    <!-- Due to -->
+                                                    <RowDefinition Height="Auto"/>
+
+                                                    <!-- Deadline -->
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+
+                                                <!-- Due to -->
+                                                <TextBlock Grid.Row="0"
+                                                   Text="Due To"
+                                                           FontSize="10"
+                                                   HorizontalAlignment="Center"/>
+
+                                                <!-- Deadline -->
+                                                <TextBlock Grid.Row="1"
+                                                            FontSize="10"
+                                                   Text="{Binding DueDate,
+                                                          Converter={StaticResource dateConverter}}"
+                                                   HorizontalAlignment="Center"/>
+
+                                            </Grid>
+
+                                            <!-- Controls -->
+                                            <Grid Grid.Column="3">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*"/>
+                                                    <RowDefinition Height="*"/>
+                                                  
+                                                </Grid.RowDefinitions>
+
+                                                <!-- OnMouseOver visibility -->
+                                                <Grid.Style>
+                                                    <Style TargetType="{x:Type Grid}">
+                                                        <Setter Property="Visibility" Value="Hidden" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type TreeViewItem}},Path=IsMouseOver}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Grid.Style>
+
+                                             
+                                                <!-- Edit -->
+                                                <Button Grid.Row="0" 
+                                                Style="{StaticResource ControlButton}"
+                                                Command="{Binding ElementName=projectTaskList, 
+                                                                  Path=DataContext.EditTaskCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="Edit task">
+                                                    <materialDesign:PackIcon Kind="Edit" 
+                                                                     Foreground="Black"
+                                                                     Width="12" Height="12"/>
+                                                </Button>
+
+                                                <!-- Delete -->
+                                                <Button Grid.Row="1" 
+                                                Style="{StaticResource ControlButton}"
+                                                Command="{Binding ElementName=projectTaskList, 
+                                                          Path=DataContext.DeleteTaskCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="Delete task">
+                                                    <materialDesign:PackIcon Kind="Delete" 
+                                                                     Foreground="Black"
+                                                                     Width="12" Height="12"/>
+                                                </Button>
+
+                                            </Grid>
+
+                                        </Grid>
+                                    </materialDesign:Card>
                                 </HierarchicalDataTemplate>
                             </HierarchicalDataTemplate.ItemTemplate>
 
