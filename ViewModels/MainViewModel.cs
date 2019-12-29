@@ -15,7 +15,21 @@ namespace EPJ.ViewModels
             ActivateItem(new ProjectListViewModel());
         }
 
-       
+        #region Public 
+
+        public void NewProject()
+        {
+            ActivateItem(new AddProjectViewModel());
+        }
+
+        public void ProjectList()
+        {
+            ActivateItem(new ProjectListViewModel());
+        }
+
+        
+
+        #endregion //Public 
 
     }
 }

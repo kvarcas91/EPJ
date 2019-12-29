@@ -35,14 +35,14 @@ namespace EPJ
             }
         }
 
-        public static void UpdateProject(IProject project)
+        public static void UpdateProject(Project project)
         {
             using IDbConnection connection = new SQLiteConnection(GetConnectionString());
             connection.Update(project);
             connection.Dispose();
         }
 
-        public static void DeleteProject(IProject project)
+        public static void DeleteProject(Project project)
         {
             using IDbConnection connection = new SQLiteConnection(GetConnectionString());
             connection.Delete(project);
@@ -274,10 +274,17 @@ new { taskID, subtaskID });
             connection.Dispose();
         }
 
-        public static void DeleteTask(Task task)
+        public static void DeleteTask(ITask task)
         {
             using IDbConnection connection = new SQLiteConnection(GetConnectionString());
-            connection.Delete(task);
+            connection.Delete((Task)task);
+            connection.Dispose();
+        }
+
+        public static void DeleteSubTask(ISubTask task)
+        {
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            connection.Delete((SubTask)task);
             connection.Dispose();
         }
 

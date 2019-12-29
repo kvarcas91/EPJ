@@ -99,7 +99,7 @@ namespace EPJ.ViewModels
                                                         MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                var project = (IProject)param;
+                var project = (Project)param;
                 DataBase.DeleteProject(project);
                 Projects.Remove(project);
             }
@@ -107,7 +107,7 @@ namespace EPJ.ViewModels
 
         private void ArchiveProject(object param)
         {
-            var project = (IProject)param;
+            var project = (Project)param;
             project.IsArchived = !project.IsArchived;
             DataBase.UpdateProject(project);
             Getprojects();
@@ -125,17 +125,6 @@ namespace EPJ.ViewModels
         #endregion //ICommand
 
         #endregion //Methods
-
-        #region Public 
-
-        public void LoadAddProjectPage()
-        {
-            AddProjectViewModel lg = new AddProjectViewModel();
-            var parentConductor = (Conductor<object>)(this.Parent);
-            parentConductor.ActivateItem(lg);
-        }
-
-        #endregion //Public 
 
         #region Private
 

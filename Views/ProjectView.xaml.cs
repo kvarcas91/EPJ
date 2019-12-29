@@ -1,5 +1,6 @@
 ﻿using EPJ.Models;
 using EPJ.Models.Components;
+using EPJ.Models.Interfaces;
 using EPJ.Models.Task;
 using EPJ.Utilities;
 using EPJ.ViewModels;
@@ -7,6 +8,7 @@ using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -110,10 +112,77 @@ namespace EPJ.Views
 
         private void TreeView_MouseDown (object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
+            startPoint = e.GetPosition(null);
+        }
+
+        private void TreeView_MouseMove(object sender, MouseEventArgs e)
+        {
+            Point mousePos = e.GetPosition(null);
+            Vector diff = startPoint - mousePos;
+
+            if (e.LeftButton == MouseButtonState.Pressed &&
+                (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
             {
-                startPoint = e.GetPosition(null);
-                Console.WriteLine(startPoint);
+                //TreeView treeView = sender as TreeView;
+                TreeViewItem treeviewItem = FindAnchestor.Find<TreeViewItem>((DependencyObject)e.OriginalSource);
+                if (treeviewItem == null) return;
+                IElement component = (IElement)projectTaskList.ItemContainerGenerator.ItemFromContainer(treeviewItem);
+                if (component == null) return;
+
+                //startIndex = FileListView.SelectedIndex;
+                DataObject dragData = new DataObject("taskItem", component);
+                DragDrop.DoDragDrop(treeviewItem, dragData, DragDropEffects.Copy | DragDropEffects.Move);
+            }
+            else
+            {
+                Console.WriteLine("TreeView_MouseMove failed");
+            }
+        }
+
+        private void TreeView_DragEnter(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent("taskItem") || sender != e.Source)
+            {
+                e.Effects = DragDropEffects.None;
+            }
+            else
+            {
+                Console.WriteLine("TreeView_DragEnter failed");
+            }
+        }
+
+        private void TreeView_Drop(object sender, DragEventArgs e)
+        {
+            var index = -1;
+
+            //if (startIndex < 0) return;
+
+            if (e.Data.GetDataPresent("taskItem"))
+            {
+                //ListView listView = sender as ListView;
+                TreeViewItem treeViewItem = FindAnchestor.Find<TreeViewItem>((DependencyObject)e.OriginalSource);
+                if (treeViewItem == null)
+                {
+                    e.Effects = DragDropEffects.None;
+                    return;
+                }
+                var item = ((ITask)projectTaskList.SelectedItem);
+                startIndex = ((ProjectViewModel)DataContext).ProjectTasks.IndexOf(item);
+
+                IElement component = (IElement)projectTaskList.ItemContainerGenerator.ItemFromContainer(treeViewItem);
+                IElement source = (IElement)projectTaskList.Items.GetItemAt(startIndex);
+                e.Effects = DragDropEffects.Move;
+               
+
+                ((ProjectViewModel)DataContext).OnDropTask(source, component);
+
+                startIndex = -1;
+                index = -1;
+            }
+            else
+            {
+                Console.WriteLine("TreeView_Drop failed");
             }
         }
 

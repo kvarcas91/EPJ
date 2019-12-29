@@ -32,17 +32,6 @@
         <!-- Menu panel -->
         <StackPanel Orientation="Horizontal">
 
-            <!-- Add new project -->
-            <Button x:Name="LoadAddProjectPage"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center"
-                ToolTip="Add new project"
-                    Width="60"
-                    materialDesign:RippleAssist.IsCentered="True">
-                <materialDesign:PackIcon Kind="AddCircleOutline" 
-                                         Width="24" Height="24"/>
-            </Button>
-
             <TextBlock Margin="10, 0, 10, 0" Text="Sort by" VerticalAlignment="Center"/>
 
             <!-- SortBy combo box -->

@@ -400,23 +400,19 @@
                           HorizontalContentAlignment="Stretch"
                           ScrollViewer.CanContentScroll="False"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          Background="Transparent"
                           AllowDrop="True">
-
-                    <TreeView.ItemContainerStyle>
-                        <Style TargetType="{x:Type TreeViewItem}">
-                            <!--<EventSetter Event="TreeViewItem.DragOver"  Handler="treeView_DragOver"/>-->
-                            <!--<EventSetter Event="TreeViewItem.Drop" Handler="treeView_Drop"/>-->
-                            <!--<EventSetter Event="TreeViewItem.MouseMove" Handler="treeView_MouseMove"/>-->
-                            <EventSetter Event="TreeViewItem.MouseDown" Handler="TreeView_MouseDown"/>
-                        </Style>
-                    </TreeView.ItemContainerStyle>
                     <TreeView.ItemTemplate>
                      
                         <HierarchicalDataTemplate ItemsSource="{Binding SubTasks}">
 
                             <!-- Main Tasks -->
                             <materialDesign:Card Background="{Binding IsCompleted, 
-                                                              Converter={StaticResource backgroundConverter}}">
+                                                              Converter={StaticResource backgroundConverter}}"
+                                                 MouseLeftButtonDown="TreeView_MouseDown"
+                                                 MouseMove="TreeView_MouseMove"
+                                                 DragEnter="TreeView_DragEnter"
+                                                 Drop="TreeView_Drop">
                                 
                                 <Grid>
                                     <Grid.RowDefinitions>

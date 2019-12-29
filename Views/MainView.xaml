@@ -7,11 +7,13 @@
         mc:Ignorable="d"
         Background="{StaticResource BackgroundLightBrush}"
         Title="Project management Tool" 
-        Height="700" Width="1000" 
-        MinHeight="700" MinWidth="800"
-        WindowStartupLocation="CenterScreen">
+        Height="700" Width="1100" 
+        MinHeight="700" MinWidth="900"
+        WindowStartupLocation="CenterScreen"
+          xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="10"/>
@@ -23,7 +25,46 @@
             <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
 
-        <ContentControl Grid.Row="1" Grid.Column="1"
+        <Grid Grid.Row="0" Grid.RowSpan="3"
+              Grid.Column="0"
+              Background="{StaticResource AccentBrush}">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <!-- New Project -->
+            <Button x:Name="NewProject"
+                    Grid.Row="0"
+                    VerticalAlignment="Top"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Margin="0 10 0 10"
+                    ToolTip="Create new project">
+                <materialDesign:PackIcon Kind="AddCircleOutline"
+                                         Foreground="White"
+                                         Width="24"
+                                         Height="24"/>
+            </Button>
+
+            <!-- Project List -->
+            <Button x:Name="ProjectList"
+                    Grid.Row="1"
+                    VerticalAlignment="Top"
+                    Background="Transparent"
+                    BorderThickness="0"
+                     Margin="0 10 0 10"
+                    ToolTip="Project List">
+                <materialDesign:PackIcon Kind="FilterList"
+                                         Foreground="White"
+                                         Width="24"
+                                         Height="24"/>
+            </Button>
+
+        </Grid>
+        
+        <ContentControl Grid.Row="1" Grid.Column="2"
             x:Name="ActiveItem"/>
     </Grid>
 </Window>

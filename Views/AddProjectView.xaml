@@ -29,12 +29,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Button x:Name="BackToProjectList" 
-                Grid.Column="0" Grid.Row="0"
-                Width="60"
-                HorizontalAlignment="Left">
-            <materialDesign:PackIcon Kind="ArrowBackCircle" Height="24" Width="24"/>
-        </Button>
+     
 
         <!-- Files -->
         <Grid Grid.Row="1" Grid.Column="0" Background="White"

@@ -28,7 +28,8 @@ namespace EPJ.ViewModels
         {
             _project = project;
             // TODO
-            _projectPath = $".{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}{_project.Header}{Path.DirectorySeparatorChar}";
+            //_projectPath = $".{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}{_project.Header}{Path.DirectorySeparatorChar}";
+            _projectPath = _project.Path;
             FileListItemClickCommand = new RelayCommand(FileListItemClick);
             IsTaskCompletedCommand = new RelayCommand(SetProgress);
             IsSubTaskCompletedCommand = new RelayCommand(SetTaskProgress);
@@ -797,26 +798,42 @@ namespace EPJ.ViewModels
 
         public void DeleteTask(object param)
         {
-            var task = (Task)param;
-            DataBase.DeleteTask(task);
-            ProjectTasks.Remove(task);
+            var task = (IElement)param;
+            if (task is ITask ts)
+            {
+                DataBase.DeleteTask(ts);
+                ProjectTasks.RemoveAt(GetSubTaskParentIndex(task));
+            }
+            if (task is ISubTask subTask)
+            {
+                DataBase.DeleteSubTask(subTask);
+                ProjectTasks[GetSubTaskParentIndex(subTask)].SubTasks.Remove(subTask);
+            }
+           
+           
+        }
+
+        private int GetSubTaskParentIndex (IElement sub)
+        {
+            for (int i = 0; i < ProjectTasks.Count; i++)
+            {
+                for (int j = 0; j < ProjectTasks[i].SubTasks.Count; j++)
+                {
+                    if (Equals(sub, ProjectTasks[i].SubTasks[j]))
+                    {
+                        return i;
+                    }
+                }
+            }
+            return -1;
         }
 
         public void SetTaskProgress (object param)
         {
             var element = (ISubTask)param;
 
-            var taskIndex = -1;
-            for (int i = 0; i < ProjectTasks.Count; i++)
-            {
-                for (int j = 0; j < ProjectTasks[i].SubTasks.Count; j++)
-                {
-                    if (Equals(element, ProjectTasks[i].SubTasks[j]))
-                    {
-                        taskIndex = i;
-                    }
-                }
-            }
+            var taskIndex = GetSubTaskParentIndex(element);
+            
             var task = ProjectTasks[taskIndex];
             var totalSubTaskCount = ProjectTasks[taskIndex].SubTasks.Count;
             var completedSubTaskCount = 0;
@@ -1053,7 +1070,7 @@ namespace EPJ.ViewModels
                 {
                    attr = File.GetAttributes(file);
                 }
-                catch (FileNotFoundException e)
+                catch (FileNotFoundException)
                 {
                     MessageBox.Show("Sorry, coulnd't drop file. It might not exist");
                     return;
@@ -1067,27 +1084,19 @@ namespace EPJ.ViewModels
             
         }
 
-        public void OnDropTask(ITask source, ITask destination)
+        public void OnDropTask(IElement source, IElement destination)
         {
-            var startIndex = ProjectTasks.IndexOf(source);
-            var destinationIndex = ProjectTasks.IndexOf(destination);
+           
+            
+            var startIndex = ProjectTasks.IndexOf((ITask)source);
+            var destinationIndex = ProjectTasks.IndexOf((ITask)destination);
 
-            if (startIndex >= 0 && destinationIndex >= 0)
-            {
-                //Console.WriteLine($"start: {startIndex}; end: {destinationIndex}");
-                ProjectTasks.Move(startIndex, destinationIndex);
-                source.OrderNumber = (uint)destinationIndex;
-                destination.OrderNumber = (uint)startIndex;
-                DataBase.UpdateTask((Task)source);
-                DataBase.UpdateTask((Task)destination);
-            }
+            ProjectTasks.Move(startIndex, destinationIndex);
+            ((ITask)source).OrderNumber = (uint)destinationIndex;
+            ((ITask)destination).OrderNumber = (uint)startIndex;
 
-            //if (Object.Equals(sourceItem, destinationItem)) return;
-
-            //if (destinationItem is IFile) return;
-
-            //sourceItem.Move(destinationItem.ComponentPath);
-            //ShowFolderContent(CurrentPath);
+            DataBase.UpdateTask(source);
+            DataBase.UpdateTask(destination);
         }
 
         #endregion

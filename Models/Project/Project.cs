@@ -40,11 +40,11 @@ namespace EPJ.Models.Project
 
         public string Path { get; set; }
 
+        [Computed]
         public double Progress { get; set; } = 0;
 
         public bool IsArchived { get; set; } = false;
 
-        [Write(false)]
         [Computed]
         public IList<IElement> Comments { get; set; }
 

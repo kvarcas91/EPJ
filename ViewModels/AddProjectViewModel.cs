@@ -310,6 +310,7 @@ namespace EPJ.ViewModels
             _project.DueDate = DueDate;
             _project.Content = Description;
             _project.AddPersons(AddedContributors.ToList());
+           
             DataBase.InsertProject(_project);
             Directory.Move(_projectPath, $"{_allProjectPath}{_project.Header}");
 
