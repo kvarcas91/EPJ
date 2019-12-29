@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EPJ.Models
+namespace EPJ.Models.Interfaces
 {
-    public interface IFile : IComponent
+    public interface IProgressable
     {
 
-        string Extention { get; set; }
+        double Progress { get; set; }
 
     }
 }

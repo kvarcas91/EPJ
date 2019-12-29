@@ -1,5 +1,10 @@
 ﻿using Dapper;
 using Dapper.Contrib.Extensions;
+using EPJ.Models.Comments;
+using EPJ.Models.Interfaces;
+using EPJ.Models.Person;
+using EPJ.Models.Project;
+using EPJ.Models.Task;
 using EPJ.Utilities;
 using System;
 using System.Collections.Generic;
@@ -17,67 +22,58 @@ namespace EPJ
 
         public static void InsertProject(IProject project)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                var order = (ulong)GetCount("projects");
-                project.OrderNumber = order;
-                connection.Execute("insert into projects (Title, Description, Date, DueDate, ProjectPath, Priority, IsArchived) " +
-                                   $"values (@Title, @Description, @Date, @DueDate, @ProjectPath, @Priority, @IsArchived)", project);
-                project.ID = GetLastRowID("projects");
-                Console.WriteLine($"ID: {project.ID }");
-                connection.Dispose();
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            connection.Execute("insert into projects (Header, Content, SubmitionDate, DueDate, Path, Priority, IsArchived) " +
+                               $"values (@Header, @Content, @SubmitionDate, @DueDate, @Path, @Priority, @IsArchived)", project);
+            project.ID = GetLastRowID("projects");
+            Console.WriteLine($"ID: {project.ID }");
+            connection.Dispose();
 
-                foreach (var contributor in project.Contributors)
-                {
-                    AssignContributors(project.ID, contributor.Id);
-                }
+            foreach (var contributor in project.Contributors)
+            {
+                AssignContributors(project.ID, contributor.ID);
             }
         }
 
-        public static void UpdateProject(Project project)
+        public static void UpdateProject(IProject project)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                connection.Update(project);
-                connection.Dispose();
-            }
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            connection.Update(project);
+            connection.Dispose();
         }
 
         public static void DeleteProject(IProject project)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                connection.Delete(project);
-                connection.Dispose();
-            }
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            connection.Delete(project);
+            connection.Dispose();
         }
 
 
-        public static List<Project> GetProjects(ViewType viewType)
+        public static IList<IProject> GetProjects(ViewType viewType)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            var sql = "select * from projects";
+            switch (viewType)
             {
-
-                var sql = "select * from projects";
-                switch (viewType)
-                {
-                    case ViewType.Ongoing:
-                        sql = $"{sql} where IsArchived = '0'";
-                        break;
-                    case ViewType.Archived:
-                        sql = $"{sql} where IsArchived = '1'";
-                        break;
-                }
-                sql = $"{sql} order by OrderNumber";
-                var output = connection.Query<Project>(sql);
-                foreach (var project in output)
-                {
-                    project.Progress = GetProjectprogress(project.ID);
-                    project.AddContributors(GetProjectContributors(project.ID));
-                }
-                connection.Dispose();
-                return output.ToList();
+                case ViewType.Ongoing:
+                    sql = $"{sql} where IsArchived = '0'";
+                    break;
+                case ViewType.Archived:
+                    sql = $"{sql} where IsArchived = '1'";
+                    break;
             }
+            sql = $"{sql} order by OrderNumber";
+            List<Project> output = connection.Query<Project>(sql).ToList();
+
+            foreach (var project in output)
+            {
+                project.Progress = GetProjectprogress(project.ID);
+                project.AddPersons(GetProjectContributors(project.ID));
+                Console.WriteLine(project.ToString());
+            }
+            connection.Dispose();
+            return output.ConvertAll(o => (IProject)o);
         }
 
         private static double GetProjectprogress(long projectID)
@@ -100,102 +96,115 @@ namespace EPJ
 
         #region Contributors
 
-        public static List<Contributor> GetProjectContributors(long projectID)
+        public static IList<IPerson> GetProjectContributors(long projectID)
         {
-
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            List<Contributor> contributors = connection.Query<Contributor>(
+                "SELECT c.ID, c.FirstName, c.LastName " +
+                "FROM contributors c " +
+                "INNER JOIN project_contributors p ON p.contributorID = c.ID " +
+                $"INNER JOIN projects pr on pr.ID = p.projectID WHERE pr.ID = {projectID}").ToList();
+            connection.Dispose();
+            var output = new List<IPerson>();
+            foreach (var contributor in contributors)
             {
-                var output = connection.Query<Contributor>(
-                    "SELECT c.Id, c.FirstName, c.LastName " +
-                    "FROM contributors c " +
-                    "INNER JOIN project_contributors p ON p.contributorID = c.Id " +
-                    $"INNER JOIN projects pr on pr.ID = p.projectID WHERE pr.Id = {projectID}");
-                connection.Dispose();
-                return output.ToList();
+                output.Add(contributor);
             }
+            return output;
         }
 
         public static void InsertContributor(IContributor contributor)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                var sql = @"insert into contributors (FirstName, LastName) values (@FirstName, @LastName)";
-                connection.Execute(sql,
-                                new
-                                {
-                                    contributor.FirstName,
-                                    contributor.LastName,
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            var sql = @"insert into contributors (FirstName, LastName) values (@FirstName, @LastName)";
+            connection.Execute(sql,
+                            new
+                            {
+                                contributor.FirstName,
+                                contributor.LastName,
+                            });
 
-                                });
-
-                connection.Dispose();
-                //return newContributor;
-            }
+            connection.Dispose();
         }
 
         public static void AssignContributors(long pID, long cID)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                connection.Execute("INSERT INTO project_contributors (projectID, contributorID) values (@projectID, @contributorID)",
-                    new { projectID = pID, contributorID = cID });
-                connection.Dispose();
-            }
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            connection.Execute("INSERT INTO project_contributors (projectID, contributorID) values (@projectID, @contributorID)",
+                new { projectID = pID, contributorID = cID });
+            connection.Dispose();
         }
 
-        public static List<Contributor> GetContributors()
+        public static IList<IContributor> GetContributors()
         {
-
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                var output = connection.Query<Contributor>("SELECT * FROM contributors;");
-                connection.Dispose();
-                return output.ToList();
-            }
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            List<Contributor> output = connection.Query<Contributor>("SELECT * FROM contributors;").ToList();
+            connection.Dispose();
+            return output.ConvertAll(o => (IContributor)o);
         }
 
         #endregion
 
         #region Tasks
 
-        public static List<Task> GetProjectTasks(long projectID)
+        public static IList<ITask> GetProjectTasks(long projectID)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            List<Task> output = connection.Query<Task>(
+                "SELECT t.ID, t.Content, t.IsCompleted, t.Priority, t.DueDate, t.OrderNumber " +
+                "FROM tasks t " +
+                "INNER JOIN project_tasks p ON p.taskID = t.ID " +
+                $"INNER JOIN projects pr on pr.ID = p.projectID WHERE pr.ID = {projectID} order by t.OrderNumber").ToList();
+            foreach (var task in output)
             {
-                var output = connection.Query<Task>(
-                    "SELECT t.ID, t.Content, t.IsCompleted, t.Priority, t.DueDate, t.OrderNumber " +
-                    "FROM tasks t " +
-                    "INNER JOIN project_tasks p ON p.taskID = t.ID " +
-                    $"INNER JOIN projects pr on pr.ID = p.projectID WHERE pr.Id = {projectID} order by t.OrderNumber");
-                foreach (var task in output)
-                {
-                    task.AddSubTasks(GetSubTasks(task.ID));
-                }
-                connection.Dispose();
-                return output.ToList();
+                task.AddElements(GetSubTasks(task.ID));
+                task.Progress = GetTaskProgress(task.ID);
+                //task.AddSubTasks(GetSubTasks(task.ID));
             }
+            connection.Dispose();
+            return output.ConvertAll(o => (ITask)o);
         }
 
-        private static List<Task> GetSubTasks(long taskID)
+        private static double GetTaskProgress(long taskID)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
+            var SubTasks = GetSubTasks(taskID);
+            var totalSubTaskCount = SubTasks.Count;
+            if (totalSubTaskCount == 0) return 0;
+            var completedTaskCount = 0;
+            foreach (var task in SubTasks)
             {
-                var output = connection.Query<Task>(
-                    "SELECT s.ID, s.Content, s.IsCompleted, s.Priority, s.DueDate, s.OrderNumber " +
-                    "FROM subtasks s " +
-                    "INNER JOIN task_subtasks p ON p.subtaskID = s.ID " +
-                    $"INNER JOIN tasks ts on ts.ID = p.taskID WHERE ts.Id = {taskID} order by s.OrderNumber");
-                connection.Dispose();
-                return output.ToList();
+                if (((SubTask)task).IsCompleted)
+                {
+                    completedTaskCount++;
+                }
             }
+            return (completedTaskCount * 100) / totalSubTaskCount;
+        }
+
+        private static IList<IElement> GetSubTasks(long taskID)
+        {
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            List<SubTask> tasks = connection.Query<SubTask>(
+                "SELECT s.ID, s.Content, s.IsCompleted, s.Priority, s.DueDate, s.OrderNumber " +
+                "FROM subtasks s " +
+                "INNER JOIN task_subtasks p ON p.subtaskID = s.ID " +
+                $"INNER JOIN tasks ts on ts.ID = p.taskID WHERE ts.ID = {taskID} order by s.OrderNumber").ToList();
+            connection.Dispose();
+            var output = new List<IElement>();
+            foreach (var task in tasks)
+            {
+                output.Add(task);
+            }
+            return output;
         }
 
         public static void InsertTask(ITask task, long projectID)
         {
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
-                var order = (ulong)GetCount("tasks");
+                var order = (uint)GetCount("tasks");
                 task.OrderNumber = order;
+                
                 var sql = @"insert into tasks (Content, Priority, IsCompleted, DueDate) 
                             values (@Content, @Priority, @IsCompleted, @DueDate)";
                 connection.Execute(sql,
@@ -213,11 +222,11 @@ namespace EPJ
             AssignTaskToTheProject(projectID, GetLastRowID("tasks"));
         }
 
-        public static void InsertSubTask(ITask subTask, long taskID)
+        public static void InsertSubTask(ISubTask subTask, long taskID)
         {
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
-                var order = (ulong)GetCount("subtasks");
+                var order = (uint)GetCount("subtasks");
                 subTask.OrderNumber = order;
                 var sql = @"insert into subtasks (Content, Priority, IsCompleted, DueDate) 
                             values (@Content, @Priority, @IsCompleted, @DueDate)";
@@ -238,71 +247,68 @@ namespace EPJ
 
         private static void AssignSubTaskToTheTask (long taskID, long subtaskID)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                connection.Execute("INSERT INTO task_subtasks (taskID, subtaskID) values (@taskID, @subtaskID)",
-                    new { taskID, subtaskID });
-                connection.Dispose();
-            }
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            connection.Execute("INSERT INTO task_subtasks (taskID, subtaskID) values (@taskID, @subtaskID)",
+new { taskID, subtaskID });
+            connection.Dispose();
         }
 
         private static void AssignTaskToTheProject(long projectID, long taskID)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                connection.Execute("INSERT INTO project_tasks (projectID, taskID) values (@projectID, @taskID)",
-                    new { projectID, taskID });
-                connection.Dispose();
-            }
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            connection.Execute("INSERT INTO project_tasks (projectID, taskID) values (@projectID, @taskID)",
+                new { projectID, taskID });
+            connection.Dispose();
         }
 
-        public static void UpdateTask(Task task)
+        public static void UpdateTask(IElement param)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            if (param is Task task)
                 connection.Update(task);
-                connection.Dispose();
-            }
+
+            if (param is SubTask subTask)
+                connection.Update(subTask);
+
+            Console.WriteLine(param.ToString());
+            connection.Dispose();
         }
 
         public static void DeleteTask(Task task)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                connection.Delete(task);
-                connection.Dispose();
-            }
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            connection.Delete(task);
+            connection.Dispose();
         }
 
         #endregion
 
         #region Comments
 
-        public static List<Comment> GetProjectComments (long projectID)
+        public static List<IComment> GetProjectComments (long projectID)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                var sql = $" SELECT c.ID, c.Content, c.SubmitionDate " +
-                    "FROM comments c " +
-                    "INNER JOIN project_comments p ON p.commentID = c.ID " +
-                    $"INNER JOIN projects pr on pr.ID = p.projectID WHERE pr.Id = {projectID}";
-                var output = connection.Query<Comment>(sql).ToList();
-                connection.Dispose();
-                return output;
-            }
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            var sql = $" SELECT c.ID, c.Content, c.SubmitionDate " +
+                        "FROM comments c " +
+                        "INNER JOIN project_comments p ON p.commentID = c.ID " +
+                        $"INNER JOIN projects pr on pr.ID = p.projectID WHERE pr.Id = {projectID}";
+            List<Comment> output = connection.Query<Comment>(sql).ToList();
+            connection.Dispose();
+            return output.ConvertAll(o => (IComment)o); ;
         }
 
         public static void InsertComment(IComment comment, long projectID)
         {
             using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
             {
-                var sql = @"insert into comments (Content, SubmitionDate) 
-                            values (@Content, @SubmitionDate)";
+                var sql = @"insert into comments (Content, SubmitionDate, Header) 
+                            values (@Content, @SubmitionDate, @Header)";
                 connection.Execute(sql,
                                 new
                                 {
                                     comment.Content,
-                                    comment.SubmitionDate
+                                    comment.SubmitionDate,
+                                    comment.Header
                                 });
 
                 connection.Dispose();
@@ -313,72 +319,54 @@ namespace EPJ
 
         private static void AssigCommentToTheProject(long projectID, long commentID)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                connection.Execute("INSERT INTO project_comments (projectID, commentID) values (@projectID, @commentID)",
-                    new { projectID, commentID });
-                connection.Dispose();
-            }
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            connection.Execute("INSERT INTO project_comments (projectID, commentID) values (@projectID, @commentID)",
+                new { projectID, commentID });
+            connection.Dispose();
         }
 
 
-        public static void DeleteComment(Comment comment)
+        public static void DeleteComment(IComment comment)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                connection.Delete(comment);
-                connection.Dispose();
-            }
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            connection.Delete(comment);
+            connection.Dispose();
         }
 
-        public static void UpdateComment (Comment comment)
+        public static void UpdateComment (IComment comment)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                connection.Update(comment);
-                connection.Dispose();
-            }
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            connection.Update(comment);
+            connection.Dispose();
         }
 
         #endregion
 
         private static int GetLastRowID(string table)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                var count = connection.ExecuteScalar<int>($"select seq from sqlite_sequence where name='{table}'");
-                //var count = connection.Query("SELECT COUNT(*) FROM projects;");
-                connection.Dispose();
-                return count;
-            }
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            var count = connection.ExecuteScalar<int>($"select seq from sqlite_sequence where name='{table}'");
+            //var count = connection.Query("SELECT COUNT(*) FROM projects;");
+            connection.Dispose();
+            return count;
         }
 
         public static int GetCount (string table)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                var count = connection.ExecuteScalar<int>($"SELECT COUNT(*) FROM {table}");
-                //var count = connection.Query("SELECT COUNT(*) FROM projects;");
-                connection.Dispose();
-                return count;
-            }
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            var count = connection.ExecuteScalar<int>($"SELECT COUNT(*) FROM {table}");
+            //var count = connection.Query("SELECT COUNT(*) FROM projects;");
+            connection.Dispose();
+            return count;
         }
         public static int GetCount (string table, string rowName, string param)
         {
-            using (IDbConnection connection = new SQLiteConnection(GetConnectionString()))
-            {
-                var count = connection.ExecuteScalar<int>($"SELECT COUNT(*) FROM {table} WHERE {rowName} = '{param}'");
-                //var count = connection.Query("SELECT COUNT(*) FROM projects;");
-                connection.Dispose();
-                return count;
-            }
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            var count = connection.ExecuteScalar<int>($"SELECT COUNT(*) FROM {table} WHERE {rowName} = '{param}'");
+            //var count = connection.Query("SELECT COUNT(*) FROM projects;");
+            connection.Dispose();
+            return count;
         }
-
-      
-
-    
-
-      
 
         private static string GetConnectionString (string id = "Default")
         {

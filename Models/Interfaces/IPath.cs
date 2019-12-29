@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EPJ.Models
+namespace EPJ.Models.Interfaces
 {
-    public interface IFolder : IComponent
+    public interface IPath
     {
 
-
+        string Path { get; set; }
 
     }
 }

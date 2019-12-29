@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using EPJ.Models.Project;
 using EPJ.Utilities;
 using System;
 using System.Collections.Generic;
@@ -15,36 +16,30 @@ namespace EPJ.ViewModels
         
         public ProjectListViewModel()
         {
-            //for (int i = 0; i < 100; i++)
-            //{
-                Getprojects();
-            //}
-
-            //mAddProjectCommand = new RelayCommand(ShowMessage);
-            ShowListItemSettingsCommand = new RelayCommand(ShowListItemSettings);
+           
+            Getprojects();
+          
             ShowProjectCommand = new RelayCommand(ShowProject);
             DeleteProjectCommand = new RelayCommand(Deleteproject);
             ArchiveProjectCommand = new RelayCommand(ArchiveProject);
         }
 
 
-        #endregion
+        #endregion //Constructors
 
         #region Properties
 
-       // public ICommand mAddProjectCommand { get; set; }
+        #region Private
 
-       public ICommand ShowListItemSettingsCommand { get; set; }
+        private ObservableCollection<IProject> _projects;
 
-        public ICommand ShowProjectCommand { get; set; }
-        public ICommand DeleteProjectCommand { get; set; }
-        public ICommand ArchiveProjectCommand { get; set; }
+        private ViewType _selectedViewType = ViewType.Ongoing;
 
+        #endregion //Private
 
-        /// <summary>
-        /// List of all projects
-        /// </summary>
-        public ObservableCollection<Project> Projects
+        #region Public
+
+        public ObservableCollection<IProject> Projects
         {
             get
             {
@@ -57,9 +52,6 @@ namespace EPJ.ViewModels
             }
         }
 
-        private ObservableCollection<Project> _projects;
-
-        private ViewType _selectedViewType = ViewType.Ongoing;
         public ViewType SelectedViewType
         {
             get
@@ -82,24 +74,47 @@ namespace EPJ.ViewModels
             }
         }
 
-        #endregion
 
-       public void LoadAddProjectPage ()
+        #endregion //Public
+
+        #region ICommand
+
+        public ICommand ShowProjectCommand { get; set; }
+        public ICommand DeleteProjectCommand { get; set; }
+        public ICommand ArchiveProjectCommand { get; set; }
+
+        #endregion //ICommand
+
+        #endregion //Properties
+
+        #region Methods
+
+        #region ICommand
+
+        private void Deleteproject(object param)
         {
-            //MessageBox.Show("test");
-            AddProjectViewModel lg = new AddProjectViewModel();
-            var parentConductor = (Conductor<object>)(this.Parent);
-            parentConductor.ActivateItem(lg);
-            
+            MessageBoxResult result = MessageBox.Show("Do you want to delete this project?", 
+                                                        "Warning", 
+                                                        MessageBoxButton.YesNo, 
+                                                        MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                var project = (IProject)param;
+                DataBase.DeleteProject(project);
+                Projects.Remove(project);
+            }
         }
 
-        public void ShowListItemSettings (object param)
+        private void ArchiveProject(object param)
         {
-            MessageBox.Show("Labas");
             var project = (IProject)param;
+            project.IsArchived = !project.IsArchived;
+            DataBase.UpdateProject(project);
+            Getprojects();
+            //Projects.Remove(project);
         }
 
-        public void ShowProject (object param)
+        public void ShowProject(object param)
         {
             var project = (IProject)param;
             ProjectViewModel lg = new ProjectViewModel(project);
@@ -107,32 +122,29 @@ namespace EPJ.ViewModels
             parentConductor.ActivateItem(lg);
         }
 
-        public void Getprojects ()
+        #endregion //ICommand
+
+        #endregion //Methods
+
+        #region Public 
+
+        public void LoadAddProjectPage()
         {
-            Projects = new ObservableCollection<Project>(DataBase.GetProjects(SelectedViewType));
+            AddProjectViewModel lg = new AddProjectViewModel();
+            var parentConductor = (Conductor<object>)(this.Parent);
+            parentConductor.ActivateItem(lg);
         }
 
-        private void Deleteproject (object param)
-        {
-            MessageBoxResult result = MessageBox.Show("Do you want to delete this project?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.Yes)
-            {
-                Project project = (Project)param;
-                DataBase.DeleteProject(project);
-                Projects.Remove(project);
-            }
+        #endregion //Public 
 
-            
+        #region Private
+
+        private void Getprojects()
+        {
+            Projects = new ObservableCollection<IProject>(DataBase.GetProjects(SelectedViewType));
         }
 
-        private void ArchiveProject (object param)
-        {
-            var project = (Project)param;
-            project.IsArchived = !project.IsArchived;
-            DataBase.UpdateProject(project);
-            Getprojects();
-            //Projects.Remove(project);
-        }
+        #endregion //Private
 
     }
 }

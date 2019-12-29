@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EPJ.Models.Components;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -13,10 +14,6 @@ namespace EPJ.Models
 
         #region Properties
 
-        /// <summary>
-        /// Project ID which holds this file
-        /// </summary>
-        public ulong ID { get; set; }
 
         /// <summary>
         /// related to the project file name
@@ -26,7 +23,7 @@ namespace EPJ.Models
         /// <summary>
         /// Related to the project file absolute path
         /// </summary>
-        public string ComponentPath { get; set; }
+        public string Path { get; set; }
 
         /// <summary>
         /// Related to the project file extention
@@ -39,6 +36,8 @@ namespace EPJ.Models
         /// File version
         /// </summary>
         public ulong Version { get; set; } = 0;
+        uint IComponent.Version { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
 
         #endregion
 
@@ -48,9 +47,9 @@ namespace EPJ.Models
 
         public RelatedFile(string filePath)
         {
-            ComponentPath = filePath;
-            Name = Path.GetFileNameWithoutExtension(filePath);
-            Extention = Path.GetExtension(filePath);
+            Path = filePath;
+            Name = System.IO.Path.GetFileNameWithoutExtension(filePath);
+            Extention = System.IO.Path.GetExtension(filePath);
             Icon = Icon.ExtractAssociatedIcon(filePath);
         }
 
@@ -58,29 +57,38 @@ namespace EPJ.Models
 
         #region Public Methods
 
-        public void Copy(string newName)
+        public bool Copy(string newName)
         {
             throw new NotImplementedException();
         }
 
-        public void Replace(string destination)
+        public bool Replace(string destination)
         {
             throw new NotImplementedException();
         }
 
-        public void Move (string destination)
+        public bool Move (string destination)
         {
-            var fullFileDestination = $"{destination}{Path.DirectorySeparatorChar}{Path.GetFileName(ComponentPath)}";
-            File.Move(ComponentPath, fullFileDestination);
+            
+            var fullFileDestination = $"{destination}{System.IO.Path.DirectorySeparatorChar}{System.IO.Path.GetFileName(Path)}";
+            File.Move(Path, fullFileDestination);
+            return true;
         }
 
-        public void Rename(string newName)
+        public bool Rename(string newName)
         {
-            var parent = Directory.GetParent(ComponentPath);
-            var destination = $"{parent}{Path.DirectorySeparatorChar}{newName}{Extention}";
-            File.Move(ComponentPath, destination);
-            ComponentPath = destination;
+            var parent = Directory.GetParent(Path);
+            var destination = $"{parent}{System.IO.Path.DirectorySeparatorChar}{newName}{Extention}";
+            File.Move(Path, destination);
+            Path = destination;
             Name = newName;
+            return true;
+        }
+
+        public bool Delete()
+        {
+            File.Delete(Path);
+            return true;
         }
 
         #endregion

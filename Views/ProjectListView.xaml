@@ -128,7 +128,7 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- Project name -->
-                                <TextBlock Text="{Binding Title}" Style="{StaticResource ProjectName}"/>
+                                <TextBlock Text="{Binding Header}" Style="{StaticResource ProjectName}"/>
 
                                 <!-- Project deadline -->
                                 <StackPanel Grid.Column="1" Grid.ColumnSpan="2"
@@ -142,7 +142,7 @@
                                 <!-- Project description-->
 
                                 <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
-                                       Text="{Binding Description, Converter={StaticResource trimTextConverter}}"
+                                       Text="{Binding Content, Converter={StaticResource trimTextConverter}}"
                                        Style="{StaticResource ProjectDescriptionTrimmed}"/>
 
                                 <!-- Options and contributors -->

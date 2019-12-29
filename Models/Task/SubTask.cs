@@ -1,32 +1,22 @@
-﻿using System;
+﻿using Dapper.Contrib.Extensions;
+using EPJ.Models.Interfaces;
+using EPJ.Models.Person;
+using EPJ.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Dapper.Contrib.Extensions;
-using EPJ.Models.Interfaces;
-using EPJ.Models.Person;
-using EPJ.Utilities;
 
 namespace EPJ.Models.Task
 {
-    public class Task : ITask, INotifyPropertyChanged
+    public class SubTask : ISubTask, INotifyPropertyChanged
     {
-
-        #region Constructors
-
-        public Task()
-        {
-
-        }
-
-        #endregion //Constructors
 
         #region Private 
 
-        private double _progress = 0;
         private bool _isCompleted = false;
         private uint _order;
         private DateTime _dueDate;
@@ -94,20 +84,6 @@ namespace EPJ.Models.Task
         [Computed]
         public DateTime SubmitionDate { get; set; }
 
-        [Computed]
-        public double Progress
-        {
-            get
-            {
-                return _progress;
-            }
-            set
-            {
-                _progress = value;
-                OnPropertyChanged("Progress");
-            }
-        }
-
         public uint OrderNumber
         {
             get
@@ -141,6 +117,9 @@ namespace EPJ.Models.Task
         }
 
         [Computed]
+        public double Progress { get; set; }
+
+        [Computed]
         public IList<IContributor> Contributors { get; }
 
         [Computed]
@@ -157,7 +136,6 @@ namespace EPJ.Models.Task
 
         public bool AddElement(IElement element)
         {
-            if (element is ISubTask task) SubTasks.Add(task);
             return true;
         }
 
@@ -172,18 +150,12 @@ namespace EPJ.Models.Task
 
         public bool UpdateElement(IElement element)
         {
-            if (element is Task task)
-            {
-                Content = task.Content;
-                Priority = task.Priority;
-                DueDate = task.DueDate;
-            }
-            return true;
+            throw new NotImplementedException();
         }
 
         public bool RemoveElement(IElement element)
         {
-            if (element is ISubTask task) SubTasks.Remove(task);
+           
             return true;
         }
 
@@ -216,7 +188,6 @@ namespace EPJ.Models.Task
         #endregion //Contributors
 
         #endregion //Public Methods
-
 
         public event PropertyChangedEventHandler PropertyChanged;
 

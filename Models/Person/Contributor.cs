@@ -1,50 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EPJ
+namespace EPJ.Models.Person
 {
-   
     public class Contributor : IContributor
     {
 
-        #region Properties
+        #region Public Properties
 
-        public long Id { get; set; }
+        public long ID { get; set; }
 
-        /// <summary>
-        /// Contributor first name
-        /// </summary>
         public string FirstName { get; private set; }
 
-        /// <summary>
-        /// Contributor last name
-        /// </summary>
         public string LastName { get; private set; }
 
         public string FullName => $"{FirstName} {LastName}";
 
-        /// <summary>
-        /// Contributors first letter of first name and first letter of last name
-        /// </summary>
-        public string Initials { 
-            get
-            {
-                return $"{FirstName.Substring(0, 1)}{LastName.Substring(0, 1)}";
-            } 
-        }
+        public string Initials => $"{FirstName.Substring(0, 1)}{LastName.Substring(0, 1)}";
 
         public string InitialColor { get; private set; }
 
-
-        #endregion
+        #endregion //Public Properties
 
         #region Constructors
 
-        public Contributor() 
+        public Contributor()
         {
             InitialColor = ColourPool.GetColour();
         }
@@ -56,13 +39,16 @@ namespace EPJ
             InitialColor = ColourPool.GetColour();
         }
 
-        #endregion
+        #endregion //Constructors
+
+        #region Override Methods
 
         public override string ToString()
         {
-            return $"ID: {Id}. {FirstName} {LastName}";
+            return $"ID: {ID}. {FirstName} {LastName}";
         }
 
+        #endregion //OverrideMethods
 
     }
 }

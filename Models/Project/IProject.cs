@@ -1,46 +1,31 @@
-﻿using EPJ.Models;
-using EPJ.Utilities;
+﻿using Dapper.Contrib.Extensions;
+using EPJ.Models.Interfaces;
+using EPJ.Models.Person;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace EPJ
+namespace EPJ.Models.Project
 {
-    public interface IProject
+    public interface IProject : IInteractiveElement, IPath
     {
 
-        long ID { get; set; }
+        /// <summary>
+        /// Project Title
+        /// </summary>
+        string Header { get; set; }
 
-        ulong OrderNumber { get; set; }
-
-        string Title { get; set; }
-
-        string Description { get; set; }
-
-        DateTime Date { get; set; }
-
-        DateTime DueDate { get; set; }
-
-        string ProjectPath { get; set; }
-
+        /// <summary>
+        /// Is project archived
+        /// </summary>
         bool IsArchived { get; set; }
 
-        Priority Priority { get; set; }
+        IList<IElement> Comments { get; set; }
 
-        double Progress { get; set; }
-
-        List<IComment> Comments { get; }
-        ObservableCollection<IContributor> Contributors { get; }
-
-        List<IProjectElement> ProjectBodyElements { get; }
-      
-       
-        List<IComponent> RelatedComponents { get; }
-     
-        Project AddElement(IProjectElement element);
-        Project AddComment(IComment comment);
-        //Project AddContributor(Contributor contributor);
-
-        Project AddContributor(IContributor contributor);
+        IList<IContributor> Contributors { get; set; } 
+        
+        IList<IElement> Tasks { get; set; }
     }
 }

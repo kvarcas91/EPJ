@@ -1,5 +1,11 @@
 ﻿using Caliburn.Micro;
 using EPJ.Models;
+using EPJ.Models.Comments;
+using EPJ.Models.Components;
+using EPJ.Models.Interfaces;
+using EPJ.Models.Person;
+using EPJ.Models.Project;
+using EPJ.Models.Task;
 using EPJ.Utilities;
 using System;
 using System.Collections.Generic;
@@ -9,7 +15,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -22,10 +27,13 @@ namespace EPJ.ViewModels
         public ProjectViewModel(IProject project)
         {
             _project = project;
-            _projectPath = $".{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}{_project.Title}{Path.DirectorySeparatorChar}";
+            // TODO
+            _projectPath = $".{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}{_project.Header}{Path.DirectorySeparatorChar}";
             FileListItemClickCommand = new RelayCommand(FileListItemClick);
             IsTaskCompletedCommand = new RelayCommand(SetProgress);
+            IsSubTaskCompletedCommand = new RelayCommand(SetTaskProgress);
             EditTaskCommand = new RelayCommand(EditTask);
+            EditSubTaskCommand = new RelayCommand(EditSubTask);
             CloseAddTaskPanelCommand = new RelayCommand(CloseAddTaskPanel);
             TitleLostFocusCommand = new RelayCommand(UpdateProjectTitle);
             DescriptionLostFocusCommand = new RelayCommand(UpdateProjectDescription);
@@ -48,7 +56,7 @@ namespace EPJ.ViewModels
         private string _currentPath;
         private string _projectPath;
         private readonly IProject _project;
-        private IComponent _editableComponent = null;
+        private IData _editableComponent = null;
         private string _projectTitle;
         private string _description;
         private DateTime _dueDate;
@@ -61,11 +69,12 @@ namespace EPJ.ViewModels
         private bool _isFileListVisible = true;
         private string _newFolderName;
         private string _taskContent;
-        private Task _updateableTask = null;
-        private Comment _editableComment = null;
+        private IElement _updateableTask = null;
+        private IComment _editableComment = null;
         private Priority _taskPriority = Priority.Default;
         private Priority _priority = Priority.Default;
         private string _commentContent;
+        private string _commentHeader;
         private bool _canEdit = false;
         private bool _isProjectVisible = true;
         private bool _isExpandedCommentVisible = false;
@@ -94,9 +103,9 @@ namespace EPJ.ViewModels
             }
         }
 
-        public String SubmitionDate { get
+        public string SubmitionDate { get
             {
-                return _project.Date.ToShortDateString();
+                return _project.SubmitionDate.ToShortDateString();
             }
         }
 
@@ -294,6 +303,19 @@ namespace EPJ.ViewModels
             }
         }
 
+        public string CommentHeader
+        {
+            get
+            {
+                return _commentHeader;
+            }
+            set
+            {
+                _commentHeader = value;
+                NotifyOfPropertyChange(() => CommentHeader);
+            }
+        }
+
         public string ArchiveString
         {
             get
@@ -471,10 +493,10 @@ namespace EPJ.ViewModels
 
         public ObservableCollection<ITask> ProjectTasks { get; set; }
 
-        public ObservableCollection<IComponent> RelatedFiles { get; set; } = new ObservableCollection<IComponent>();
-        public ObservableCollection<IContributor> ProjectContributors { get; set; }
+        public ObservableCollection<IData> RelatedFiles { get; set; } = new ObservableCollection<IData>();
+        public ObservableCollection<IPerson> ProjectContributors { get; set; }
 
-        public ObservableCollection<Comment> Notes { get; set; }
+        public ObservableCollection<IComment> Notes { get; set; }
 
         #endregion
 
@@ -482,9 +504,11 @@ namespace EPJ.ViewModels
 
         public ICommand FileListItemClickCommand { get; set; }
         public ICommand IsTaskCompletedCommand { get; set; }
+        public ICommand IsSubTaskCompletedCommand { get; set; }
         public ICommand EditNoteCommand { get; set; }
         public ICommand DeleteNoteCommand { get; set; }
         public ICommand EditTaskCommand { get; set; }
+        public ICommand EditSubTaskCommand { get; set; }
         public ICommand DeleteTaskCommand { get; set; }
         public ICommand CloseAddTaskPanelCommand { get; set; }
         public ICommand TitleLostFocusCommand {get; set; }
@@ -503,10 +527,10 @@ namespace EPJ.ViewModels
 
         private void InitializeProject()
         {
-            ProjectTitle = _project.Title;
-            Description = _project.Description;
+            ProjectTitle = _project.Header;
+            Description = _project.Content;
             DueDate = _project.DueDate;
-            _currentPath = _project.ProjectPath;
+            _currentPath = _project.Path;
             Priority = _project.Priority;
             GetTasks();
             GetComments();
@@ -542,7 +566,7 @@ namespace EPJ.ViewModels
 
         public bool CanAddNewFolder(string newFolderName)
         {
-            return !String.IsNullOrWhiteSpace(newFolderName);
+            return !string.IsNullOrWhiteSpace(newFolderName);
         }
 
         public void ShowProjectDirectory()
@@ -571,22 +595,22 @@ namespace EPJ.ViewModels
 
         public void FileListItemClick(object param)
         {
-            var component = (IComponent)param;
+            var component = (IData)param;
             if (component is IFolder folder)
             {
                 CanNavigateBack = true;
                 _currentPath = $"{_currentPath}{Path.DirectorySeparatorChar}{folder.Name}";
-                ShowFolderContent(folder.ComponentPath);
+                ShowFolderContent(folder.Path);
                 return;
             }
 
             CanNavigateBack = false;
-            Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{component.ComponentPath.Substring(1)}");
+            Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{component.Path.Substring(1)}");
         } 
 
         private void EditFile (object param)
         {
-            _editableComponent = (IComponent)param;
+            _editableComponent = (IData)param;
             CanEdit = true;
             ShowAddFolderPanel();
             NewFolderName = _editableComponent.Name;
@@ -595,8 +619,8 @@ namespace EPJ.ViewModels
 
         private void DeleteFile (object param)
         {
-            var component = (IComponent)param;
-            var message = "";
+            var component = (IData)param;
+            var message = string.Empty;
             if (component is IFolder)
             {
                 message = "Do you want to delete this folder?";
@@ -609,15 +633,7 @@ namespace EPJ.ViewModels
             MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                if (component is IFolder)
-                {
-                    Directory.Delete(component.ComponentPath);
-                }
-                else
-                {
-                    File.Delete(component.ComponentPath);
-                }
-               
+                component.Delete();
                 RelatedFiles.Remove(component);
             }
            
@@ -625,13 +641,13 @@ namespace EPJ.ViewModels
 
         private void ShowInExplorer (object param)
         {
-            var component = (IComponent)param;
+            var component = (IData)param;
             if (component is IFile)
             {
-                Process.Start(Directory.GetParent(component.ComponentPath).FullName);
+                Process.Start(Directory.GetParent(component.Path).FullName);
                 return;
             }
-            Process.Start(component.ComponentPath);
+            Process.Start(component.Path);
         }
 
         #endregion
@@ -665,55 +681,111 @@ namespace EPJ.ViewModels
         {
             return ValidateUserInput.IsNullOrWhiteSpace(taskContent);
         }
+
+
+
         public void SaveTask(string taskContent)
         {
 
-            if (_updateableTask != null && !_isSubTask)
+            if (_updateableTask == null)
             {
-                var index = ProjectTasks.IndexOf(_updateableTask);
-                _updateableTask.Content = TaskContent;
-                _updateableTask.DueDate = TaskDueDate;
-                _updateableTask.Priority = TaskPriority;
-                ProjectTasks.Insert(index, _updateableTask);
-                ProjectTasks.RemoveAt(index + 1);
-                DataBase.UpdateTask(_updateableTask);
-                //ProjectTasks[index] = _updateableTask;
-                _updateableTask = null;
-                ShowAddTaskPanel();
-            }
-            else
-            {
-                var mTask = new Task
+                Console.WriteLine("insert task");
+                var task = new Task
                 {
                     Content = TaskContent,
                     DueDate = TaskDueDate,
                     Priority = TaskPriority
                 };
-                if (_isSubTask)
+                DataBase.InsertTask(task, _project.ID);
+                ProjectTasks.Add(task);
+            }
+            else {
+               if (_updateableTask is Task task)
                 {
-                    DataBase.InsertSubTask(mTask, _updateableTask.ID);
+                    if (!_isSubTask)
+                    {
+                        Console.WriteLine("update task");
+                        var index = ProjectTasks.IndexOf(task);
+                        task.Content = TaskContent;
+                        task.DueDate = TaskDueDate;
+                        task.Priority = TaskPriority;
+                        //ProjectTasks.Insert(index, task);
+                        //ProjectTasks.RemoveAt(index + 1);
+                        DataBase.UpdateTask(task);
+                        _updateableTask = null;
+                      
+                    }
+                    else
+                    {
+                        Console.WriteLine("insert subtask");
+                        var newSubTask = new SubTask
+                        {
+                            Content = TaskContent,
+                            DueDate = TaskDueDate,
+                            Priority = TaskPriority
+                        };
+                        DataBase.InsertSubTask(newSubTask, task.ID);
+                        task.SubTasks.Add(newSubTask);
+                    }
+                   
+                }
+              
+               if (_updateableTask is SubTask subTask)
+                {
+                    Console.WriteLine("Update subtask");
+                    var subtaskIndex = -1;
+                    var taskIndex = -1;
+                    for (int i = 0; i < ProjectTasks.Count; i++)
+                    {
+                        for (int j = 0; j < ProjectTasks[i].SubTasks.Count; j++)
+                        {
+                            if (Equals(_updateableTask, ProjectTasks[i].SubTasks[j]))
+                            {
+                                taskIndex = i;
+                                subtaskIndex = j;
+                            }
+                        }
 
-                    _updateableTask.SubTasks.Add(mTask);
+                    }
+
+                    subTask.Content = TaskContent;
+                    subTask.DueDate = TaskDueDate;
+                    subTask.Priority = TaskPriority;
+                    //ProjectTasks[taskIndex].SubTasks.Insert(subtaskIndex, subTask);
+                    //ProjectTasks[taskIndex].SubTasks.RemoveAt(subtaskIndex + 1);
+                    DataBase.UpdateTask(subTask);
+                    _updateableTask = null;
                     _isSubTask = false;
                 }
-                else
-                {
-                    DataBase.InsertTask(mTask, _project.ID);
-                    ProjectTasks.Add(mTask);
-                }
-                ShowAddTaskPanel();
+                _isSubTask = false;
+                _editableComponent = null;
+
             }
-            
+            ShowAddTaskPanel();
             ResetNewTaskProperties();
         }
 
-        public void EditTask(object task)
+
+        public void EditTask(object param)
         {
-            _updateableTask = (Task)task;
+            _isSubTask = false;
+            var task = (Task)param;
+            _updateableTask = task;
             ShowAddTaskPanel();
-            TaskContent = _updateableTask.Content;
-            TaskDueDate = _updateableTask.DueDate;
-            TaskPriority = _updateableTask.Priority;
+            TaskContent = task.Content;
+            TaskDueDate = task.DueDate;
+            TaskPriority = task.Priority;
+        }
+
+        public void EditSubTask (object param)
+        {
+            var subTask = (SubTask)param;
+            _updateableTask = subTask;
+            _isSubTask = true;
+            ShowAddTaskPanel();
+            TaskContent = subTask.Content;
+            TaskDueDate = subTask.DueDate;
+            TaskPriority = subTask.Priority;
         }
 
         public void AddSubTask (object param)
@@ -730,13 +802,53 @@ namespace EPJ.ViewModels
             ProjectTasks.Remove(task);
         }
 
+        public void SetTaskProgress (object param)
+        {
+            var element = (ISubTask)param;
+
+            var taskIndex = -1;
+            for (int i = 0; i < ProjectTasks.Count; i++)
+            {
+                for (int j = 0; j < ProjectTasks[i].SubTasks.Count; j++)
+                {
+                    if (Equals(element, ProjectTasks[i].SubTasks[j]))
+                    {
+                        taskIndex = i;
+                    }
+                }
+            }
+            var task = ProjectTasks[taskIndex];
+            var totalSubTaskCount = ProjectTasks[taskIndex].SubTasks.Count;
+            var completedSubTaskCount = 0;
+
+            foreach (var subTask in task.SubTasks)
+            {
+                if (subTask.IsCompleted)
+                {
+                    completedSubTaskCount++;
+                }
+            }
+            task.Progress = (completedSubTaskCount * 100) / totalSubTaskCount;
+            if (task.Progress == 100) task.IsCompleted = true;
+
+            if (task.Progress < 100) task.IsCompleted = false;
+
+            //ProjectTasks.Insert(taskIndex, task);
+            //ProjectTasks.RemoveAt(taskIndex + 1);
+          
+            DataBase.UpdateTask(element);
+            SetProgress(ProjectTasks[taskIndex]);
+          
+        }
+
         #endregion
 
         #region Project
 
         private void SetProgress (object param)
         {
-            var mTask = (Task)param;
+            var element = (ITask)param;
+            
             var totalTaskCount = ProjectTasks.Count;
             var completedTaskCount = 0;
             foreach (var task in ProjectTasks)
@@ -747,23 +859,23 @@ namespace EPJ.ViewModels
                 }
             }
             Progress = (completedTaskCount * 100) / totalTaskCount;
-            DataBase.UpdateTask(mTask);
+            DataBase.UpdateTask(element);
 
         }
 
         private void UpdateProjectTitle (object param)
         {
-            if (String.Equals(_project.Title, ProjectTitle.Trim())) return;
+            if (string.Equals(_project.Header, ProjectTitle.Trim())) return;
 
             if (!ValidateUserInput.IsNullOrWhiteSpace(ProjectTitle))
             {
-                ProjectTitle = _project.Title;
+                ProjectTitle = _project.Header;
                 return;
             }
             _projectPath = $".{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}{ProjectTitle}{Path.DirectorySeparatorChar}";
-            Directory.Move(_project.ProjectPath, _projectPath.Substring(2));
-            _project.Title = ProjectTitle;
-            _project.ProjectPath = _projectPath;
+            Directory.Move(_project.Path, _projectPath.Substring(2));
+            _project.Header = ProjectTitle;
+            _project.Path = _projectPath;
             DataBase.UpdateProject((Project)_project);
         }
 
@@ -771,12 +883,11 @@ namespace EPJ.ViewModels
         {
             if (!ValidateUserInput.IsNullOrWhiteSpace(Description))
             {
-                Description = _project.Description;
+                Description = _project.Content;
                 return;
             }
 
-            Console.WriteLine("updating");
-            _project.Description = Description;
+            _project.Content = Description;
             DataBase.UpdateProject((Project)_project);
         }
 
@@ -806,7 +917,7 @@ namespace EPJ.ViewModels
 
         #endregion
 
-        #region Notes
+        #region Comments
 
         public void ExpandCommentPanel()
         {
@@ -814,7 +925,7 @@ namespace EPJ.ViewModels
         }
         private void GetComments ()
         {
-            Notes = new ObservableCollection<Comment>(DataBase.GetProjectComments(_project.ID));
+            Notes = new ObservableCollection<IComment>(DataBase.GetProjectComments(_project.ID));
             Console.WriteLine($"size: {Notes.Count}");
         }
 
@@ -842,7 +953,8 @@ namespace EPJ.ViewModels
                 var comment = new Comment
                 {
                     SubmitionDate = DateTime.Now,
-                    Content = CommentContent
+                    Content = CommentContent,
+                    Header = CommentHeader
                 };
                 DataBase.InsertComment(comment, _project.ID);
                 Notes.Add(comment);
@@ -914,7 +1026,7 @@ namespace EPJ.ViewModels
 
         private void GetContributors ()
         {
-            ProjectContributors = new ObservableCollection<IContributor>(DataBase.GetProjectContributors(_project.ID));
+            ProjectContributors = new ObservableCollection<IPerson>(DataBase.GetProjectContributors(_project.ID));
         }
 
         #endregion //Contributors
@@ -923,12 +1035,12 @@ namespace EPJ.ViewModels
 
         #region Drag and Drop
 
-        public void OnDrop (IComponent sourceItem, IComponent destinationItem)
+        public void OnDrop (IData sourceItem, IData destinationItem)
         {
-            if (Object.Equals(sourceItem, destinationItem)) return;
+            if (Equals(sourceItem, destinationItem)) return;
             if (destinationItem is IFile) return;
            
-            sourceItem.Move(destinationItem.ComponentPath);
+            sourceItem.Move(destinationItem.Path);
             ShowFolderContent(CurrentPath);
         }
 
@@ -946,7 +1058,7 @@ namespace EPJ.ViewModels
                     MessageBox.Show("Sorry, coulnd't drop file. It might not exist");
                     return;
                 }
-                IComponent component;
+                IData component;
                 if (attr.HasFlag(FileAttributes.Directory)) component = new RelatedFolder(file);
                 else component = new RelatedFile(file);
                 component.Move(CurrentPath);
@@ -964,8 +1076,8 @@ namespace EPJ.ViewModels
             {
                 //Console.WriteLine($"start: {startIndex}; end: {destinationIndex}");
                 ProjectTasks.Move(startIndex, destinationIndex);
-                source.OrderNumber = (ulong)destinationIndex;
-                destination.OrderNumber = (ulong)startIndex;
+                source.OrderNumber = (uint)destinationIndex;
+                destination.OrderNumber = (uint)startIndex;
                 DataBase.UpdateTask((Task)source);
                 DataBase.UpdateTask((Task)destination);
             }

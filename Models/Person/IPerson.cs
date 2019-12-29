@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EPJ
+namespace EPJ.Models.Person
 {
-    public interface IProjectElement
+    public interface IPerson
     {
 
         long ID { get; set; }
-
-        List<IContributor> Contributors { get; }
-        string Content { get; set; }
+        string FirstName { get; }
+        string LastName { get; }
+        string FullName { get;}
 
     }
 }

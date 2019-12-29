@@ -1,4 +1,6 @@
 ﻿using EPJ.Models;
+using EPJ.Models.Components;
+using EPJ.Models.Task;
 using EPJ.Utilities;
 using EPJ.ViewModels;
 using MaterialDesignThemes.Wpf;
@@ -53,7 +55,7 @@ namespace EPJ.Views
                 ListView listView = sender as ListView;
                 ListViewItem listViewItem = FindAnchestor.Find<ListViewItem>((DependencyObject)e.OriginalSource);
                 if (listViewItem == null) return;
-                IComponent component = (IComponent)listView.ItemContainerGenerator.ItemFromContainer(listViewItem);
+                IData component = (IData)listView.ItemContainerGenerator.ItemFromContainer(listViewItem);
                 if (component == null) return;
 
                 startIndex = FileListView.SelectedIndex;
@@ -92,8 +94,8 @@ namespace EPJ.Views
                     return;
                 }
 
-                IComponent component = (IComponent)listView.ItemContainerGenerator.ItemFromContainer(listViewItem);
-                IComponent source = (IComponent)FileListView.Items.GetItemAt(startIndex);
+                var component = (IData)listView.ItemContainerGenerator.ItemFromContainer(listViewItem);
+                var source = (IData)FileListView.Items.GetItemAt(startIndex);
                 startIndex = -1;
                 ((ProjectViewModel)this.DataContext).OnDrop(source, component);
             }
@@ -106,7 +108,16 @@ namespace EPJ.Views
             ((ProjectViewModel)this.DataContext).OnDropOuterFile(files);
         }
 
+        private void TreeView_MouseDown (object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                startPoint = e.GetPosition(null);
+                Console.WriteLine(startPoint);
+            }
+        }
 
+        /*
         private void projectTaskList_MouseMove(object sender, MouseEventArgs e)
         {
             Point mousePos = e.GetPosition(null);
@@ -165,6 +176,6 @@ namespace EPJ.Views
             }
         }
 
-      
+      */
     }
 }

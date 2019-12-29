@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:EPJ"
+             xmlns:models="clr-namespace:EPJ.Models"
              mc:Ignorable="d" 
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:System="clr-namespace:System;assembly=mscorlib"
@@ -396,14 +397,24 @@
                 <TreeView x:Name="projectTaskList"
                           Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                           ItemsSource="{Binding ProjectTasks}"
-                          HorizontalContentAlignment="Stretch">
+                          HorizontalContentAlignment="Stretch"
+                          ScrollViewer.CanContentScroll="False"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          AllowDrop="True">
 
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <!--<EventSetter Event="TreeViewItem.DragOver"  Handler="treeView_DragOver"/>-->
+                            <!--<EventSetter Event="TreeViewItem.Drop" Handler="treeView_Drop"/>-->
+                            <!--<EventSetter Event="TreeViewItem.MouseMove" Handler="treeView_MouseMove"/>-->
+                            <EventSetter Event="TreeViewItem.MouseDown" Handler="TreeView_MouseDown"/>
+                        </Style>
+                    </TreeView.ItemContainerStyle>
                     <TreeView.ItemTemplate>
-                        <!-- Main Tasks -->
-                        <HierarchicalDataTemplate ItemsSource="{Binding SubTasks}"
-                                                  DataType="{x:Type local:Task}">
-                            
-                            <!-- Body -->
+                     
+                        <HierarchicalDataTemplate ItemsSource="{Binding SubTasks}">
+
+                            <!-- Main Tasks -->
                             <materialDesign:Card Background="{Binding IsCompleted, 
                                                               Converter={StaticResource backgroundConverter}}">
                                 
@@ -411,8 +422,14 @@
                                     <Grid.RowDefinitions>
                                         <!-- Task information -->
                                         <RowDefinition Height="Auto"/>
-                                        
+
+                                        <!-- Task deadline -->
+                                        <RowDefinition Height="Auto"/>
+
                                         <!-- Task Contributors -->
+                                        <RowDefinition Height="Auto"/>
+                                        
+                                        <!-- Progress -->
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
@@ -431,7 +448,7 @@
                                     </Grid.ColumnDefinitions>
 
                                     <!-- Priority -->
-                                    <TextBlock  Grid.Column="0"
+                                    <TextBlock  Grid.Column="0" Grid.RowSpan="4"
                                                 Style="{StaticResource Priority}"
                                                 Background="{Binding Priority, Converter={StaticResource priorityColorConverter}}">
                                          <ItemsControl 
@@ -439,7 +456,8 @@
                                     </TextBlock>
 
                                     <!-- Task Description -->
-                                    <CheckBox Grid.Row="0" Grid.Column="1"
+                                    <CheckBox Grid.Row="0" Grid.Column="1" 
+                                              Grid.RowSpan="2"
                                               x:Name="IsCompleted"
                                               IsChecked="{Binding IsCompleted}"
                                               Command="{Binding ElementName=projectTaskList,
@@ -453,7 +471,8 @@
                                     </CheckBox>
 
                                     <!-- Deadline -->
-                                    <Grid Grid.Row="0" Grid.Column="2" Grid.RowSpan="2"
+                                    <Grid Grid.Row="1" Grid.Column="2" 
+                                          Grid.RowSpan="2" 
                                           VerticalAlignment="Center">
                                         
                                         <Grid.RowDefinitions>
@@ -478,12 +497,13 @@
                                     </Grid>
                                
                                     <!-- Controls -->
-                                    <Grid Grid.Column="3">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="*"/>
-                                            <RowDefinition Height="*"/>
-                                            <RowDefinition Height="*"/>
-                                        </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0" Grid.Column="2" 
+                                          Grid.ColumnSpan="2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
 
                                         <!-- OnMouseOver visibility -->
                                         <Grid.Style>
@@ -498,7 +518,7 @@
                                         </Grid.Style>
 
                                         <!-- Add -->
-                                        <Button Grid.Row="0" 
+                                        <Button Grid.Column="0" 
                                                 Style="{StaticResource ControlButton}"
                                                 Command="{Binding ElementName=projectTaskList, 
                                                                   Path=DataContext.AddSubTaskCommand}"
@@ -510,7 +530,7 @@
                                         </Button>
 
                                         <!-- Edit -->
-                                        <Button Grid.Row="1" 
+                                        <Button Grid.Column="1" 
                                                 Style="{StaticResource ControlButton}"
                                                 Command="{Binding ElementName=projectTaskList, 
                                                                   Path=DataContext.EditTaskCommand}"
@@ -522,7 +542,7 @@
                                         </Button>
 
                                         <!-- Delete -->
-                                        <Button Grid.Row="2" 
+                                        <Button Grid.Column="2" 
                                                 Style="{StaticResource ControlButton}"
                                                 Command="{Binding ElementName=projectTaskList, 
                                                           Path=DataContext.DeleteTaskCommand}"
@@ -534,11 +554,43 @@
                                         </Button>
 
                                     </Grid>
+                                    
+                                    <!-- Contributors -->
+
+                                    <!-- Progress -->
+                                    <Grid Grid.Row="3" Grid.Column="1"
+                                          Grid.ColumnSpan="3">
+
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Progress text -->
+                                        <TextBlock Text="{Binding Progress,
+                                            Mode=TwoWay,
+                                            StringFormat=' {0}%'}" 
+                                               Foreground="Gray" 
+                                               HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center"/>
+
+                                        <!-- Progress bar -->
+                                        <ProgressBar Value="{Binding Progress}" Grid.Row="1"
+                                                 Background="#F2F2F2" 
+                                                 BorderThickness="0">
+                                            <ProgressBar.Foreground>
+                                                <LinearGradientBrush EndPoint="1,0" StartPoint="0.0, 0">
+                                                    <GradientStop Color="#90caf9" Offset="0"/>
+                                                    <GradientStop Color="#1565c0" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </ProgressBar.Foreground>
+                                        </ProgressBar>
+
+
+                                    </Grid>
 
                                 </Grid>
                             </materialDesign:Card>
-                            
-                            
                             
                             <!-- SubTasks -->
                             <HierarchicalDataTemplate.ItemTemplate>
@@ -554,6 +606,7 @@
 
                                                 <!-- Task Contributors -->
                                                 <RowDefinition Height="Auto"/>
+                                               
                                             </Grid.RowDefinitions>
 
                                             <Grid.ColumnDefinitions>
@@ -571,11 +624,11 @@
                                             </Grid.ColumnDefinitions>
 
                                             <!-- Priority -->
-                                            <TextBlock  Grid.Column="0"
+                                            <TextBlock  Grid.Column="0" Grid.RowSpan="2"
                                                 Style="{StaticResource Priority}"
                                                 Background="{Binding Priority, Converter={StaticResource priorityColorConverter}}">
-                                         <ItemsControl 
-                                             ItemsSource="{Binding Priority, Converter={StaticResource priorityToStringConverter}}"/>
+                                                 <ItemsControl 
+                                                     ItemsSource="{Binding Priority, Converter={StaticResource priorityToStringConverter}}"/>
                                             </TextBlock>
 
                                             <!-- Task Description -->
@@ -583,7 +636,7 @@
                                               x:Name="IsCompleted"
                                               IsChecked="{Binding IsCompleted}"
                                               Command="{Binding ElementName=projectTaskList,
-                                                        Path=DataContext.IsTaskCompletedCommand}"
+                                                        Path=DataContext.IsSubTaskCompletedCommand}"
                                               CommandParameter="{Binding}">
                                                 <TextBlock Text="{Binding Content}"
                                                    TextAlignment="Justify"
@@ -645,7 +698,7 @@
                                                 <Button Grid.Row="0" 
                                                 Style="{StaticResource ControlButton}"
                                                 Command="{Binding ElementName=projectTaskList, 
-                                                                  Path=DataContext.EditTaskCommand}"
+                                                                  Path=DataContext.EditSubTaskCommand}"
                                                 CommandParameter="{Binding}"
                                                 ToolTip="Edit task">
                                                     <materialDesign:PackIcon Kind="Edit" 
@@ -666,7 +719,9 @@
                                                 </Button>
 
                                             </Grid>
-
+                                            
+                                            <!-- Contributors -->
+                                            
                                         </Grid>
                                     </materialDesign:Card>
                                 </HierarchicalDataTemplate>
@@ -740,7 +795,7 @@
             </Grid.RowDefinitions>
 
             <!-- Contributors -->
-            <Grid Grid.Row="0" Margin="10">
+            <Grid Grid.Row="0" Margin="5" >
                 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -968,7 +1023,7 @@
             </Grid>
 
             <!-- Comments -->
-            <Grid Grid.Row="1" Margin="10 0 10 10">
+            <Grid Grid.Row="1" Margin="5">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -1026,55 +1081,10 @@
                             Grid.Row="0"
                             Content="Add Comment"/>
                     
-                    <!-- New Comment Panel -->
-                    <materialDesign:Card Grid.Row="1"
-                                         Margin="10"
-                                         Visibility="{Binding IsAddCommentPanelVisible,
-                                                      Converter={StaticResource boolToVisibility}}">
-
-                        <Grid>
-                            
-                            <Grid.RowDefinitions>
-                                <!-- Comment Header -->
-                                <RowDefinition Height="Auto"/>
-                                <!-- Comment Content -->
-                                <RowDefinition Height="Auto"/>
-                                <!-- Submit button -->
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- Comment Header -->
-                            <TextBox Grid.Row="0"
-                                     Text="{Binding CommentHeader,
-                                            Mode=TwoWay}"
-                                     materialDesign:HintAssist.Hint="Header"
-                                     materialDesign:HintAssist.IsFloating="True"
-                                     TextWrapping="Wrap"
-                                     TextAlignment="Justify"/>
-
-                            <!-- Comment Content -->
-                            <TextBox Grid.Row="1"
-                                     Text="{Binding CommentContent,
-                                            Mode=TwoWay}"
-                                     materialDesign:HintAssist.Hint="Comment*"
-                                     materialDesign:HintAssist.IsFloating="True"
-                                     TextWrapping="Wrap"
-                                     TextAlignment="Justify"/>
-                            
-                            <!-- Add Comment -->
-                            <Button x:Name="AddComment"
-                                    Grid.Row="2"
-                                    Margin="10"
-                                    ToolTip="Add new comment"
-                                    Content="Add"/>
-
-                        </Grid>
-                    </materialDesign:Card>
-                    
                     <!-- Comment List View -->
                     <ListView x:Name="noteListView"
                               Grid.Row="1"
-                              Margin="0 5 0 0"
+                              Margin="0 5 0 5"
                               HorizontalContentAlignment="Stretch"
                               ItemsSource="{Binding Notes}"
                               Style="{StaticResource ListView}">
@@ -1149,7 +1159,7 @@
                                         <!-- Separates Date from content -->
                                         <Separator Grid.Row="1"
                                                    Background="{StaticResource AccentBrush}"
-                                                   Margin="5"/>
+                                                   Margin="3"/>
 
                                         <!-- Content -->
                                         <TextBlock Grid.Row="2"
@@ -1162,6 +1172,50 @@
                         </ListView.ItemTemplate>
                         
                     </ListView>
+
+                    <!-- New Comment Panel -->
+                    <materialDesign:Card Grid.Row="1"
+                                         Visibility="{Binding IsAddCommentPanelVisible,
+                                                      Converter={StaticResource boolToVisibility}}">
+
+                        <Grid Margin="5">
+
+                            <Grid.RowDefinitions>
+                                <!-- Comment Header -->
+                                <RowDefinition Height="Auto"/>
+                                <!-- Comment Content -->
+                                <RowDefinition Height="Auto"/>
+                                <!-- Submit button -->
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Comment Header -->
+                            <TextBox Grid.Row="0"
+                                     Text="{Binding CommentHeader,
+                                            Mode=TwoWay}"
+                                     materialDesign:HintAssist.Hint="Header"
+                                     materialDesign:HintAssist.IsFloating="True"
+                                     TextWrapping="Wrap"
+                                     TextAlignment="Justify"/>
+
+                            <!-- Comment Content -->
+                            <TextBox Grid.Row="1"
+                                     Text="{Binding CommentContent,
+                                            Mode=TwoWay}"
+                                     materialDesign:HintAssist.Hint="Comment*"
+                                     materialDesign:HintAssist.IsFloating="True"
+                                     TextWrapping="Wrap"
+                                     TextAlignment="Justify"/>
+
+                            <!-- Add Comment -->
+                            <Button x:Name="AddComment"
+                                    Grid.Row="2"
+                                    Margin="10"
+                                    ToolTip="Add new comment"
+                                    Content="Add"/>
+
+                        </Grid>
+                    </materialDesign:Card>
                 </Grid>
                 
             </Grid>

@@ -1,19 +1,20 @@
-﻿using EPJ.Utilities;
-using System;
+﻿using Dapper.Contrib.Extensions;
+using EPJ.Models.Interfaces;
+using EPJ.Models.Person;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
-namespace EPJ
+namespace EPJ.Models.Task
 {
-    public interface ITask : IProjectElement
+    public interface ITask : IInteractiveElement, IOrderable
     {
-        
-        ulong OrderNumber { get; set; }
-        DateTime DueDate { get; set; }
-        bool IsCompleted { get; set; }
-        Priority Priority { get; set; }
 
-        ObservableCollection<ITask> SubTasks { get; set; }
+        bool IsCompleted { get; set; }
+
+        [Computed]
+        IList<IContributor> Contributors { get; }
+
+        [Computed]
+        IList<ISubTask> SubTasks { get;}
 
     }
 }

@@ -1,156 +1,138 @@
 ﻿using Dapper.Contrib.Extensions;
-using EPJ.Models;
+using EPJ.Models.Comments;
+using EPJ.Models.Interfaces;
+using EPJ.Models.Person;
+using EPJ.Models.Task;
 using EPJ.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace EPJ
+namespace EPJ.Models.Project
 {
     public class Project : IProject
     {
 
-        #region Properties
-
-        [Key]
-        /// <summary>
-        /// Current project ID
-        /// </summary>
-        public long ID { get; set; }
-
-        public ulong OrderNumber { get; set; }
-
-        /// <summary>
-        /// Project name
-        /// </summary>
-        public string Title { get; set; }
-
-        /// <summary>
-        /// Project description
-        /// </summary>
-        public string Description { get; set; }
-
-        /// <summary>
-        /// Project creation date
-        /// </summary>
-        public DateTime Date { get; set; }
-
-        /// <summary>
-        /// Project deadline
-        /// </summary>
-        public DateTime DueDate { get; set; }
-
-        public bool IsArchived { get; set; } = false;
-
-        /// <summary>
-        /// Project priority
-        /// </summary>
-        public Priority Priority { get; set; } = Priority.Default;
-
-        [Computed]
-        /// <summary>
-        /// Project progress
-        /// </summary>
-        public double Progress { get; set; } = 0;
-
-        [Computed]
-        public string ArchiveString
-        {
-            get
-            {
-                return IsArchived ? "Unarchive" : "Archive";
-            }
-        }
-
-        [Computed]
-        /// <summary>
-        /// Contributors for the project
-        /// </summary>
-        public ObservableCollection<IContributor> Contributors { get; } = new ObservableCollection<IContributor>();
-
-        [Computed]
-        /// <summary>
-        /// Related files to the project
-        /// </summary>
-        public List<IComponent> RelatedComponents { get; } = new List<IComponent>();
-
-        [Computed]
-        /// <summary>
-        /// Comments for the project
-        /// </summary>
-        public List<IComment> Comments { get; } = new List<IComment>();
-
-        [Computed]
-        public List<IProjectElement> ProjectBodyElements { get; } = new List<IProjectElement>();
-
-        public string ProjectPath { get; set; }
-
-
-        #endregion
-
-        #region Constructors
+        #region Constructors 
 
         public Project()
         {
-           
+
         }
 
-        #endregion
+        #endregion //Constructors
 
-        #region Builder
+        #region Public Properties
 
-        /// <summary>
-        /// Creates Contributor and adds it to the list if doesn't exist
-        /// </summary>
-        /// <param name="firstName">contributor first name</param>
-        /// <param name="lastName">contributor last name</param>
-        /// <returns></returns>
-        public Project AddContributor(Contributor contributor)
+        #region Interface Implementation
+
+        [Key]
+        public long ID { get; set; }
+
+        public string Header { get; set; }
+
+        public string Content { get; set; }
+
+        public Priority Priority { get; set; } = Priority.Default;
+
+        public DateTime SubmitionDate { get; set; }
+
+        public DateTime DueDate { get; set; }
+
+        public string Path { get; set; }
+
+        public double Progress { get; set; } = 0;
+
+        public bool IsArchived { get; set; } = false;
+
+        [Write(false)]
+        [Computed]
+        public IList<IElement> Comments { get; set; }
+
+        [Computed]
+        public IList<IContributor> Contributors { get; set; } = new List<IContributor>();
+
+        [Computed]
+        public IList<IElement> Tasks { get; set; }
+
+        #endregion //Interface Implementation
+
+        [Computed]
+        public string ArchiveString => IsArchived ? "Unarchive" : "Archive";
+
+        #endregion //Public Properties
+
+        #region Public Methods
+
+        #region Elements
+
+        public bool AddElement(IElement element)
         {
-            if (!Contributors.Contains(contributor))
-                Contributors.Add(contributor);
-
-            return this;
+            if (element is ITask) Tasks.Add(element);
+            if (element is IComment) Comments.Add(element);
+            return true;
         }
 
-        public void AddContributors(List<Contributor> contributors)
+        public bool AddElements(IList<IElement> elements)
         {
-            foreach (var contributor in contributors)
+            foreach (var element in elements)
             {
-                Contributors.Add(contributor);
-                Console.WriteLine(contributor.ToString());
+                AddElement(element);
             }
+            return true;
         }
 
-        public Project AddComment(IComment comment)
+        public bool RemoveElement(IElement element)
         {
-            Comments.Add(comment);
-            return this;
+            throw new NotImplementedException();
         }
 
-        public Project AddElement(IProjectElement element)
+        public bool UpdateElement(IElement element)
         {
-            //todo stuf
-            return this;
+            throw new NotImplementedException();
         }
 
-        public Project AddContributor(IContributor contributor)
+        #endregion //Elements
+
+        #region Contributors
+
+        public bool AddPerson(IPerson person)
         {
-            if (!Contributors.Contains(contributor))
-                Contributors.Add(contributor);
-
-            return this;
+            if (person is IContributor contributor) Contributors.Add(contributor);
+            return true;
         }
 
-        #endregion
+        public bool AddPersons (IList<IPerson> persons)
+        {
+            foreach (var person in persons)
+            {
+                AddPerson(person);
+            }
+            return true;
+        }
+
+        public bool RemovePerson(IPerson person)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool UpdatePerson(IPerson person)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        #endregion //Contributors
+
+        #region Override Methods
 
         public override string ToString()
         {
-            return $"priority: {Priority.ToString()}; title: {Title}; Description: {Description}; DueDate: {DueDate.ToString()}; Date: {Date.ToString()}";
+            return $"priority: {Priority.ToString()}; title: {Header}; Description: {Content}; DueDate: {DueDate.ToString()}; Date: {SubmitionDate.ToString()}";
         }
+
+        #endregion //Override Methods
+
+        #endregion //Public Methods
 
     }
 }

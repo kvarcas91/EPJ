@@ -1,4 +1,5 @@
 ﻿using EPJ.Models;
+using EPJ.Models.Components;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,9 +12,11 @@ namespace EPJ
     public class FileHelper
     {
 
-        public static List<IComponent> GetFolderContent (string path)
+        public static IList<IData> GetFolderContent (string path)
         {
-            var output = new List<IComponent>();
+            var output = new List<IData>();
+
+            if (!Directory.Exists(path)) return output;
 
             string[] contentDirectories = Directory.GetDirectories(path);
             string[] contentFiles = Directory.GetFiles(path);

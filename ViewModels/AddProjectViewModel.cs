@@ -17,6 +17,9 @@ using System.Windows.Media.Imaging;
 using System.Diagnostics;
 using System.Reflection;
 using EPJ.Models;
+using EPJ.Models.Project;
+using EPJ.Models.Person;
+using EPJ.Models.Components;
 
 namespace EPJ.ViewModels
 {
@@ -38,7 +41,7 @@ namespace EPJ.ViewModels
 
         #region Private Properties
 
-        private readonly Project _project = new Project();
+        private readonly IProject _project = new Project();
 
         // Project Properties
         private string _title;
@@ -281,11 +284,11 @@ namespace EPJ.ViewModels
             }
         }
 
-        public ObservableCollection<Contributor> AllContributors { get; } = new ObservableCollection<Contributor>(DataBase.GetContributors());
+        public ObservableCollection<IContributor> AllContributors { get; } = new ObservableCollection<IContributor>(DataBase.GetContributors());
 
-        public BindableCollection<Contributor> AddedContributors { get; } = new BindableCollection<Contributor>();
+        public ObservableCollection<IPerson> AddedContributors { get; } = new ObservableCollection<IPerson>();
 
-        public ObservableCollection<IComponent> RelatedFiles { get; set; } = new ObservableCollection<IComponent>();
+        public ObservableCollection<IData> RelatedFiles { get; set; } = new ObservableCollection<IData>();
 
         #endregion
 
@@ -301,14 +304,14 @@ namespace EPJ.ViewModels
         public void AddProject(string title, string description)
         {
             _project.Priority = Priority;
-            _project.Title = Title;
-            _project.ProjectPath = $"Projects{Path.DirectorySeparatorChar}{Title}{Path.DirectorySeparatorChar}";
-            _project.Date = DateTime.Now;
+            _project.Header = Title;
+            _project.Path = $"Projects{Path.DirectorySeparatorChar}{Title}{Path.DirectorySeparatorChar}";
+            _project.SubmitionDate = DateTime.Now;
             _project.DueDate = DueDate;
-            _project.Description = Description;
-            _project.AddContributors(AddedContributors.ToList());
+            _project.Content = Description;
+            _project.AddPersons(AddedContributors.ToList());
             DataBase.InsertProject(_project);
-            Directory.Move(_projectPath, $"{_allProjectPath}{_project.Title}");
+            Directory.Move(_projectPath, $"{_allProjectPath}{_project.Header}");
 
             ProjectListViewModel lg = new ProjectListViewModel();
             var parentConductor = (Conductor<object>)(this.Parent);
@@ -420,16 +423,17 @@ namespace EPJ.ViewModels
 
         public void FileListItemClick (object param)
         {
-            var component = (IComponent)param;
+            var component = (IData)param;
             if (component is IFolder folder)
             {
                 CanNavigateBack = true;
+
                 _currentPath = $"{_currentPath}{Path.DirectorySeparatorChar}{folder.Name}";
-                ShowFolderContent(folder.ComponentPath);
+                ShowFolderContent(folder.Path);
                 return;
             }
             
-            Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{component.ComponentPath.Substring(1)}"); 
+            Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{component.Path.Substring(1)}"); 
             
         }
 
@@ -472,12 +476,12 @@ namespace EPJ.ViewModels
 
 
 
-        public void OnDrop(IComponent sourceItem, IComponent destinationItem)
+        public void OnDrop(IData sourceItem, IData destinationItem)
         {
             if (Object.Equals(sourceItem, destinationItem)) return;
             if (destinationItem is IFile) return;
 
-            sourceItem.Move(destinationItem.ComponentPath);
+            ((IFolder)sourceItem).Move(destinationItem.Path);
             ShowFolderContent(_currentPath);
         }
 
@@ -486,10 +490,10 @@ namespace EPJ.ViewModels
             foreach (var file in files)
             {
                 FileAttributes attr = File.GetAttributes(file);
-                IComponent component;
+                IData component;
                 if (attr.HasFlag(FileAttributes.Directory)) component = new RelatedFolder(file);
                 else component = new RelatedFile(file);
-                component.Move(_currentPath);
+                ((IFolder)component).Move(_currentPath);
                 ShowFolderContent(_currentPath);
             }
 
