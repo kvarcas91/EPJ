@@ -98,8 +98,8 @@
     <Compile Include="Converters\BoolToTextDecorationConverter.cs" />
     <Compile Include="Converters\DateToStringConverter.cs" />
     <Compile Include="Converters\ImageConverter.cs" />
-    <Compile Include="Converters\ItemsPanelOrientationConverter.cs" />
     <Compile Include="Converters\IverseBoolConverter.cs" />
+    <Compile Include="Converters\ListCountToVisibilityConverter.cs" />
     <Compile Include="Models\Components\IData.cs" />
     <Compile Include="Models\Components\RelatedFolder.cs" />
     <Compile Include="Models\Comments\Comment.cs" />
@@ -168,10 +168,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Resources\Styles\TextBoxStyle.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Resources\Styles\TreeViewStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

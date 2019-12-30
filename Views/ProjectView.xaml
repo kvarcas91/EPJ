@@ -983,7 +983,23 @@
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Grid Margin="2"
-                                      ToolTip="{Binding FullName}">
+                                      ToolTip="{Binding FullName}"
+                                       Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor,
+                                          AncestorType={x:Type UserControl}}}">
+
+                                    <!-- Context menu -->
+                                    <Grid.ContextMenu>
+                                        <ContextMenu>
+
+                                            <!-- Delete -->
+                                            <MenuItem Header="Delete"
+                                                      Command="{Binding 
+                                                                Path=PlacementTarget.Tag.DataContext.RemoveContributorCommand,
+                                                                RelativeSource={RelativeSource Mode=FindAncestor,
+                                                                AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding}"/>
+                                        </ContextMenu>
+                                    </Grid.ContextMenu>
                                     <Ellipse Width="20" 
                                              Height="20" 
                                              Fill="{Binding InitialColor}"/>

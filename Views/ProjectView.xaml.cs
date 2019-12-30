@@ -136,7 +136,7 @@ namespace EPJ.Views
             }
             else
             {
-                Console.WriteLine("TreeView_MouseMove failed");
+                //Console.WriteLine("TreeView_MouseMove failed");
             }
         }
 
@@ -148,7 +148,7 @@ namespace EPJ.Views
             }
             else
             {
-                Console.WriteLine("TreeView_DragEnter failed");
+                //Console.WriteLine("TreeView_DragEnter failed");
             }
         }
 
@@ -182,7 +182,7 @@ namespace EPJ.Views
             }
             else
             {
-                Console.WriteLine("TreeView_Drop failed");
+                //Console.WriteLine("TreeView_Drop failed");
             }
         }
 

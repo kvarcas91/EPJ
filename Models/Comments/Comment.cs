@@ -10,13 +10,16 @@ namespace EPJ.Models.Comments
     public class Comment : IComment
     {
         #region Public Properties
-        public string Header { get; set; }
+
+        [Key]
         public long ID { get; set; }
+        public string Header { get; set; }
+       
         public string Content { get; set; }
         public DateTime SubmitionDate { get; set; }
 
-       
-        public DateTime DueDate { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+       [Computed]
+        public DateTime DueDate { get; set; }
 
         #endregion //Public Properties
     }

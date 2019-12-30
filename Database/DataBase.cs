@@ -45,6 +45,16 @@ namespace EPJ
         public static void DeleteProject(Project project)
         {
             using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            foreach (var task in project.Tasks)
+            {
+                DeleteTask(task);
+            }
+
+            foreach (var contributor in project.Contributors)
+            {
+                RemoveContributor(contributor.ID, project.ID);
+            }
+
             connection.Delete(project);
             connection.Dispose();
         }
@@ -135,6 +145,14 @@ namespace EPJ
             connection.Dispose();
         }
 
+        public static void RemoveContributor (long projectID, long contributorID)
+        {
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            string query = $"DELETE FROM project_contributors WHERE projectID = '{projectID}' AND contributorID = '{contributorID}'";
+            int test = connection.Execute(query);
+            connection.Dispose();
+        }
+
         public static IList<IContributor> GetContributors()
         {
             using IDbConnection connection = new SQLiteConnection(GetConnectionString());
@@ -204,7 +222,6 @@ namespace EPJ
             {
                 var order = (uint)GetCount("tasks");
                 task.OrderNumber = order;
-                
                 var sql = @"insert into tasks (Content, Priority, IsCompleted, DueDate) 
                             values (@Content, @Priority, @IsCompleted, @DueDate)";
                 connection.Execute(sql,
@@ -216,6 +233,7 @@ namespace EPJ
                                     task.DueDate
                                 });
 
+                task.ID = GetLastRowID("tasks");
                 connection.Dispose();
 
             }
@@ -228,6 +246,7 @@ namespace EPJ
             {
                 var order = (uint)GetCount("subtasks");
                 subTask.OrderNumber = order;
+               
                 var sql = @"insert into subtasks (Content, Priority, IsCompleted, DueDate) 
                             values (@Content, @Priority, @IsCompleted, @DueDate)";
                 connection.Execute(sql,
@@ -239,6 +258,7 @@ namespace EPJ
                                     subTask.DueDate
                                 });
 
+                subTask.ID = GetLastRowID("subtasks");
                 connection.Dispose();
 
             }
@@ -249,7 +269,7 @@ namespace EPJ
         {
             using IDbConnection connection = new SQLiteConnection(GetConnectionString());
             connection.Execute("INSERT INTO task_subtasks (taskID, subtaskID) values (@taskID, @subtaskID)",
-new { taskID, subtaskID });
+                new { taskID, subtaskID });
             connection.Dispose();
         }
 
@@ -274,9 +294,22 @@ new { taskID, subtaskID });
             connection.Dispose();
         }
 
-        public static void DeleteTask(ITask task)
+        public static void DeleteTask(IElement element)
         {
             using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+
+            var task = (ITask)element;
+           
+            foreach (var subtask in task.SubTasks)
+            {
+                string subtaskQuery = $"DELETE FROM task_subtasks WHERE subtaskID = '{subtask.ID}'";
+                connection.Execute(subtaskQuery);
+            }
+
+            string taskQuery = $"DELETE FROM project_tasks WHERE taskID = '{task.ID}'";
+
+            connection.Execute(taskQuery);
+
             connection.Delete((Task)task);
             connection.Dispose();
         }
@@ -317,7 +350,7 @@ new { taskID, subtaskID });
                                     comment.SubmitionDate,
                                     comment.Header
                                 });
-
+                comment.ID = GetLastRowID("comments");
                 connection.Dispose();
 
             }
@@ -335,8 +368,10 @@ new { taskID, subtaskID });
 
         public static void DeleteComment(IComment comment)
         {
+            string query = $"DELETE FROM project_comments WHERE commentID = '{comment.ID}'";
             using IDbConnection connection = new SQLiteConnection(GetConnectionString());
-            connection.Delete(comment);
+            connection.Execute(query);
+            connection.Delete((Comment)comment);
             connection.Dispose();
         }
 

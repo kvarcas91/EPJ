@@ -46,6 +46,8 @@ namespace EPJ.ViewModels
             ShowInExplorerCommand = new RelayCommand(ShowInExplorer);
             ExpandCommentCommand = new RelayCommand(ExpandCommentView);
             AddSubTaskCommand = new RelayCommand(AddSubTask);
+            AddContributorCommand = new RelayCommand(AddContributor);
+            RemoveContributorCommand = new RelayCommand(RemoveContributor);
             InitializeProject();
             ShowFolderContent(_projectPath);
         }
@@ -84,6 +86,7 @@ namespace EPJ.ViewModels
         private bool _isProjectInfoPanelVisible = true;
         private bool _isAddContributorPanelVisible = false;
         private bool _isAddNewContributorPanelVisible = false;
+        private bool _isAddedContributorListVisible = true;
         private bool _isAllContributorListVisible = false;
         private bool _isContributorPanelVisible = true;
         private bool _isCommentPanelVisible = true;
@@ -492,10 +495,25 @@ namespace EPJ.ViewModels
             }
         }
 
+        public bool IsAddedContributorListVisible
+        {
+            get
+            {
+                return _isAddedContributorListVisible;
+            }
+            set
+            {
+                _isAddedContributorListVisible = value;
+                NotifyOfPropertyChange(() => IsAddedContributorListVisible);
+            }
+        }
+
         public ObservableCollection<ITask> ProjectTasks { get; set; }
 
         public ObservableCollection<IData> RelatedFiles { get; set; } = new ObservableCollection<IData>();
         public ObservableCollection<IPerson> ProjectContributors { get; set; }
+
+        public ObservableCollection<IPerson> AllContributors { get; } = new ObservableCollection<IPerson>(DataBase.GetContributors());
 
         public ObservableCollection<IComment> Notes { get; set; }
 
@@ -521,6 +539,8 @@ namespace EPJ.ViewModels
         public ICommand DeleteFileCommand { get; set; }
         public ICommand ExpandCommentCommand { get; set; }
         public ICommand AddSubTaskCommand { get; set; }
+        public ICommand AddContributorCommand { get; set; }
+        public ICommand RemoveContributorCommand { get; set; }
 
         #endregion
 
@@ -802,7 +822,7 @@ namespace EPJ.ViewModels
             if (task is ITask ts)
             {
                 DataBase.DeleteTask(ts);
-                ProjectTasks.RemoveAt(GetSubTaskParentIndex(task));
+                ProjectTasks.Remove(ts);
             }
             if (task is ISubTask subTask)
             {
@@ -1044,6 +1064,45 @@ namespace EPJ.ViewModels
         private void GetContributors ()
         {
             ProjectContributors = new ObservableCollection<IPerson>(DataBase.GetProjectContributors(_project.ID));
+        }
+
+        private void AddContributor(object param)
+        {
+            var contributor = (IPerson)param;
+
+            if (!ProjectContributors.Contains(contributor))
+            {
+                ProjectContributors.Add(contributor);
+                DataBase.AssignContributors(_project.ID, contributor.ID);
+            }
+
+            IsAllContributorListVisible = false;
+            IsAddedContributorListVisible = true;
+            IsAddContributorPanelVisible = false;
+        }
+
+        private void RemoveContributor (object param)
+        {
+
+            var contributor = (IPerson)param;
+            if (ProjectContributors.Contains(contributor))
+            {
+                ProjectContributors.Remove(contributor);
+                DataBase.RemoveContributor(_project.ID, contributor.ID);
+            }
+        }
+
+        public void ShowContributorList ()
+        {
+            IsAddedContributorListVisible = IsAddContributorPanelVisible;
+            IsAddContributorPanelVisible = !IsAddContributorPanelVisible;
+            IsAllContributorListVisible = !IsAllContributorListVisible;
+        }
+
+        public void ShowAddNewContributorToolBar()
+        {
+            IsAllContributorListVisible = !IsAllContributorListVisible;
+            IsAddNewContributorPanelVisible = !IsAddNewContributorPanelVisible;
         }
 
         #endregion //Contributors

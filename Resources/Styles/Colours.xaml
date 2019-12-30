@@ -11,12 +11,15 @@
     <Color x:Key="Foreground">#686868</Color>
     <SolidColorBrush x:Key="ForegroudBrush" Color="{StaticResource Foreground}"/>
 
+    <!-- Black -->
     <Color x:Key="ForegroundDark">#000000</Color>
     <SolidColorBrush x:Key="ForegroudDarkBrush" Color="{StaticResource ForegroundDark}"/>
 
+    <!-- White -->
     <Color x:Key="ForegroundLight">#ffffff</Color>
     <SolidColorBrush x:Key="ForegroudLightBrush" Color="{StaticResource ForegroundLight}"/>
 
+    <!-- Light Blue -->
     <Color x:Key="AccentColor">#2196F3</Color>
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
 
