@@ -24,7 +24,7 @@ using System.Windows.Input;
 
 namespace EPJ.ViewModels
 {
-    class ProjectViewModel : BaseScreen
+    class ProjectViewModel : Screen
     {
 
         public ProjectViewModel(IProject project)
@@ -36,7 +36,7 @@ namespace EPJ.ViewModels
             // TODO
             //_projectPath = $".{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}{_project.Header}{Path.DirectorySeparatorChar}";
             _projectPath = _project.Path;
-            FileView = FileViewModel.Build(_projectPath);
+            //FileView = FileViewModel.Build(_projectPath);
            
             FileListItemClickCommand = new RelayCommand(FileListItemClick);
             IsTaskCompletedCommand = new RelayCommand(SetProgress);
@@ -535,7 +535,7 @@ namespace EPJ.ViewModels
 
         public FileViewModel FileView { get; private set; }
 
-        //public ObservableCollection<IData> RelatedFiles { get; set; } = new ObservableCollection<IData>();
+        public ObservableCollection<IData> RelatedFiles { get; set; } = new ObservableCollection<IData>();
         public ObservableCollection<IPerson> ProjectContributors { get; set; }
 
         public ObservableCollection<IPerson> AllContributors { get; } = new ObservableCollection<IPerson>(DataBase.GetContributors());
@@ -599,11 +599,11 @@ namespace EPJ.ViewModels
         {
             CurrentPath = path;
 
-            //RelatedFiles.Clear();
+            RelatedFiles.Clear();
 
             foreach (var item in FileHelper.GetFolderContent(path))
             {
-                //RelatedFiles.Add(item);
+                RelatedFiles.Add(item);
             }
             
         }
@@ -654,7 +654,8 @@ namespace EPJ.ViewModels
             }
 
             CanNavigateBack = false;
-            Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{component.Path.Substring(1)}");
+            Debug.WriteLine(component.Path);
+            Process.Start($"{Directory.GetParent(Assembly.GetExecutingAssembly().Location)}{$"{Path.DirectorySeparatorChar}{component.Path}"}");
         } 
 
         private void EditFile (object param)

@@ -78,10 +78,8 @@
 
 
         <!-- File -->
-        <!--<Grid Grid.Row="1" Grid.Column="0">
-            <templates:FileView />
-        </Grid>-->
-        <Grid Grid.Row="1" Grid.Column="0" Background="White"
+        <Grid Grid.Row="1" Grid.Column="0"
+            Background="White"
               Margin="10"
               HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
               
@@ -121,7 +119,7 @@
                 </Button>
 
                 <Button Background="Transparent" 
-                        Command="{Binding FileView.ShowNewFolderPanelCommand}"
+                        x:Name="ShowAddFolderPanel"
                         BorderThickness="0"  ToolTip="Create new folder">
                     <materialDesign:PackIcon Kind="FolderAddOutline"
                                              Foreground="#2196F3"
@@ -161,7 +159,7 @@
                       MouseMove="FileListView_MouseMove"
                       DragEnter="FileListView_DragEnter"
                       Drop="FileListView_Drop"
-                      ItemsSource="{Binding FileView.RelatedFiles}"
+                      ItemsSource="{Binding RelatedFiles}"
                       Visibility="{Binding IsFileListVisible, Converter={StaticResource boolToVisibility}}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
@@ -234,10 +232,11 @@
                         <WrapPanel Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
-                
+
             </ListView>
 
         </Grid>
+
 
         <GridSplitter Grid.Row="1" Grid.Column="1"
                       Width="5" HorizontalAlignment="Stretch" />

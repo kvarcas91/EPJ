@@ -61,7 +61,7 @@ namespace EPJ.Views
                 IData component = (IData)listView.ItemContainerGenerator.ItemFromContainer(listViewItem);
                 if (component == null) return;
 
-                startIndex = FileListView.SelectedIndex;
+                //startIndex = FileListView.SelectedIndex;
                 DataObject dragData = new DataObject("componentItem", component);
                 DragDrop.DoDragDrop(listViewItem, dragData, DragDropEffects.Copy | DragDropEffects.Move);
             }
@@ -98,9 +98,9 @@ namespace EPJ.Views
                 }
 
                 var component = (IData)listView.ItemContainerGenerator.ItemFromContainer(listViewItem);
-                var source = (IData)FileListView.Items.GetItemAt(startIndex);
+                //var source = (IData)FileListView.Items.GetItemAt(startIndex);
                 startIndex = -1;
-                ((ProjectViewModel)this.DataContext).OnDrop(source, component);
+                //((ProjectViewModel)this.DataContext).OnDrop(source, component);
             }
         }
 
