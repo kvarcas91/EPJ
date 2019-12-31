@@ -7,6 +7,7 @@ using System.Windows.Input;
 
 namespace EPJ
 {
+    
     public class RelayCommand : ICommand
     {
         #region Private variables

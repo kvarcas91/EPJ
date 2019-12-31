@@ -67,7 +67,8 @@
                                           Tag="{Binding RelativeSource={RelativeSource 
                                                         Mode=FindAncestor, 
                                                         AncestorType={x:Type UserControl}}}"
-                                         Background="{Binding IsArchived, Converter={StaticResource backgroundConverter}}">
+                                         Background="{Binding IsArchived, Converter={StaticResource backgroundConverter}}"
+>
                         <materialDesign:Card.InputBindings>
                             <MouseBinding Gesture="LeftDoubleClick"
                                           Command="{Binding ElementName=listView, Path= DataContext.ShowProjectCommand}"

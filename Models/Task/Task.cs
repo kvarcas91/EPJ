@@ -32,6 +32,7 @@ namespace EPJ.Models.Task
         private DateTime _dueDate;
         private Priority _priority;
         private string _content;
+        private bool _isExpanded = false;
 
 
         #endregion //Private Properties
@@ -141,7 +142,24 @@ namespace EPJ.Models.Task
         }
 
         [Computed]
-        public IList<IContributor> Contributors { get; }
+        public bool IsExpanded
+        {
+            get
+            {
+                return _isExpanded;
+            }
+            set
+            {
+                if (_isExpanded != value)
+                {
+                    _isExpanded = value;
+                    OnPropertyChanged("IsExpanded");
+                }
+            }
+        }
+
+        [Computed]
+        public IList<IPerson> Contributors { get; } = new ObservableCollection<IPerson>();
 
         [Computed]
         public IList<ISubTask> SubTasks { get; set; } = new ObservableCollection<ISubTask>();
@@ -208,9 +226,13 @@ namespace EPJ.Models.Task
             throw new NotImplementedException();
         }
 
-        public bool AddPersons(IList<IPerson> person)
+        public bool AddPersons(IList<IPerson> persons)
         {
-            throw new NotImplementedException();
+            foreach (var person in persons)
+            {
+                AddPerson(person);
+            }
+            return true;
         }
 
         #endregion //Contributors

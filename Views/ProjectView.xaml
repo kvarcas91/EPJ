@@ -11,6 +11,7 @@
              xmlns:StyleAlias="clr-namespace:EPJ.Utilities"
              d:DesignHeight="700" d:DesignWidth="800"
              xmlns:utils="clr-namespace:EPJ.Utilities"
+             xmlns:templates="clr-namespace:EPJ.Views;assembly="
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
 
     <UserControl.Resources>
@@ -77,9 +78,13 @@
 
 
         <!-- File -->
+        <!--<Grid Grid.Row="1" Grid.Column="0">
+            <templates:FileView />
+        </Grid>-->
         <Grid Grid.Row="1" Grid.Column="0" Background="White"
               Margin="10"
               HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+              
               >
 
             <Grid.RowDefinitions>
@@ -115,7 +120,8 @@
                                              Width="24" Height="24"/>
                 </Button>
 
-                <Button x:Name="ShowAddFolderPanel" Background="Transparent" 
+                <Button Background="Transparent" 
+                        Command="{Binding FileView.ShowNewFolderPanelCommand}"
                         BorderThickness="0"  ToolTip="Create new folder">
                     <materialDesign:PackIcon Kind="FolderAddOutline"
                                              Foreground="#2196F3"
@@ -126,6 +132,7 @@
             <TextBlock Grid.Row="2" Text="{Binding CurrentPath}"
                        FontSize="10" ToolTip="{Binding CurrentPath}"/>
 
+            <!-- Add New Folder -->
             <Grid Grid.Row="3"
                 Visibility="{Binding IsAddFilePanelVisible, Mode=TwoWay, 
                 Converter={StaticResource boolToVisibility}}">
@@ -154,7 +161,7 @@
                       MouseMove="FileListView_MouseMove"
                       DragEnter="FileListView_DragEnter"
                       Drop="FileListView_Drop"
-                      ItemsSource="{Binding RelatedFiles}"
+                      ItemsSource="{Binding FileView.RelatedFiles}"
                       Visibility="{Binding IsFileListVisible, Converter={StaticResource boolToVisibility}}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
@@ -422,10 +429,10 @@
                                         <!-- Task deadline -->
                                         <RowDefinition Height="Auto"/>
 
-                                        <!-- Task Contributors -->
-                                        <RowDefinition Height="Auto"/>
-                                        
                                         <!-- Progress -->
+                                        <RowDefinition Height="Auto"/>
+
+                                        <!-- Task Contributors -->
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
@@ -469,7 +476,7 @@
                                     <!-- Deadline -->
                                     <Grid Grid.Row="1" Grid.Column="2" 
                                           Grid.RowSpan="2" 
-                                          VerticalAlignment="Center">
+                                          VerticalAlignment="Top">
                                         
                                         <Grid.RowDefinitions>
                                             <!-- Due to -->
@@ -482,10 +489,12 @@
                                         <!-- Due to -->
                                         <TextBlock Grid.Row="0"
                                                    Text="Due To"
+                                                   FontSize="10"
                                                    HorizontalAlignment="Center"/>
                                         
                                         <!-- Deadline -->
                                         <TextBlock Grid.Row="1"
+                                                   FontSize="10"
                                                    Text="{Binding DueDate,
                                                           Converter={StaticResource dateConverter}}"
                                                    HorizontalAlignment="Center"/>
@@ -551,10 +560,8 @@
 
                                     </Grid>
                                     
-                                    <!-- Contributors -->
-
                                     <!-- Progress -->
-                                    <Grid Grid.Row="3" Grid.Column="1"
+                                    <Grid Grid.Row="2" Grid.Column="1"
                                           Grid.ColumnSpan="3">
 
                                         <Grid.RowDefinitions>
@@ -562,11 +569,18 @@
                                             <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
 
+
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
                                         <!-- Progress text -->
                                         <TextBlock Text="{Binding Progress,
                                             Mode=TwoWay,
                                             StringFormat=' {0}%'}" 
                                                Foreground="Gray" 
+                                                   FontSize="10"
                                                HorizontalAlignment="Center" 
                                                VerticalAlignment="Center"/>
 
@@ -582,6 +596,85 @@
                                             </ProgressBar.Foreground>
                                         </ProgressBar>
 
+                                        <!-- Expand -->
+                                        <Button Grid.Row="1" Grid.Column="1" 
+                                                Style="{StaticResource ControlButton}"
+                                                Command="{Binding ElementName=projectTaskList, 
+                                                          Path=DataContext.ShowTaskContributorsCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="Show Contributors">
+                                            <materialDesign:PackIcon Kind="{Binding IsExpanded,
+                                                                            Converter={local:BoolToExpandableIconConverter}}" 
+                                                                     Foreground="Black"
+                                                                             
+                                                                     Width="12" Height="12"/>
+                                        </Button>
+
+                                    </Grid>
+
+                                    <!-- Contributors -->
+                                    <Grid Grid.Row="3" Grid.Column="1"
+                                          Grid.ColumnSpan="3"
+                                          HorizontalAlignment="Right"
+                                          Visibility="{Binding IsExpanded,
+                                                       Converter={StaticResource boolToVisibility}}">
+
+                                        <!-- Added Contributors List -->
+                                        <ListView x:Name="taskContributorsList"
+                              Grid.Row="1"
+                              ItemsSource="{Binding Contributors}">
+
+                                            <!-- Item Template -->
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="2"
+                                      ToolTip="{Binding FullName}"
+                                       Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor,
+                                          AncestorType={x:Type UserControl}}}">
+
+                                                        <!-- Context menu -->
+                                                        <Grid.ContextMenu>
+                                                            <ContextMenu>
+
+                                                                <!-- Delete -->
+                                                                <MenuItem Header="Delete"
+                                                      Command="{Binding 
+                                                                Path=PlacementTarget.Tag.DataContext.RemoveTaskContributorCommand,
+                                                                RelativeSource={RelativeSource Mode=FindAncestor,
+                                                                AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding}"/>
+                                                            </ContextMenu>
+                                                        </Grid.ContextMenu>
+                                                        <Ellipse Width="20" 
+                                             Height="20" 
+                                             Fill="{Binding InitialColor}"/>
+                                                        <TextBlock Text="{Binding Initials}"
+                                               Style="{StaticResource InitialsStyle}"
+                                                                   FontSize="10"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+
+                                            <!-- Item orientation -->
+                                            <ListView.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal"/>
+                                                </ItemsPanelTemplate>
+                                            </ListView.ItemsPanel>
+
+                                            <!-- Disable hover effect -->
+                                            <ListView.ItemContainerStyle>
+                                                <Style TargetType="ListViewItem">
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                                                <ContentPresenter />
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </ListView.ItemContainerStyle>
+                                        </ListView>
 
                                     </Grid>
 
@@ -674,7 +767,6 @@
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="*"/>
                                                     <RowDefinition Height="*"/>
-                                                  
                                                 </Grid.RowDefinitions>
 
                                                 <!-- OnMouseOver visibility -->
@@ -713,7 +805,6 @@
                                                                      Foreground="Black"
                                                                      Width="12" Height="12"/>
                                                 </Button>
-
                                             </Grid>
                                             
                                             <!-- Contributors -->
@@ -743,6 +834,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
@@ -751,25 +843,41 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock  Text="{Binding PreviewCommentSubmitionDate, Converter={local:DateToStringConverter}}"
-                               Grid.Row="0" FontSize="10" FontStyle="Italic"
-                               Margin="20 0 0 0"
-                            VerticalAlignment="Bottom"/>
+                <TextBox  Text="{Binding PreviewCommentHeader, Mode=TwoWay}"
+                            Grid.Row="0" Grid.ColumnSpan="2" FontSize="20"
+                            FontWeight="Bold"
+                            Margin="10 10 40 5"
+                            VerticalAlignment="Bottom"
+                          BorderThickness="0"
+                          materialDesign:HintAssist.Hint="Header"
+                          materialDesign:HintAssist.FloatingScale="0.4"
+                          materialDesign:HintAssist.IsFloating="True"/>
+
                 <Button x:Name="ExpandCommentView" Grid.Column="1"
                         HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
                         Style="{StaticResource ExpandButton}">
                     <materialDesign:PackIcon Kind="CircleExpand"
                                              Width="24"
                                              Height="24"/>
                 </Button>
+                
                 <Separator Background="#2196F3" Margin="10" Grid.Column="0"
                            Grid.Row=" 1" Grid.ColumnSpan="2" />
 
-                <TextBox Grid.Row="2" Grid.ColumnSpan="2" TextWrapping="Wrap"
+                <TextBlock  Text="{Binding PreviewCommentSubmitionDate, Converter={local:DateToStringConverter}}"
+                            Grid.Row="2" FontSize="10"
+                            FontStyle="Italic"
+                            Margin="20 0 0 0"
+                            VerticalAlignment="Bottom"/>
+                <TextBox Grid.Row="3" Grid.ColumnSpan="2" 
+                         TextWrapping="Wrap"
                          TextAlignment="Justify"
-                         Text="{Binding PreviewCommentContent, Mode=TwoWay}"/>
+                         Margin="5 0 0 0"
+                         Text="{Binding PreviewCommentContent, Mode=TwoWay}"
+                         BorderThickness="0"/>
                 <Button x:Name="EditPreviewComment"
-                    Grid.Row=" 3" Margin="10" Grid.Column="0" Grid.ColumnSpan="2"
+                    Grid.Row=" 4" Margin="10" Grid.Column="0" Grid.ColumnSpan="2"
                         Content="Commit"/>
             </Grid>
             

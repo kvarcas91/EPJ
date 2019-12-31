@@ -11,7 +11,7 @@ namespace EPJ.Models.Task
         bool IsCompleted { get; set; }
 
         [Computed]
-        IList<IContributor> Contributors { get; }
+        IList<IPerson> Contributors { get; }
 
         [Computed]
         IList<ISubTask> SubTasks { get;}

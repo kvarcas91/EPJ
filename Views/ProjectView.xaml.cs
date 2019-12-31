@@ -1,6 +1,7 @@
 ﻿using EPJ.Models;
 using EPJ.Models.Components;
 using EPJ.Models.Interfaces;
+using EPJ.Models.Person;
 using EPJ.Models.Task;
 using EPJ.Utilities;
 using EPJ.ViewModels;

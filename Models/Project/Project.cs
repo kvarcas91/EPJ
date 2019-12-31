@@ -52,7 +52,7 @@ namespace EPJ.Models.Project
         public IList<IContributor> Contributors { get; set; } = new List<IContributor>();
 
         [Computed]
-        public IList<IElement> Tasks { get; set; }
+        public IList<IElement> Tasks { get; set; } = new List<IElement>();
 
         #endregion //Interface Implementation
 

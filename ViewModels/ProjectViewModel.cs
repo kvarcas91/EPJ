@@ -7,13 +7,16 @@ using EPJ.Models.Person;
 using EPJ.Models.Project;
 using EPJ.Models.Task;
 using EPJ.Utilities;
+using EPJ.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,15 +24,20 @@ using System.Windows.Input;
 
 namespace EPJ.ViewModels
 {
-    class ProjectViewModel : Screen
+    class ProjectViewModel : BaseScreen
     {
 
         public ProjectViewModel(IProject project)
         {
             _project = project;
+
+           
+
             // TODO
             //_projectPath = $".{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}{_project.Header}{Path.DirectorySeparatorChar}";
             _projectPath = _project.Path;
+            FileView = FileViewModel.Build(_projectPath);
+           
             FileListItemClickCommand = new RelayCommand(FileListItemClick);
             IsTaskCompletedCommand = new RelayCommand(SetProgress);
             IsSubTaskCompletedCommand = new RelayCommand(SetTaskProgress);
@@ -47,11 +55,12 @@ namespace EPJ.ViewModels
             ExpandCommentCommand = new RelayCommand(ExpandCommentView);
             AddSubTaskCommand = new RelayCommand(AddSubTask);
             AddContributorCommand = new RelayCommand(AddContributor);
+            ShowTaskContributorsCommand = new RelayCommand(ShowTaskContributors);
             RemoveContributorCommand = new RelayCommand(RemoveContributor);
+            RemoveTaskContributorCommand = new RelayCommand(RemoveTaskContributor);
             InitializeProject();
             ShowFolderContent(_projectPath);
         }
-
 
         #region Private Properties
 
@@ -83,6 +92,7 @@ namespace EPJ.ViewModels
         private bool _isExpandedCommentVisible = false;
         private DateTime _previewCommentSubmitionDate;
         private string _previewCommentContent;
+        private string _previewCommentHeader;
         private bool _isProjectInfoPanelVisible = true;
         private bool _isAddContributorPanelVisible = false;
         private bool _isAddNewContributorPanelVisible = false;
@@ -418,6 +428,19 @@ namespace EPJ.ViewModels
             }
         }
 
+        public string PreviewCommentHeader
+        {
+            get
+            {
+                return _previewCommentHeader;
+            }
+            set
+            {
+                _previewCommentHeader = value;
+                NotifyOfPropertyChange(() => PreviewCommentHeader);
+            }
+        }
+
         public bool IsProjectInfoPanelVisible
         {
             get
@@ -510,7 +533,9 @@ namespace EPJ.ViewModels
 
         public ObservableCollection<ITask> ProjectTasks { get; set; }
 
-        public ObservableCollection<IData> RelatedFiles { get; set; } = new ObservableCollection<IData>();
+        public FileViewModel FileView { get; private set; }
+
+        //public ObservableCollection<IData> RelatedFiles { get; set; } = new ObservableCollection<IData>();
         public ObservableCollection<IPerson> ProjectContributors { get; set; }
 
         public ObservableCollection<IPerson> AllContributors { get; } = new ObservableCollection<IPerson>(DataBase.GetContributors());
@@ -541,6 +566,8 @@ namespace EPJ.ViewModels
         public ICommand AddSubTaskCommand { get; set; }
         public ICommand AddContributorCommand { get; set; }
         public ICommand RemoveContributorCommand { get; set; }
+        public ICommand RemoveTaskContributorCommand { get; set; }
+        public ICommand ShowTaskContributorsCommand { get; set; }
 
         #endregion
 
@@ -567,15 +594,16 @@ namespace EPJ.ViewModels
 
         #region File
 
+
         private void ShowFolderContent(string path)
         {
             CurrentPath = path;
 
-            RelatedFiles.Clear();
+            //RelatedFiles.Clear();
 
             foreach (var item in FileHelper.GetFolderContent(path))
             {
-                RelatedFiles.Add(item);
+                //RelatedFiles.Add(item);
             }
             
         }
@@ -604,11 +632,11 @@ namespace EPJ.ViewModels
             }
             else
             {
-                var index = RelatedFiles.IndexOf(_editableComponent);
-                _editableComponent.Rename(newFolderName);
-                RelatedFiles.Insert(index, _editableComponent);
-                RelatedFiles.RemoveAt(index + 1);
-                _editableComponent = null;
+                //var index = RelatedFiles.IndexOf(_editableComponent);
+                //_editableComponent.Rename(newFolderName);
+                //RelatedFiles.Insert(index, _editableComponent);
+                //RelatedFiles.RemoveAt(index + 1);
+                //_editableComponent = null;
             }
             NewFolderName = "";
             IsAddFilePanelVisible = false;
@@ -655,7 +683,7 @@ namespace EPJ.ViewModels
             if (result == MessageBoxResult.Yes)
             {
                 component.Delete();
-                RelatedFiles.Remove(component);
+                //RelatedFiles.Remove(component);
             }
            
         }
@@ -682,6 +710,11 @@ namespace EPJ.ViewModels
             {
                 Console.WriteLine($"subtask count: {item.SubTasks.Count}");
             }
+        }
+
+        private void ShowTaskContributors (object param)
+        {
+            ((Task)param).IsExpanded = !((Task)param).IsExpanded;
         }
 
         private void CloseAddTaskPanel (object param)
@@ -818,19 +851,25 @@ namespace EPJ.ViewModels
 
         public void DeleteTask(object param)
         {
-            var task = (IElement)param;
-            if (task is ITask ts)
+
+
+            MessageBoxResult result = MessageBox.Show("Do you want to delete this Task?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
             {
-                DataBase.DeleteTask(ts);
-                ProjectTasks.Remove(ts);
+
+                var task = (IElement)param;
+                if (task is ITask ts)
+                {
+                    DataBase.DeleteTask(ts);
+                    ProjectTasks.Remove(ts);
+                }
+                if (task is ISubTask subTask)
+                {
+                    DataBase.DeleteSubTask(subTask);
+                    ProjectTasks[GetSubTaskParentIndex(subTask)].SubTasks.Remove(subTask);
+                }
+
             }
-            if (task is ISubTask subTask)
-            {
-                DataBase.DeleteSubTask(subTask);
-                ProjectTasks[GetSubTaskParentIndex(subTask)].SubTasks.Remove(subTask);
-            }
-           
-           
         }
 
         private int GetSubTaskParentIndex (IElement sub)
@@ -969,6 +1008,11 @@ namespace EPJ.ViewModels
         public void ShowAddNotePanel ()
         {
             IsAddCommentPanelVisible = !IsAddCommentPanelVisible;
+            if (IsExpandedCommentVisible)
+            {
+                ChangeCommentView();
+                _editableComment = null;
+            }
         }
 
         public void AddComment ()
@@ -980,6 +1024,7 @@ namespace EPJ.ViewModels
             {
                 var index = Notes.IndexOf(_editableComment);
                 _editableComment.Content = CommentContent;
+                _editableComment.Header = CommentHeader;
                 Notes.Insert(index, _editableComment);
                 Notes.RemoveAt(index + 1);
                 DataBase.UpdateComment(_editableComment);
@@ -996,7 +1041,7 @@ namespace EPJ.ViewModels
                 DataBase.InsertComment(comment, _project.ID);
                 Notes.Add(comment);
             }
-            CommentContent = String.Empty;
+            CommentContent = string.Empty;
             ShowAddNotePanel();
         }
 
@@ -1013,8 +1058,7 @@ namespace EPJ.ViewModels
             _editableComment = (Comment)param;
             PreviewCommentSubmitionDate = _editableComment.SubmitionDate;
             PreviewCommentContent = _editableComment.Content;
-            
-           
+            PreviewCommentHeader = _editableComment.Header;
         }
 
         private void ChangeCommentView ()
@@ -1027,6 +1071,7 @@ namespace EPJ.ViewModels
         {
             var index = Notes.IndexOf(_editableComment);
             _editableComment.Content = PreviewCommentContent;
+            _editableComment.Header = PreviewCommentHeader;
             Notes.Insert(index, _editableComment);
             Notes.RemoveAt(index + 1);
             DataBase.UpdateComment(_editableComment);
@@ -1038,6 +1083,7 @@ namespace EPJ.ViewModels
         {
             _editableComment = (Comment)param;
             CommentContent = _editableComment.Content;
+            CommentHeader = _editableComment.Header;
             ShowAddNotePanel();
         }
 
@@ -1089,6 +1135,17 @@ namespace EPJ.ViewModels
             {
                 ProjectContributors.Remove(contributor);
                 DataBase.RemoveContributor(_project.ID, contributor.ID);
+            }
+        }
+
+        private void RemoveTaskContributor(object param)
+        {
+
+            var contributor = (IPerson)param;
+            if (ProjectContributors.Contains(contributor))
+            {
+                //ProjectContributors.Remove(contributor);
+                //DataBase.RemoveContributor(_project.ID, contributor.ID);
             }
         }
 

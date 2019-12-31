@@ -123,6 +123,23 @@ namespace EPJ
             return output;
         }
 
+        public static IList<IPerson> GetTaskContributors (long taskID)
+        {
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            List<Contributor> contributors = connection.Query<Contributor>(
+                "SELECT c.ID, c.FirstName, c.LastName " +
+                "FROM contributors c " +
+                "INNER JOIN task_contributors p ON p.contributorID = c.ID " +
+                $"INNER JOIN tasks pr on pr.ID = p.taskID WHERE pr.ID = {taskID}").ToList();
+            connection.Dispose();
+            var output = new List<IPerson>();
+            foreach (var contributor in contributors)
+            {
+                output.Add(contributor);
+            }
+            return output;
+        }
+
         public static void InsertContributor(IContributor contributor)
         {
             using IDbConnection connection = new SQLiteConnection(GetConnectionString());
@@ -153,6 +170,14 @@ namespace EPJ
             connection.Dispose();
         }
 
+        public static void RemoveTaskContributor (long taskID, long contributorID)
+        {
+            using IDbConnection connection = new SQLiteConnection(GetConnectionString());
+            string query = $"DELETE FROM project_contributors WHERE taskID = '{taskID}' AND contributorID = '{contributorID}'";
+            int test = connection.Execute(query);
+            connection.Dispose();
+        }
+
         public static IList<IContributor> GetContributors()
         {
             using IDbConnection connection = new SQLiteConnection(GetConnectionString());
@@ -176,6 +201,7 @@ namespace EPJ
             foreach (var task in output)
             {
                 task.AddElements(GetSubTasks(task.ID));
+                task.AddPersons(GetTaskContributors(task.ID));
                 task.Progress = GetTaskProgress(task.ID);
                 //task.AddSubTasks(GetSubTasks(task.ID));
             }
@@ -307,8 +333,10 @@ namespace EPJ
             }
 
             string taskQuery = $"DELETE FROM project_tasks WHERE taskID = '{task.ID}'";
+            string contrQuery = $"DELETE FROM task_contributors WHERE taskID = '{task.ID}'";
 
             connection.Execute(taskQuery);
+            connection.Execute(contrQuery);
 
             connection.Delete((Task)task);
             connection.Dispose();
@@ -328,7 +356,7 @@ namespace EPJ
         public static List<IComment> GetProjectComments (long projectID)
         {
             using IDbConnection connection = new SQLiteConnection(GetConnectionString());
-            var sql = $" SELECT c.ID, c.Content, c.SubmitionDate " +
+            var sql = $" SELECT c.ID, c.Content, c.SubmitionDate, c.Header " +
                         "FROM comments c " +
                         "INNER JOIN project_comments p ON p.commentID = c.ID " +
                         $"INNER JOIN projects pr on pr.ID = p.projectID WHERE pr.Id = {projectID}";
@@ -378,7 +406,7 @@ namespace EPJ
         public static void UpdateComment (IComment comment)
         {
             using IDbConnection connection = new SQLiteConnection(GetConnectionString());
-            connection.Update(comment);
+            connection.Update((Comment)comment);
             connection.Dispose();
         }
 
