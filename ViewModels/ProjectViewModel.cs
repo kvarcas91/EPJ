@@ -632,11 +632,11 @@ namespace EPJ.ViewModels
             }
             else
             {
-                //var index = RelatedFiles.IndexOf(_editableComponent);
-                //_editableComponent.Rename(newFolderName);
-                //RelatedFiles.Insert(index, _editableComponent);
-                //RelatedFiles.RemoveAt(index + 1);
-                //_editableComponent = null;
+                var index = RelatedFiles.IndexOf(_editableComponent);
+                _editableComponent.Rename(newFolderName);
+                RelatedFiles.Insert(index, _editableComponent);
+                RelatedFiles.RemoveAt(index + 1);
+                _editableComponent = null;
             }
             NewFolderName = "";
             IsAddFilePanelVisible = false;
@@ -684,7 +684,7 @@ namespace EPJ.ViewModels
             if (result == MessageBoxResult.Yes)
             {
                 component.Delete();
-                //RelatedFiles.Remove(component);
+                RelatedFiles.Remove(component);
             }
            
         }
@@ -950,7 +950,16 @@ namespace EPJ.ViewModels
                 return;
             }
             _projectPath = $".{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}{ProjectTitle}{Path.DirectorySeparatorChar}";
-            Directory.Move(_project.Path, _projectPath.Substring(2));
+            try
+            {
+                Directory.Move(_project.Path, _projectPath.Substring(2));
+            }
+            catch
+            {
+                ProjectTitle = _project.Header;
+                MessageBox.Show("That project already exist");
+                return;
+            }
             _project.Header = ProjectTitle;
             _project.Path = _projectPath;
             DataBase.UpdateProject((Project)_project);

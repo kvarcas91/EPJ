@@ -33,6 +33,9 @@ namespace EPJ.ViewModels
             AddContributorCommand = new RelayCommand(AddContributor);
             RemoveContributorCommand = new RelayCommand(RemoveContributor);
             FileListItemClickCommand = new RelayCommand(FileListItemClick);
+            EditFileCommand = new RelayCommand(EditFile);
+            DeleteFileCommand = new RelayCommand(DeleteFile);
+            ShowInExplorerCommand = new RelayCommand(ShowInExplorer);
             CreateProjectFolder(_projectPath);
             ShowFolderContent(_projectPath);
         }
@@ -57,6 +60,7 @@ namespace EPJ.ViewModels
         private readonly string _allProjectPath = ".\\projects\\";
         private string _currentPath;
         private string _newFolderName;
+        private IData _editableComponent = null;
 
         // AddContributor toolbar visibilities
         private bool _isContributorListVisible = false;
@@ -84,7 +88,9 @@ namespace EPJ.ViewModels
         /// </summary>
         public ICommand RemoveContributorCommand { get; set; }
 
-
+        public ICommand ShowInExplorerCommand { get; set; }
+        public ICommand EditFileCommand { get; set; }
+        public ICommand DeleteFileCommand { get; set; }
         public ICommand FileListItemClickCommand { get; set; }
 
         #endregion
@@ -311,8 +317,17 @@ namespace EPJ.ViewModels
             _project.Content = Description;
             _project.AddPersons(AddedContributors.ToList());
            
-            DataBase.InsertProject(_project);
-            Directory.Move(_projectPath, $"{_allProjectPath}{_project.Header}");
+           
+            try
+            {
+                Directory.Move(_projectPath, $"{_allProjectPath}{_project.Header}");
+                DataBase.InsertProject(_project);
+            }
+            catch
+            {
+                MessageBox.Show("Project directory already exist");
+                return;
+            }
 
             ProjectListViewModel lg = new ProjectListViewModel();
             var parentConductor = (Conductor<object>)(this.Parent);
@@ -392,12 +407,64 @@ namespace EPJ.ViewModels
             return !String.IsNullOrWhiteSpace(newFolderName);
         }
 
+        private void EditFile(object param)
+        {
+            _editableComponent = (IData)param;
+           
+            ShowAddFolderPanel();
+            NewFolderName = _editableComponent.Name;
+            NotifyOfPropertyChange();
+        }
+
+        private void DeleteFile(object param)
+        {
+            var component = (IData)param;
+            var message = string.Empty;
+            if (component is IFolder)
+            {
+                message = "Do you want to delete this folder?";
+            }
+            else
+            {
+                message = "Do you want to delete this file?";
+            }
+
+            MessageBoxResult result = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                component.Delete();
+                RelatedFiles.Remove(component);
+            }
+
+        }
+
+        private void ShowInExplorer(object param)
+        {
+            var component = (IData)param;
+            if (component is IFile)
+            {
+                Process.Start(Directory.GetParent(component.Path).FullName);
+                return;
+            }
+            Process.Start(component.Path);
+        }
         public void AddNewFolder(string newFolderName)
         {
-            Directory.CreateDirectory($"{_currentPath}/{NewFolderName}");
+            if (_editableComponent == null)
+            {
+                Directory.CreateDirectory($"{_currentPath}/{NewFolderName}");
+                ShowFolderContent(_currentPath);
+            }
+            else
+            {
+                var index = RelatedFiles.IndexOf(_editableComponent);
+                _editableComponent.Rename(newFolderName);
+                RelatedFiles.Insert(index, _editableComponent);
+                RelatedFiles.RemoveAt(index + 1);
+                _editableComponent = null;
+            }
             NewFolderName = "";
             IsAddFilePanelVisible = false;
-            ShowFolderContent(_currentPath);
         }
 
         public void ShowProjectDirectory ()
@@ -482,7 +549,7 @@ namespace EPJ.ViewModels
             if (Object.Equals(sourceItem, destinationItem)) return;
             if (destinationItem is IFile) return;
 
-            ((IFolder)sourceItem).Move(destinationItem.Path);
+            sourceItem.Move(destinationItem.Path);
             ShowFolderContent(_currentPath);
         }
 
@@ -494,7 +561,7 @@ namespace EPJ.ViewModels
                 IData component;
                 if (attr.HasFlag(FileAttributes.Directory)) component = new RelatedFolder(file);
                 else component = new RelatedFile(file);
-                ((IFolder)component).Move(_currentPath);
+                (component).Move(_currentPath);
                 ShowFolderContent(_currentPath);
             }
 

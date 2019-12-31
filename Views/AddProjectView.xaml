@@ -108,14 +108,35 @@
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <materialDesign:Card VerticalAlignment="Top" 
-                                             Background="Transparent">
+                                             Background="Transparent"
+                                             Tag="{Binding RelativeSource={RelativeSource 
+                                                        Mode=FindAncestor, 
+                                                        AncestorType={x:Type UserControl}}}">
 
                             <materialDesign:Card.InputBindings>
                                 <MouseBinding Gesture="LeftDoubleClick" 
                                               Command="{Binding ElementName=FileListView,Path=DataContext.FileListItemClickCommand}"
                                               CommandParameter="{Binding}"/>
                             </materialDesign:Card.InputBindings>
+                            <materialDesign:Card.ContextMenu>
+                                <ContextMenu>
+                                    <!-- Options -->
 
+                                    <MenuItem Header="Edit" Command="{
+                                                    Binding Path=PlacementTarget.Tag.DataContext.EditFileCommand,
+                                                    RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
+                                                    CommandParameter="{Binding}"/>
+                                    <MenuItem Header="Delete" Command="{
+                                                    Binding Path=PlacementTarget.Tag.DataContext.DeleteFileCommand,
+                                                    RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
+                                                    CommandParameter="{Binding}"/>
+                                    <Separator/>
+                                    <MenuItem Header="Show in explorer" Command="{
+                                                    Binding Path=PlacementTarget.Tag.DataContext.ShowInExplorerCommand,
+                                                    RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
+                                                    CommandParameter="{Binding}"/>
+                                </ContextMenu>
+                            </materialDesign:Card.ContextMenu>
                             <StackPanel Orientation="Vertical" VerticalAlignment="Top">
 
 
