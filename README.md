@@ -1,5 +1,5 @@
-# EPJ
+# EPJ [Deprecated]
 
 Electronic Project Management tool
 
-[Deprecated]
+
